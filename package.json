@@ -13,13 +13,18 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest --maxWorkers=4",
-    "lint": "tslint --project tsconfig.json"
+    "lint": "tslint --project tsconfig.json",
+    "prepublishOnly": "npm run build"
   },
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint"
     }
   },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ionic-team/cordova-res.git"
@@ -40,7 +45,8 @@
   "dependencies": {
     "@ionic/utils-fs": "^1.0.0",
     "debug": "^4.1.1",
-    "sharp": "^0.21.2"
+    "sharp": "^0.21.2",
+    "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/debug": "0.0.31",
