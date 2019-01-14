@@ -1,0 +1,29 @@
+{
+  "name": "cordova-res",
+  "version": "0.0.0",
+  "description": "This tool will crop and resize PNG source images into appropriate sizes for modern iOS and Android devices.",
+  "homepage": "https://ionicframework.com",
+  "author": "Ionic Team <hi@ionicframework.com>",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ionic-team/cordova-res.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ionic-team/cordova-res/issues"
+  },
+  "keywords": [
+    "ionic",
+    "cordova",
+    "phonegap",
+    "resources",
+    "mobile",
+    "native",
+    "icon",
+    "splash screen"
+  ]
+}
