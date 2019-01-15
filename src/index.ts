@@ -2,7 +2,7 @@ import * as Debug from 'debug';
 import * as path from 'path';
 
 import { RunPlatformOptions, runPlatform, validatePlatforms, validateResourceTypes } from './platform';
-import { PLATFORMS, RESOURCE_TYPES, ResourceType } from './resources';
+import { PLATFORMS, Platform, RESOURCE_TYPES, ResourceType } from './resources';
 import { getOptionValue } from './utils/cli';
 
 const debug = Debug('cordova-res');
@@ -29,7 +29,7 @@ export async function run(): Promise<void> {
     const types = validateResourceTypes(typeOption ? [typeOption] : RESOURCE_TYPES);
 
     for (const platform of platforms) {
-      await runPlatform(platform, types, generateRunOptions(args));
+      await runPlatform(platform, types, generateRunOptions(platform, args));
     }
   } catch (e) {
     debug('Caught fatal error: %O', e);
@@ -38,10 +38,7 @@ export async function run(): Promise<void> {
   }
 }
 
-const DEFAULT_ICON_OPTIONS = Object.freeze({ source: 'resources/icon.png' });
-const DEFAULT_SPLASH_OPTIONS = Object.freeze({ source: 'resources/splash.png' });
-
-export function generateRunOptions(args: ReadonlyArray<string>): RunPlatformOptions {
+export function generateRunOptions(platform: Platform, args: ReadonlyArray<string>): RunPlatformOptions {
   const iconSourceOption = getOptionValue(args, '--icon-source');
   const splashSourceOption = getOptionValue(args, '--splash-source');
 
@@ -49,15 +46,15 @@ export function generateRunOptions(args: ReadonlyArray<string>): RunPlatformOpti
   const splashOptions: Partial<RunPlatformOptions[ResourceType.SPLASH]> = {};
 
   if (iconSourceOption) {
-    iconOptions.source = iconSourceOption;
+    iconOptions.sources = [iconSourceOption];
   }
 
   if (splashSourceOption) {
-    splashOptions.source = splashSourceOption;
+    splashOptions.sources = [splashSourceOption];
   }
 
   return {
-    [ResourceType.ICON]: { ...DEFAULT_ICON_OPTIONS, ...iconOptions },
-    [ResourceType.SPLASH]: { ...DEFAULT_SPLASH_OPTIONS, ...splashOptions },
+    [ResourceType.ICON]: { ...{ sources: [`resources/${platform}/icon.png`, 'resources/icon.png'] }, ...iconOptions },
+    [ResourceType.SPLASH]: { ...{ sources: [`resources/${platform}/splash.png`, 'resources/splash.png'] }, ...splashOptions },
   };
 }

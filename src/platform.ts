@@ -1,4 +1,4 @@
-import { ensureDir } from '@ionic/utils-fs';
+import { ensureDir, readFile } from '@ionic/utils-fs';
 import * as Debug from 'debug';
 import * as path from 'path';
 import * as sharp from 'sharp';
@@ -8,7 +8,7 @@ import { PLATFORMS, Platform, RESOURCES, RESOURCE_TYPES, ResourceType } from './
 const debug = Debug('cordova-res:platform');
 
 export interface RunPlatformResourceTypeOptions {
-  source: string;
+  sources: string[];
 }
 
 export interface RunPlatformOptions {
@@ -24,6 +24,7 @@ export async function runPlatform(platform: Platform, types: ReadonlyArray<Resou
     debug('Building %s resources for %s platform', type, platform);
 
     const config = RESOURCES[platform][type];
+    const src = await resolveSourceImage(options[type].sources);
     const dir = path.join('resources', platform, type);
     await ensureDir(dir);
 
@@ -31,7 +32,7 @@ export async function runPlatform(platform: Platform, types: ReadonlyArray<Resou
       const p = path.join(dir, image.name);
       debug('Generating %o (%ox%o)', p, image.width, image.height);
 
-      await sharp(options[type].source)
+      await sharp(src)
         .resize(image.width, image.height)
         .toFile(p);
 
@@ -40,6 +41,18 @@ export async function runPlatform(platform: Platform, types: ReadonlyArray<Resou
   }));
 
   process.stdout.write(`Generated ${images} images for ${platform}\n`);
+}
+
+export async function resolveSourceImage(sources: string[]): Promise<Buffer> {
+  for (const source of sources) {
+    try {
+      return await readFile(source);
+    } catch (e) {
+      debug('Error with source file %s: %s', source, e);
+    }
+  }
+
+  throw new Error(`Could not find suitable source image. Looked at: ${sources.join(', ')}`);
 }
 
 export function validatePlatforms(platforms: ReadonlyArray<string>): Platform[] {
