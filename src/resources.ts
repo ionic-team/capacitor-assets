@@ -3,10 +3,14 @@ export const enum Platform {
   IOS = 'ios',
 }
 
+export const PLATFORMS: ReadonlyArray<Platform> = [Platform.ANDROID, Platform.IOS];
+
 export const enum ResourceType {
   ICON = 'icon',
   SPLASH = 'splash',
 }
+
+export const RESOURCE_TYPES: ReadonlyArray<ResourceType> = [ResourceType.ICON, ResourceType.SPLASH];
 
 export const enum Orientation {
   LANDSCAPE = 'landscape',

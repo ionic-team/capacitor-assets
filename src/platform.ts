@@ -3,18 +3,27 @@ import * as Debug from 'debug';
 import * as path from 'path';
 import * as sharp from 'sharp';
 
-import { Platform, RESOURCES } from './resources';
+import { PLATFORMS, Platform, RESOURCES, RESOURCE_TYPES, ResourceType } from './resources';
 
 const debug = Debug('cordova-res:platform');
 
-export async function runPlatform(platform: Platform): Promise<void> {
-  const plt = RESOURCES[platform];
+export interface RunPlatformResourceTypeOptions {
+  source: string;
+}
 
+export interface RunPlatformOptions {
+  [ResourceType.ICON]: RunPlatformResourceTypeOptions;
+  [ResourceType.SPLASH]: RunPlatformResourceTypeOptions;
+}
+
+export async function runPlatform(platform: Platform, types: ReadonlyArray<ResourceType>, options: Readonly<RunPlatformOptions>): Promise<void> {
+  debug('Running %s platform with options: %O', platform, options);
   let images = 0;
 
-  await Promise.all(Object.entries(plt).map(async ([ type, config]) => {
+  await Promise.all(types.map(async type => {
     debug('Building %s resources for %s platform', type, platform);
 
+    const config = RESOURCES[platform][type];
     const dir = path.join('resources', platform, type);
     await ensureDir(dir);
 
@@ -22,7 +31,7 @@ export async function runPlatform(platform: Platform): Promise<void> {
       const p = path.join(dir, image.name);
       debug('Generating %o (%ox%o)', p, image.width, image.height);
 
-      await sharp(`./resources/${type}.png`)
+      await sharp(options[type].source)
         .resize(image.width, image.height)
         .toFile(p);
 
@@ -33,6 +42,38 @@ export async function runPlatform(platform: Platform): Promise<void> {
   process.stdout.write(`Generated ${images} images for ${platform}\n`);
 }
 
-export function isSupportedPlatform(platform?: string): platform is Platform {
-  return platform === 'ios' || platform === 'android';
+export function validatePlatforms(platforms: ReadonlyArray<string>): Platform[] {
+  const result: Platform[] = [];
+
+  for (const platform of platforms) {
+    if (!isSupportedPlatform(platform)) {
+      throw new Error(`Unsupported platform: ${platform}`);
+    }
+
+    result.push(platform);
+  }
+
+  return result;
+}
+
+export function validateResourceTypes(types: ReadonlyArray<string>): ResourceType[] {
+  const result: ResourceType[] = [];
+
+  for (const type of types) {
+    if (!isSupportedResourceType(type)) {
+      throw new Error(`Unsupported resource type: ${type}`);
+    }
+
+    result.push(type);
+  }
+
+  return result;
+}
+
+export function isSupportedPlatform(platform: any): platform is Platform {
+  return PLATFORMS.includes(platform);
+}
+
+export function isSupportedResourceType(type: any): type is ResourceType {
+  return RESOURCE_TYPES.includes(type);
 }

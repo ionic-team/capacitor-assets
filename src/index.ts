@@ -1,8 +1,9 @@
 import * as Debug from 'debug';
 import * as path from 'path';
 
-import { isSupportedPlatform, runPlatform } from './platform';
-import { Platform, RESOURCES } from './resources';
+import { RunPlatformOptions, runPlatform, validatePlatforms, validateResourceTypes } from './platform';
+import { PLATFORMS, RESOURCE_TYPES, ResourceType } from './resources';
+import { getOptionValue } from './utils/cli';
 
 const debug = Debug('cordova-res');
 
@@ -15,24 +16,48 @@ export async function run(): Promise<void> {
     return;
   }
 
-  const [ platform ] = args;
+  if (args[0] === 'help' || args.includes('--help') || args.includes('-h')) {
+    const help = await import('./help');
+    return help.run();
+  }
+
+  const platformArg = args[0] ? args[0].toString() : undefined;
+  const typeOption = getOptionValue(args, '--type');
 
   try {
-    if (isSupportedPlatform(platform)) {
-      await runPlatform(platform);
-    } else {
-      if (platform === 'help' || args.includes('--help') || args.includes('-h')) {
-        const help = await import('./help');
-        return help.run();
-      }
+    const platforms = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : PLATFORMS);
+    const types = validateResourceTypes(typeOption ? [typeOption] : RESOURCE_TYPES);
 
-      for (const plt of Object.keys(RESOURCES)) {
-        await runPlatform(plt as Platform); // TODO
-      }
+    for (const platform of platforms) {
+      await runPlatform(platform, types, generateRunOptions(args));
     }
   } catch (e) {
     debug('Caught fatal error: %O', e);
     process.exitCode = 1;
     process.stdout.write(e.stack ? e.stack : e.toString());
   }
+}
+
+const DEFAULT_ICON_OPTIONS = Object.freeze({ source: 'resources/icon.png' });
+const DEFAULT_SPLASH_OPTIONS = Object.freeze({ source: 'resources/splash.png' });
+
+export function generateRunOptions(args: ReadonlyArray<string>): RunPlatformOptions {
+  const iconSourceOption = getOptionValue(args, '--icon-source');
+  const splashSourceOption = getOptionValue(args, '--splash-source');
+
+  const iconOptions: Partial<RunPlatformOptions[ResourceType.ICON]> = {};
+  const splashOptions: Partial<RunPlatformOptions[ResourceType.SPLASH]> = {};
+
+  if (iconSourceOption) {
+    iconOptions.source = iconSourceOption;
+  }
+
+  if (splashSourceOption) {
+    splashOptions.source = splashSourceOption;
+  }
+
+  return {
+    [ResourceType.ICON]: { ...DEFAULT_ICON_OPTIONS, ...iconOptions },
+    [ResourceType.SPLASH]: { ...DEFAULT_SPLASH_OPTIONS, ...splashOptions },
+  };
 }
