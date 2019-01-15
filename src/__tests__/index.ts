@@ -1,4 +1,5 @@
 import { generateRunOptions } from '../';
+import { Platform } from '../resources';
 
 describe('cordova-res', () => {
 
@@ -7,16 +8,16 @@ describe('cordova-res', () => {
     describe('generateRunOptions', () => {
 
       it('should provide defaults with no args', async () => {
-        expect(generateRunOptions([])).toEqual({
-          icon: { source: 'resources/icon.png' },
-          splash: { source: 'resources/splash.png' },
+        expect(generateRunOptions(Platform.ANDROID, [])).toEqual({
+          icon: { sources: ['resources/android/icon.png', 'resources/icon.png'] },
+          splash: { sources: ['resources/android/splash.png', 'resources/splash.png'] },
         });
       });
 
       it('should override source image paths', async () => {
-        expect(generateRunOptions(['--icon-source', 'foo.png', '--splash-source', 'bar.png'])).toEqual({
-          icon: { source: 'foo.png' },
-          splash: { source: 'bar.png' },
+        expect(generateRunOptions(Platform.IOS, ['--icon-source', 'foo.png', '--splash-source', 'bar.png'])).toEqual({
+          icon: { sources: ['foo.png'] },
+          splash: { sources: ['bar.png'] },
         });
       });
 
