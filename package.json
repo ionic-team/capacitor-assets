@@ -6,6 +6,7 @@
   "author": "Ionic Team <hi@ionicframework.com>",
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "cordova-res": "./bin/cordova-res"
   },
