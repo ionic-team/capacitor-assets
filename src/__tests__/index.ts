@@ -1,5 +1,5 @@
 import { generateRunOptions } from '../';
-import { Platform } from '../resources';
+import { Platform } from '../platform';
 
 describe('cordova-res', () => {
 

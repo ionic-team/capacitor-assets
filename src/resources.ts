@@ -33,18 +33,27 @@ export const enum Density {
   PORT_XXXHDPI = 'port-xxxhdpi',
 }
 
+export const enum ResourceKey {
+  SRC = 'src',
+  NAME = 'name',
+  WIDTH = 'width',
+  HEIGHT = 'height',
+  DENSITY = 'density',
+  ORIENTATION = 'orientation',
+}
+
 export interface ResourcesImageConfig {
-  readonly name: string;
-  readonly width: number;
-  readonly height: number;
-  readonly density?: Density;
-  readonly orientation?: Orientation;
+  readonly [ResourceKey.NAME]: string;
+  readonly [ResourceKey.WIDTH]: number;
+  readonly [ResourceKey.HEIGHT]: number;
+  readonly [ResourceKey.DENSITY]?: Density;
+  readonly [ResourceKey.ORIENTATION]?: Orientation;
 }
 
 export interface ResourcesTypeConfig {
   readonly images: ReadonlyArray<ResourcesImageConfig>;
   readonly nodeName: string;
-  readonly nodeAttributes: string[];
+  readonly nodeAttributes: ResourceKey[];
 }
 
 export type ResourcesPlatform = { readonly [T in ResourceType]: ResourcesTypeConfig; };
@@ -80,7 +89,7 @@ export const RESOURCES: ResourcesConfig = Object.freeze({
         Object.freeze({ name: 'drawable-xxxhdpi-icon.png', width: 192, height: 192, density: Density.XXXHDPI }),
       ],
       nodeName: 'icon',
-      nodeAttributes: ['src', 'density'],
+      nodeAttributes: [ResourceKey.SRC, ResourceKey.DENSITY],
     }),
     [ResourceType.SPLASH]: Object.freeze({
       images: [
@@ -98,7 +107,7 @@ export const RESOURCES: ResourcesConfig = Object.freeze({
         Object.freeze({ name: 'drawable-port-xxxhdpi-screen.png', width: 1280, height: 1920, density: Density.PORT_XXXHDPI, orientation: Orientation.PORTRAIT }),
       ],
       nodeName: 'splash',
-      nodeAttributes: ['src', 'density'],
+      nodeAttributes: [ResourceKey.SRC, ResourceKey.DENSITY],
     }),
   }),
   [Platform.IOS]: Object.freeze({
@@ -125,7 +134,7 @@ export const RESOURCES: ResourcesConfig = Object.freeze({
         Object.freeze({ name: 'icon-1024.png', width: 1024, height: 1024 }),
       ],
       nodeName: 'icon',
-      nodeAttributes: ['src', 'width', 'height'],
+      nodeAttributes: [ResourceKey.SRC, ResourceKey.WIDTH, ResourceKey.HEIGHT],
     }),
     [ResourceType.SPLASH]: Object.freeze({
       images: [
@@ -144,7 +153,7 @@ export const RESOURCES: ResourcesConfig = Object.freeze({
         Object.freeze({ name: 'Default@2x~universal~anyany.png', width: 2732, height: 2732 }),
       ],
       nodeName: 'splash',
-      nodeAttributes: ['src', 'width', 'height'],
+      nodeAttributes: [ResourceKey.SRC, ResourceKey.WIDTH, ResourceKey.HEIGHT],
     }),
   }),
 });

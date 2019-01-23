@@ -3,7 +3,7 @@ import * as Debug from 'debug';
 import * as pathlib from 'path';
 
 import { generateImage, resolveSourceImage } from './image';
-import { RESOURCES, ResourceType } from './resources';
+import { RESOURCES, ResourceKey, ResourceType, ResourcesImageConfig } from './resources';
 
 const debug = Debug('cordova-res:platform');
 
@@ -23,11 +23,12 @@ export interface RunPlatformOptions {
   [ResourceType.SPLASH]: RunPlatformResourceTypeOptions;
 }
 
-export interface GeneratedImage {
+export interface GeneratedImage extends ResourcesImageConfig {
   src: string;
   dest: string;
-  width: number;
-  height: number;
+  platform: Platform;
+  nodeName: string;
+  nodeAttributes: ResourceKey[];
 }
 
 export async function run(platform: Platform, types: ReadonlyArray<ResourceType>, options: Readonly<RunPlatformOptions>): Promise<GeneratedImage[]> {
@@ -52,7 +53,14 @@ export async function runType(platform: Platform, type: ResourceType, options: R
     const dest = pathlib.join(dir, image.name);
     await generateImage(image, srcbuf, dest);
 
-    return { src, dest, ...image };
+    return {
+      src,
+      dest,
+      platform,
+      ...image,
+      nodeName: config.nodeName,
+      nodeAttributes: config.nodeAttributes,
+    };
   }));
 
   return images;

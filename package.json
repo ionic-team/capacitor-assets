@@ -46,11 +46,13 @@
   "dependencies": {
     "@ionic/utils-fs": "^1.0.0",
     "debug": "^4.1.1",
+    "elementtree": "^0.1.7",
     "sharp": "^0.21.2",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/debug": "0.0.31",
+    "@types/elementtree": "^0.1.0",
     "@types/fs-extra": "^5.0.4",
     "@types/jest": "^23.3.12",
     "@types/sharp": "^0.21.0",
