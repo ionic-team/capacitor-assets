@@ -1,8 +1,8 @@
 import * as Debug from 'debug';
 import * as path from 'path';
 
-import { RunPlatformOptions, runPlatform, validatePlatforms, validateResourceTypes } from './platform';
-import { PLATFORMS, Platform, RESOURCE_TYPES, ResourceType } from './resources';
+import { PLATFORMS, Platform, RunPlatformOptions, run as runPlatform, validatePlatforms } from './platform';
+import { RESOURCE_TYPES, ResourceType, validateResourceTypes } from './resources';
 import { getOptionValue } from './utils/cli';
 
 const debug = Debug('cordova-res');
@@ -29,7 +29,8 @@ export async function run(): Promise<void> {
     const types = validateResourceTypes(typeOption ? [typeOption] : RESOURCE_TYPES);
 
     for (const platform of platforms) {
-      await runPlatform(platform, types, generateRunOptions(platform, args));
+      const images = await runPlatform(platform, types, generateRunOptions(platform, args));
+      process.stdout.write(`Generated ${images.length} images for ${platform}\n`);
     }
   } catch (e) {
     debug('Caught fatal error: %O', e);

@@ -1,9 +1,4 @@
-export const enum Platform {
-  ANDROID = 'android',
-  IOS = 'ios',
-}
-
-export const PLATFORMS: ReadonlyArray<Platform> = [Platform.ANDROID, Platform.IOS];
+import { Platform } from './platform';
 
 export const enum ResourceType {
   ICON = 'icon',
@@ -54,6 +49,24 @@ export interface ResourcesTypeConfig {
 
 export type ResourcesPlatform = { readonly [T in ResourceType]: ResourcesTypeConfig; };
 export type ResourcesConfig = { readonly [P in Platform]: ResourcesPlatform; };
+
+export function validateResourceTypes(types: ReadonlyArray<string>): ResourceType[] {
+  const result: ResourceType[] = [];
+
+  for (const type of types) {
+    if (!isSupportedResourceType(type)) {
+      throw new Error(`Unsupported resource type: ${type}`);
+    }
+
+    result.push(type);
+  }
+
+  return result;
+}
+
+export function isSupportedResourceType(type: any): type is ResourceType {
+  return RESOURCE_TYPES.includes(type);
+}
 
 export const RESOURCES: ResourcesConfig = Object.freeze({
   [Platform.ANDROID]: Object.freeze({
