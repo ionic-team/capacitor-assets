@@ -14,6 +14,12 @@ config.xml
 * `resources/icon.png` must be at least 1024×1024px
 * `resources/splash.png` must be at least 2732×2732px
 
+## Install
+
+```bash
+$ npm install -g cordova-res
+```
+
 ## Usage
 
 See the help documentation on the command line with the `--help` option.
