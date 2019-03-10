@@ -8,3 +8,5 @@ npm publish
 git push
 git push --tags
 ```
+
+Add a Github release for the newly pushed tag.
