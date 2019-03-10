@@ -1,3 +1,5 @@
+import { Sharp } from 'sharp';
+
 import { Platform } from './platform';
 
 export const DEFAULT_RESOURCES_DIRECTORY = 'resources';
@@ -6,6 +8,33 @@ export const enum ResourceType {
   ICON = 'icon',
   SPLASH = 'splash',
 }
+
+export type ResourceValidator = (pipeline: Sharp) => Promise<void>;
+
+export const RESOURCE_VALIDATORS: { readonly [T in ResourceType]: ResourceValidator; } = {
+  [ResourceType.ICON]: async pipeline => {
+    const metadata = await pipeline.metadata();
+
+    if (metadata.format !== 'png') {
+      throw new Error(`Icon source must be a PNG (image format is "${metadata.format}").`);
+    }
+
+    if (!metadata.width || !metadata.height || metadata.width < 1024 || metadata.height < 1024) {
+      throw new Error(`Icon source does not meet minimum size requirements: 1024x1024 (image is ${metadata.width}x${metadata.height}).`);
+    }
+  },
+  [ResourceType.SPLASH]: async pipeline => {
+    const metadata = await pipeline.metadata();
+
+    if (metadata.format !== 'png') {
+      throw new Error(`Splash screen source must be a PNG (image format is "${metadata.format}").`);
+    }
+
+    if (!metadata.width || !metadata.height || metadata.width < 2732 || metadata.height < 2732) {
+      throw new Error(`Splash screen source does not meet minimum size requirements: 2732x2732 (image is ${metadata.width}x${metadata.height}).`);
+    }
+  },
+};
 
 export const RESOURCE_TYPES: ReadonlyArray<ResourceType> = [ResourceType.ICON, ResourceType.SPLASH];
 

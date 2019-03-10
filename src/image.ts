@@ -1,6 +1,8 @@
 import { readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
-import sharp from 'sharp';
+import sharp, { Sharp } from 'sharp';
+
+import { RESOURCE_VALIDATORS, ResourceType } from './resources';
 
 const debug = Debug('cordova-res:image');
 
@@ -9,12 +11,13 @@ const debug = Debug('cordova-res:image');
  *
  * @return Promise<[path to source image, buffer of source image]>
  */
-export async function resolveSourceImage(sources: string[]): Promise<[string, Buffer]> {
+export async function resolveSourceImage(type: ResourceType, sources: string[]): Promise<[string, Sharp]> {
   for (const source of sources) {
     try {
-      // TODO: use sharp to check file and report image errors
+      const image = sharp(await readFile(source));
+      await RESOURCE_VALIDATORS[type](image);
 
-      return [source, await readFile(source)];
+      return [source, image];
     } catch (e) {
       debug('Error with source file %s: %s', source, e);
     }
@@ -28,15 +31,13 @@ export interface ImageSchema {
   height: number;
 }
 
-export async function generateImage(image: ImageSchema, src: Buffer, dest: string): Promise<void> {
+export async function generateImage(image: ImageSchema, src: Sharp, dest: string): Promise<void> {
   debug('Generating %o (%ox%o)', dest, image.width, image.height);
 
-  const buffer = await transformImage(image, src);
-  await writeFile(dest, buffer);
+  const pipeline = transformImage(image, src);
+  await writeFile(dest, await pipeline.toBuffer());
 }
 
-export async function transformImage(image: ImageSchema, src: Buffer): Promise<Buffer> {
-  return sharp(src)
-    .resize(image.width, image.height)
-    .toBuffer();
+export function transformImage(image: ImageSchema, src: Sharp): Sharp {
+  return src.resize(image.width, image.height);
 }
