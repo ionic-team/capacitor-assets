@@ -31,7 +31,7 @@ export interface GeneratedImage extends ResourcesImageConfig {
   nodeAttributes: ResourceKey[];
 }
 
-export async function run(platform: Platform, options: Readonly<RunPlatformOptions>): Promise<GeneratedImage[]> {
+export async function run(platform: Platform, resourcesPath: string, options: Readonly<RunPlatformOptions>): Promise<GeneratedImage[]> {
   debug('Running %s platform with options: %O', platform, options);
 
   const results: GeneratedImage[] = [];
@@ -40,14 +40,14 @@ export async function run(platform: Platform, options: Readonly<RunPlatformOptio
     const typeOptions = options[type];
 
     if (typeOptions) {
-      return runType(platform, type, typeOptions);
+      return runType(platform, type, resourcesPath, typeOptions);
     }
 
     return [];
   })));
 }
 
-export async function runType(platform: Platform, type: ResourceType, options: Readonly<RunPlatformResourceTypeOptions>): Promise<GeneratedImage[]> {
+export async function runType(platform: Platform, type: ResourceType, resourcesPath: string, options: Readonly<RunPlatformResourceTypeOptions>): Promise<GeneratedImage[]> {
   debug('Building %s resources for %s platform', type, platform);
 
   const [ src, srcbuf ] = await resolveSourceImage(options.sources);
@@ -55,7 +55,7 @@ export async function runType(platform: Platform, type: ResourceType, options: R
   debug('Using %O for %s source image for %s', src, type, platform);
 
   const config = RESOURCES[platform][type];
-  const dir = pathlib.join('resources', platform, type);
+  const dir = pathlib.resolve(resourcesPath, platform, type);
   await ensureDir(dir);
 
   const images = await Promise.all(config.images.map(async image => {

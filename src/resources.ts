@@ -1,5 +1,7 @@
 import { Platform } from './platform';
 
+export const DEFAULT_RESOURCES_DIRECTORY = 'resources';
+
 export const enum ResourceType {
   ICON = 'icon',
   SPLASH = 'splash',

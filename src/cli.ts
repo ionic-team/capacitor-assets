@@ -1,33 +1,36 @@
 import { Options, PlatformOptions } from '.';
 import { PLATFORMS, Platform, RunPlatformOptions, validatePlatforms } from './platform';
-import { RESOURCE_TYPES, ResourceType, validateResourceTypes } from './resources';
+import { DEFAULT_RESOURCES_DIRECTORY, RESOURCE_TYPES, ResourceType, validateResourceTypes } from './resources';
 import { getOptionValue } from './utils/cli';
 
 export function parseOptions(args: ReadonlyArray<string>): Options {
   const platformArg = args[0] ? args[0] : undefined;
   const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : PLATFORMS);
   const platforms: PlatformOptions = {};
+  const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
 
   return {
+    directory: process.cwd(),
+    resourcesDirectory,
     logstream: process.stdout,
     platforms: platformList.reduce((acc, platform) => {
-      acc[platform] = generateRunOptions(platform, args);
+      acc[platform] = generateRunOptions(platform, resourcesDirectory, args);
       return acc;
     }, platforms),
   };
 }
 
-export function generateRunOptions(platform: Platform, args: ReadonlyArray<string>): RunPlatformOptions {
+export function generateRunOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): RunPlatformOptions {
   const typeOption = getOptionValue(args, '--type');
   const types = validateResourceTypes(typeOption ? [typeOption] : RESOURCE_TYPES);
 
   return {
-    [ResourceType.ICON]: types.includes(ResourceType.ICON) ? parseIconOptions(platform, args) : undefined,
-    [ResourceType.SPLASH]: types.includes(ResourceType.SPLASH) ? parseSplashOptions(platform, args) : undefined,
+    [ResourceType.ICON]: types.includes(ResourceType.ICON) ? parseIconOptions(platform, resourcesDirectory, args) : undefined,
+    [ResourceType.SPLASH]: types.includes(ResourceType.SPLASH) ? parseSplashOptions(platform, resourcesDirectory, args) : undefined,
   };
 }
 
-export function parseIconOptions(platform: Platform, args: ReadonlyArray<string>): RunPlatformOptions[ResourceType.ICON] {
+export function parseIconOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): RunPlatformOptions[ResourceType.ICON] {
   const iconSourceOption = getOptionValue(args, '--icon-source');
   const iconOptions: Partial<RunPlatformOptions[ResourceType.ICON]> = {};
 
@@ -35,10 +38,10 @@ export function parseIconOptions(platform: Platform, args: ReadonlyArray<string>
     iconOptions.sources = [iconSourceOption];
   }
 
-  return { ...{ sources: [`resources/${platform}/icon.png`, 'resources/icon.png'] }, ...iconOptions };
+  return { ...{ sources: [`${resourcesDirectory}/${platform}/icon.png`, `${resourcesDirectory}/icon.png`] }, ...iconOptions };
 }
 
-export function parseSplashOptions(platform: Platform, args: ReadonlyArray<string>): RunPlatformOptions[ResourceType.SPLASH] {
+export function parseSplashOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): RunPlatformOptions[ResourceType.SPLASH] {
   const splashSourceOption = getOptionValue(args, '--splash-source');
   const splashOptions: Partial<RunPlatformOptions[ResourceType.SPLASH]> = {};
 
@@ -46,5 +49,5 @@ export function parseSplashOptions(platform: Platform, args: ReadonlyArray<strin
     splashOptions.sources = [splashSourceOption];
   }
 
-  return { ...{ sources: [`resources/${platform}/splash.png`, 'resources/splash.png'] }, ...splashOptions };
+  return { ...{ sources: [`${resourcesDirectory}/${platform}/splash.png`, `${resourcesDirectory}/splash.png`] }, ...splashOptions };
 }

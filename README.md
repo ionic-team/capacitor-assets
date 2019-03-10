@@ -48,6 +48,8 @@ await run();
 import { Options, run } from 'cordova-res';
 
 const options: Options = {
+  directory: '/path/to/project',
+  resourcesDirectory: 'resources',
   logstream: process.stdout, // Any WritableStream
   platforms: {
     android: { icon: { sources: ['resources/icon.png'] } },

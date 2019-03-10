@@ -1,13 +1,14 @@
 import { readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
 import et from 'elementtree';
+import pathlib from 'path';
 
 import { GeneratedImage, Platform } from './platform';
 import { ResourceKey } from './resources';
 
 const debug = Debug('cordova-res:config');
 
-export function run(images: ReadonlyArray<GeneratedImage>, doc: et.ElementTree): void {
+export function run(configPath: string, images: ReadonlyArray<GeneratedImage>, doc: et.ElementTree): void {
   const root = doc.getroot();
   const orientation = getPreference(doc, 'Orientation') || 'default';
   const platforms = groupImages(images);
@@ -23,16 +24,20 @@ export function run(images: ReadonlyArray<GeneratedImage>, doc: et.ElementTree):
     const filteredImages = platformImages.filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation);
 
     for (const image of filteredImages) {
-      // We use forward slashes, (not path.join) here to provide cross-platform
+      // We force the use of forward slashes here to provide cross-platform
       // compatibility for paths.
-      let imgElement = platformElement.find(`${image.nodeName}[@src='${image.dest}']`);
+      const dest = pathlib.relative(pathlib.dirname(configPath), image.dest).replace(/\\/g, '/');
+
+      let imgElement = platformElement.find(`${image.nodeName}[@src='${dest}']`);
 
       if (!imgElement) {
-        imgElement = platformElement.find(`${image.nodeName}[@src='${image.dest.split('/').join('\\')}']`);
+        // We didn't find the element using forward slashes, so let's try to
+        // find it with backslashes.
+        imgElement = platformElement.find(`${image.nodeName}[@src='${dest.replace(/\//g, '\\')}']`);
       }
 
       if (!imgElement) {
-        debug('Creating %O node for %o', image.nodeName, image.dest);
+        debug('Creating %O node for %o', image.nodeName, dest);
         imgElement = et.SubElement(platformElement, image.nodeName);
       }
 
@@ -40,7 +45,7 @@ export function run(images: ReadonlyArray<GeneratedImage>, doc: et.ElementTree):
         let v = image[attr];
 
         if (attr === ResourceKey.SRC) {
-          v = image.dest;
+          v = dest;
         }
 
         if (v) {

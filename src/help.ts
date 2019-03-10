@@ -11,6 +11,7 @@ const help = `
     --type <icon|splash> ..... Only generate one type of resource
     --icon-source <path> ..... Use specified file for icon source image
     --splash-source <path> ... Use specified file for splash source image
+    --resources <path> ....... Use specified directory as resources directory
 
     -h, --help ............... Print help for the platform, then quit
     --version ................ Print version, then quit
