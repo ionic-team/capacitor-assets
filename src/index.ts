@@ -12,6 +12,7 @@ async function CordovaRes({
   directory = process.cwd(),
   resourcesDirectory = DEFAULT_RESOURCES_DIRECTORY,
   logstream = process.stdout,
+  errstream = process.stderr,
   platforms = {
     [Platform.ANDROID]: generateRunOptions(Platform.ANDROID, resourcesDirectory, []),
     [Platform.IOS]: generateRunOptions(Platform.IOS, resourcesDirectory, []),
@@ -29,7 +30,7 @@ async function CordovaRes({
     const platformOptions = platforms[platform];
 
     if (platformOptions) {
-      const platformImages = await runPlatform(platform, resourcesPath, platformOptions);
+      const platformImages = await runPlatform(platform, resourcesPath, platformOptions, errstream);
       logstream.write(`Generated ${platformImages.length} images for ${platform}\n`);
       images.push(...platformImages);
     }
@@ -74,6 +75,13 @@ namespace CordovaRes {
      * A NullStream may be used to silence output entirely.
      */
     readonly logstream?: NodeJS.WritableStream;
+
+    /**
+     * Specify an alternative error output mechanism.
+     *
+     * A NullStream may be used to silence error output entirely.
+     */
+    readonly errstream?: NodeJS.WritableStream;
 
     /**
      * Resource generation configuration by platform.

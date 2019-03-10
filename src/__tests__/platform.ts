@@ -40,7 +40,7 @@ describe('cordova-res', () => {
         const generatedImages = RESOURCES[Platform.ANDROID][ResourceType.ICON].images;
 
         expect(imageMock.resolveSourceImage).toHaveBeenCalledTimes(1);
-        expect(imageMock.resolveSourceImage).toHaveBeenCalledWith('icon', ['icon.png']);
+        expect(imageMock.resolveSourceImage).toHaveBeenCalledWith('icon', ['icon.png'], undefined);
         expect(fsMock.ensureDir).toHaveBeenCalledTimes(1);
         expect(imageMock.generateImage).toHaveBeenCalledTimes(generatedImages.length);
 

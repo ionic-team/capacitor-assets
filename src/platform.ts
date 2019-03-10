@@ -31,7 +31,7 @@ export interface GeneratedImage extends ResourcesImageConfig {
   nodeAttributes: ResourceKey[];
 }
 
-export async function run(platform: Platform, resourcesPath: string, options: Readonly<RunPlatformOptions>): Promise<GeneratedImage[]> {
+export async function run(platform: Platform, resourcesPath: string, options: Readonly<RunPlatformOptions>, errstream?: NodeJS.WritableStream): Promise<GeneratedImage[]> {
   debug('Running %s platform with options: %O', platform, options);
 
   const results: GeneratedImage[] = [];
@@ -40,17 +40,17 @@ export async function run(platform: Platform, resourcesPath: string, options: Re
     const typeOptions = options[type];
 
     if (typeOptions) {
-      return runType(platform, type, resourcesPath, typeOptions);
+      return runType(platform, type, resourcesPath, typeOptions, errstream);
     }
 
     return [];
   })));
 }
 
-export async function runType(platform: Platform, type: ResourceType, resourcesPath: string, options: Readonly<RunPlatformResourceTypeOptions>): Promise<GeneratedImage[]> {
+export async function runType(platform: Platform, type: ResourceType, resourcesPath: string, options: Readonly<RunPlatformResourceTypeOptions>, errstream?: NodeJS.WritableStream): Promise<GeneratedImage[]> {
   debug('Building %s resources for %s platform', type, platform);
 
-  const [ src, pipeline ] = await resolveSourceImage(type, options.sources);
+  const [ src, pipeline ] = await resolveSourceImage(type, options.sources, errstream);
 
   debug('Using %O for %s source image for %s', src, type, platform);
 

@@ -1,6 +1,7 @@
 import { readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
 import sharp, { Sharp } from 'sharp';
+import util from 'util';
 
 import { RESOURCE_VALIDATORS, ResourceType } from './resources';
 
@@ -11,7 +12,9 @@ const debug = Debug('cordova-res:image');
  *
  * @return Promise<[path to source image, buffer of source image]>
  */
-export async function resolveSourceImage(type: ResourceType, sources: string[]): Promise<[string, Sharp]> {
+export async function resolveSourceImage(type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<[string, Sharp]> {
+  const messages: string[] = [];
+
   for (const source of sources) {
     try {
       const image = sharp(await readFile(source));
@@ -19,7 +22,15 @@ export async function resolveSourceImage(type: ResourceType, sources: string[]):
 
       return [source, image];
     } catch (e) {
-      debug('Error with source file %s: %s', source, e);
+      const msg = util.format('WARN: Error with source file %s: %s', source, e);
+      debug(msg);
+      messages.push(msg);
+    }
+  }
+
+  if (errstream) {
+    for (const message of messages) {
+      errstream.write(`${message}\n`);
     }
   }
 

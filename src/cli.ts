@@ -13,6 +13,7 @@ export function parseOptions(args: ReadonlyArray<string>): Options {
     directory: process.cwd(),
     resourcesDirectory,
     logstream: process.stdout,
+    errstream: process.stderr,
     platforms: platformList.reduce((acc, platform) => {
       acc[platform] = generateRunOptions(platform, resourcesDirectory, args);
       return acc;
