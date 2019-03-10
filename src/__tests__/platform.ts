@@ -32,9 +32,8 @@ describe('cordova-res', () => {
       it('should run through android icons with successful result', async () => {
         imageMock.resolveSourceImage.mockImplementation(async () => ['test.png', Buffer.from([])]);
 
-        const result = await platform.run(Platform.ANDROID, [ResourceType.ICON], {
+        const result = await platform.run(Platform.ANDROID, 'resources', {
           [ResourceType.ICON]: { sources: ['icon.png'] },
-          [ResourceType.SPLASH]: { sources: ['splash.png'] },
         });
 
         const generatedImages = RESOURCES[Platform.ANDROID][ResourceType.ICON].images;
