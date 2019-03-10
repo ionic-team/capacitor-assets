@@ -1,9 +1,9 @@
 import { ensureDir } from '@ionic/utils-fs';
-import * as Debug from 'debug';
-import * as pathlib from 'path';
+import Debug from 'debug';
+import pathlib from 'path';
 
 import { generateImage, resolveSourceImage } from './image';
-import { RESOURCES, ResourceKey, ResourceType, ResourcesImageConfig } from './resources';
+import { RESOURCES, RESOURCE_TYPES, ResourceKey, ResourceType, ResourcesImageConfig } from './resources';
 
 const debug = Debug('cordova-res:platform');
 
@@ -19,8 +19,8 @@ export interface RunPlatformResourceTypeOptions {
 }
 
 export interface RunPlatformOptions {
-  [ResourceType.ICON]: RunPlatformResourceTypeOptions;
-  [ResourceType.SPLASH]: RunPlatformResourceTypeOptions;
+  [ResourceType.ICON]?: RunPlatformResourceTypeOptions;
+  [ResourceType.SPLASH]?: RunPlatformResourceTypeOptions;
 }
 
 export interface GeneratedImage extends ResourcesImageConfig {
@@ -31,17 +31,26 @@ export interface GeneratedImage extends ResourcesImageConfig {
   nodeAttributes: ResourceKey[];
 }
 
-export async function run(platform: Platform, types: ReadonlyArray<ResourceType>, options: Readonly<RunPlatformOptions>): Promise<GeneratedImage[]> {
+export async function run(platform: Platform, options: Readonly<RunPlatformOptions>): Promise<GeneratedImage[]> {
   debug('Running %s platform with options: %O', platform, options);
 
-  const results = await Promise.all(types.map(async type => runType(platform, type, options)));
-  return ([] as GeneratedImage[]).concat(...results);
+  const results: GeneratedImage[] = [];
+
+  return results.concat(...await Promise.all(RESOURCE_TYPES.map(async type => {
+    const typeOptions = options[type];
+
+    if (typeOptions) {
+      return runType(platform, type, typeOptions);
+    }
+
+    return [];
+  })));
 }
 
-export async function runType(platform: Platform, type: ResourceType, options: Readonly<RunPlatformOptions>): Promise<GeneratedImage[]> {
+export async function runType(platform: Platform, type: ResourceType, options: Readonly<RunPlatformResourceTypeOptions>): Promise<GeneratedImage[]> {
   debug('Building %s resources for %s platform', type, platform);
 
-  const [ src, srcbuf ] = await resolveSourceImage(options[type].sources);
+  const [ src, srcbuf ] = await resolveSourceImage(options.sources);
 
   debug('Using %O for %s source image for %s', src, type, platform);
 

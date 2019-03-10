@@ -1,6 +1,6 @@
 import { readFile, writeFile } from '@ionic/utils-fs';
-import * as Debug from 'debug';
-import * as sharp from 'sharp';
+import Debug from 'debug';
+import sharp from 'sharp';
 
 const debug = Debug('cordova-res:image');
 

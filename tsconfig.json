@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowUnreachableCode": false,
     "declaration": true,
+    "esModuleInterop": true,
     "importHelpers": true,
     "module": "commonjs",
     "moduleResolution": "node",

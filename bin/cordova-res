@@ -8,4 +8,4 @@ if (process.argv.includes('--verbose')) {
   process.env.DEBUG = '*';
 }
 
-require('../').run();
+require('../').runCommandLine(process.argv.slice(2));

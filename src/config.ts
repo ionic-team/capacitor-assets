@@ -1,6 +1,6 @@
 import { readFile, writeFile } from '@ionic/utils-fs';
-import * as Debug from 'debug';
-import * as et from 'elementtree';
+import Debug from 'debug';
+import et from 'elementtree';
 
 import { GeneratedImage, Platform } from './platform';
 import { ResourceKey } from './resources';

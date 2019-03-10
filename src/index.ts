@@ -1,70 +1,81 @@
-import * as Debug from 'debug';
-import * as path from 'path';
+import Debug from 'debug';
+import path from 'path';
 
+import { generateRunOptions, parseOptions } from './cli';
 import { read as readConfig, run as runConfig, write as writeConfig } from './config';
-import { GeneratedImage, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform, validatePlatforms } from './platform';
-import { RESOURCE_TYPES, ResourceType, validateResourceTypes } from './resources';
-import { getOptionValue } from './utils/cli';
+import { GeneratedImage, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
 
 const debug = Debug('cordova-res');
 
-export async function run(): Promise<void> {
-  const args = process.argv.slice(2);
-
-  if (args.includes('--version')) {
-    const pkg = await import(path.resolve(__dirname, '../package.json'));
-    process.stdout.write(pkg.version + '\n');
-    return;
-  }
-
-  if (args[0] === 'help' || args.includes('--help') || args.includes('-h')) {
-    const help = await import('./help');
-    return help.run();
-  }
-
+async function CordovaRes({
+  logstream = process.stdout,
+  platforms = {
+    [Platform.ANDROID]: generateRunOptions(Platform.ANDROID, []),
+    [Platform.IOS]: generateRunOptions(Platform.IOS, []),
+  },
+}: CordovaRes.Options = {}): Promise<void> {
   const configPath = 'config.xml';
-  const platformArg = args[0] ? args[0].toString() : undefined;
-  const typeOption = getOptionValue(args, '--type');
+  const config = await readConfig(configPath);
+  const images: GeneratedImage[] = [];
 
-  try {
-    const platforms = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : PLATFORMS);
-    const types = validateResourceTypes(typeOption ? [typeOption] : RESOURCE_TYPES);
-    const config = await readConfig(configPath);
-    const images: GeneratedImage[] = [];
+  for (const platform of PLATFORMS) {
+    const platformOptions = platforms[platform];
 
-    for (const platform of platforms) {
-      const platformImages = await runPlatform(platform, types, generateRunOptions(platform, args));
-      process.stdout.write(`Generated ${platformImages.length} images for ${platform}\n`);
+    if (platformOptions) {
+      const platformImages = await runPlatform(platform, platformOptions);
+      logstream.write(`Generated ${platformImages.length} images for ${platform}\n`);
       images.push(...platformImages);
     }
+  }
 
-    runConfig(images, config);
-    await writeConfig(configPath, config);
-    process.stdout.write(`Wrote to config.xml\n`);
-  } catch (e) {
-    debug('Caught fatal error: %O', e);
-    process.exitCode = 1;
-    process.stdout.write(e.stack ? e.stack : e.toString());
+  runConfig(images, config);
+  await writeConfig(configPath, config);
+  logstream.write(`Wrote to config.xml\n`);
+}
+
+namespace CordovaRes {
+  export type PlatformOptions = { [P in Platform]?: Readonly<RunPlatformOptions>; };
+
+  export const run = CordovaRes;
+
+  /**
+   * Options for `cordova-res`.
+   *
+   * Each key may be excluded to use a provided default.
+   *
+   * Use `logstream` to specify an alternative output mechanism. A NullStream
+   * may be used to silence output entirely.
+   *
+   * Each key/value in `platforms` represents the options for a supported
+   * platform. If `platforms` is provided, resources are generated in an
+   * explicit, opt-in manner.
+   */
+  export interface Options {
+    readonly logstream?: NodeJS.WritableStream;
+    readonly platforms?: Readonly<PlatformOptions>;
+  }
+
+  export async function runCommandLine(args: ReadonlyArray<string>): Promise<void> {
+    if (args.includes('--version')) {
+      const pkg = await import(path.resolve(__dirname, '../package.json'));
+      process.stdout.write(pkg.version + '\n');
+      return;
+    }
+
+    if (args[0] === 'help' || args.includes('--help') || args.includes('-h')) {
+      const help = await import('./help');
+      return help.run();
+    }
+
+    try {
+      const options = parseOptions(args);
+      await run(options);
+    } catch (e) {
+      debug('Caught fatal error: %O', e);
+      process.exitCode = 1;
+      process.stderr.write(e.stack ? e.stack : e.toString());
+    }
   }
 }
 
-export function generateRunOptions(platform: Platform, args: ReadonlyArray<string>): RunPlatformOptions {
-  const iconSourceOption = getOptionValue(args, '--icon-source');
-  const splashSourceOption = getOptionValue(args, '--splash-source');
-
-  const iconOptions: Partial<RunPlatformOptions[ResourceType.ICON]> = {};
-  const splashOptions: Partial<RunPlatformOptions[ResourceType.SPLASH]> = {};
-
-  if (iconSourceOption) {
-    iconOptions.sources = [iconSourceOption];
-  }
-
-  if (splashSourceOption) {
-    splashOptions.sources = [splashSourceOption];
-  }
-
-  return {
-    [ResourceType.ICON]: { ...{ sources: [`resources/${platform}/icon.png`, 'resources/icon.png'] }, ...iconOptions },
-    [ResourceType.SPLASH]: { ...{ sources: [`resources/${platform}/splash.png`, 'resources/splash.png'] }, ...splashOptions },
-  };
-}
+export = CordovaRes;
