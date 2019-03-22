@@ -3,6 +3,7 @@ import path from 'path';
 
 import { generateRunOptions, parseOptions } from './cli';
 import { read as readConfig, run as runConfig, write as writeConfig } from './config';
+import { BaseError } from './error';
 import { GeneratedImage, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
 import { DEFAULT_RESOURCES_DIRECTORY, Density, Orientation } from './resources';
 
@@ -130,11 +131,20 @@ namespace CordovaRes {
 
     try {
       const options = parseOptions(args);
-      await run(options);
+      const images = await run(options);
+
+      if (args.includes('--json')) {
+        process.stdout.write(JSON.stringify({ images }));
+      }
     } catch (e) {
       debug('Caught fatal error: %O', e);
       process.exitCode = 1;
-      process.stderr.write(e.stack ? e.stack : e.toString());
+
+      if (args.includes('--json')) {
+        process.stdout.write(JSON.stringify({ error: e instanceof BaseError ? e : e.toString() }));
+      } else {
+        process.stderr.write(e instanceof BaseError ? e.message : (e.stack ? e.stack : String(e)));
+      }
     }
   }
 }

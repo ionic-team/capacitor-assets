@@ -3,6 +3,7 @@ import Debug from 'debug';
 import sharp, { Sharp } from 'sharp';
 import util from 'util';
 
+import { ResolveSourceImageError, ValidationError } from './error';
 import { RESOURCE_VALIDATORS, ResourceType } from './resources';
 
 const debug = Debug('cordova-res:image');
@@ -13,28 +14,30 @@ const debug = Debug('cordova-res:image');
  * @return Promise<[path to source image, buffer of source image]>
  */
 export async function resolveSourceImage(type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<[string, Sharp]> {
-  const messages: string[] = [];
+  const errors: [string, Error][] = [];
 
   for (const source of sources) {
     try {
       const image = sharp(await readFile(source));
-      await RESOURCE_VALIDATORS[type](image);
+      await RESOURCE_VALIDATORS[type](source, image);
 
       return [source, image];
     } catch (e) {
-      const msg = util.format('WARN: Error with source file %s: %s', source, e);
-      debug(msg);
-      messages.push(msg);
+      errors.push([source, e]);
     }
   }
 
   if (errstream) {
-    for (const message of messages) {
+    for (const [ source, error ] of errors) {
+      const message = util.format('WARN: Error with source file %s: %s', source, error);
       errstream.write(`${message}\n`);
     }
   }
 
-  throw new Error(`Could not find suitable source image. Looked at: ${sources.join(', ')}`);
+  throw new ResolveSourceImageError(
+    `Could not find suitable source image. Looked at: ${sources.join(', ')}`,
+    errors.map(([, error]) => error).filter((e): e is ValidationError => e instanceof ValidationError)
+  );
 }
 
 export interface ImageSchema {

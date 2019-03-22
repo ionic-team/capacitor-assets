@@ -8,11 +8,12 @@ export function parseOptions(args: ReadonlyArray<string>): Options {
   const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : PLATFORMS);
   const platforms: PlatformOptions = {};
   const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
+  const json = args.includes('--json');
 
   return {
     directory: process.cwd(),
     resourcesDirectory,
-    logstream: process.stdout,
+    logstream: json ? process.stderr : process.stdout,
     errstream: process.stderr,
     platforms: platformList.reduce((acc, platform) => {
       acc[platform] = generateRunOptions(platform, resourcesDirectory, args);

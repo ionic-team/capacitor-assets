@@ -1,5 +1,6 @@
 import { Sharp } from 'sharp';
 
+import { ValidationError, ValidationErrorCode } from './error';
 import { Platform } from './platform';
 
 export const DEFAULT_RESOURCES_DIRECTORY = 'resources';
@@ -9,29 +10,67 @@ export const enum ResourceType {
   SPLASH = 'splash',
 }
 
-export type ResourceValidator = (pipeline: Sharp) => Promise<void>;
+export type ResourceValidator = (source: string, pipeline: Sharp) => Promise<void>;
 
 export const RESOURCE_VALIDATORS: { readonly [T in ResourceType]: ResourceValidator; } = {
-  [ResourceType.ICON]: async pipeline => {
+  [ResourceType.ICON]: async (source, pipeline) => {
     const metadata = await pipeline.metadata();
+    const { format, width, height } = metadata;
 
-    if (metadata.format !== 'png') {
-      throw new Error(`Icon source must be a PNG (image format is "${metadata.format}").`);
+    const requiredFormat = 'png';
+    const requiredWidth = 1024;
+    const requiredHeight = 1024;
+
+    if (format !== requiredFormat) {
+      throw new ValidationError(`Icon source must be ${requiredFormat} format (image format is "${format}").`, {
+        source,
+        type: ResourceType.ICON,
+        code: ValidationErrorCode.BAD_IMAGE_FORMAT,
+        format,
+        requiredFormat,
+      });
     }
 
-    if (!metadata.width || !metadata.height || metadata.width < 1024 || metadata.height < 1024) {
-      throw new Error(`Icon source does not meet minimum size requirements: 1024x1024 (image is ${metadata.width}x${metadata.height}).`);
+    if (!width || !height || width < requiredWidth || height < requiredHeight) {
+      throw new ValidationError(`Icon source does not meet minimum size requirements: ${requiredWidth}x${requiredHeight} (image is ${width}x${height}).`, {
+        source,
+        type: ResourceType.ICON,
+        code: ValidationErrorCode.BAD_IMAGE_SIZE,
+        width,
+        height,
+        requiredWidth,
+        requiredHeight,
+      });
     }
   },
-  [ResourceType.SPLASH]: async pipeline => {
+  [ResourceType.SPLASH]: async (source, pipeline) => {
     const metadata = await pipeline.metadata();
+    const { format, width, height } = metadata;
 
-    if (metadata.format !== 'png') {
-      throw new Error(`Splash screen source must be a PNG (image format is "${metadata.format}").`);
+    const requiredFormat = 'png';
+    const requiredWidth = 2732;
+    const requiredHeight = 2732;
+
+    if (format !== requiredFormat) {
+      throw new ValidationError(`Splash Screen source must be ${requiredFormat} format (image format is "${format}").`, {
+        source,
+        type: ResourceType.SPLASH,
+        code: ValidationErrorCode.BAD_IMAGE_FORMAT,
+        format,
+        requiredFormat,
+      });
     }
 
-    if (!metadata.width || !metadata.height || metadata.width < 2732 || metadata.height < 2732) {
-      throw new Error(`Splash screen source does not meet minimum size requirements: 2732x2732 (image is ${metadata.width}x${metadata.height}).`);
+    if (!width || !height || width < requiredWidth || height < requiredHeight) {
+      throw new ValidationError(`Splash Screen source does not meet minimum size requirements: ${requiredWidth}x${requiredHeight} (image is ${width}x${height}).`, {
+        source,
+        type: ResourceType.SPLASH,
+        code: ValidationErrorCode.BAD_IMAGE_SIZE,
+        width,
+        height,
+        requiredWidth,
+        requiredHeight,
+      });
     }
   },
 };
