@@ -4,9 +4,19 @@ import path from 'path';
 import { generateRunOptions, parseOptions } from './cli';
 import { read as readConfig, run as runConfig, write as writeConfig } from './config';
 import { GeneratedImage, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
-import { DEFAULT_RESOURCES_DIRECTORY } from './resources';
+import { DEFAULT_RESOURCES_DIRECTORY, Density, Orientation } from './resources';
 
 const debug = Debug('cordova-res');
+
+interface ResultImage {
+  src: string;
+  dest: string;
+  platform: Platform;
+  width: number;
+  height: number;
+  density?: Density;
+  orientation?: Orientation;
+}
 
 async function CordovaRes({
   directory = process.cwd(),
@@ -17,7 +27,7 @@ async function CordovaRes({
     [Platform.ANDROID]: generateRunOptions(Platform.ANDROID, resourcesDirectory, []),
     [Platform.IOS]: generateRunOptions(Platform.IOS, resourcesDirectory, []),
   },
-}: CordovaRes.Options = {}): Promise<void> {
+}: CordovaRes.Options = {}): Promise<ResultImage[]> {
   const configPath = path.resolve(directory, 'config.xml');
   const resourcesPath = path.isAbsolute(resourcesDirectory) ? resourcesDirectory : path.resolve(directory, resourcesDirectory);
 
@@ -39,6 +49,20 @@ async function CordovaRes({
   runConfig(configPath, images, config);
   await writeConfig(configPath, config);
   logstream.write(`Wrote to config.xml\n`);
+
+  return images.map(image => {
+    const { src, dest, platform, width, height, density, orientation } = image;
+
+    return {
+      src,
+      dest,
+      platform,
+      width,
+      height,
+      density,
+      orientation,
+    };
+  });
 }
 
 namespace CordovaRes {
