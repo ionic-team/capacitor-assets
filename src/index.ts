@@ -143,7 +143,7 @@ namespace CordovaRes {
       if (args.includes('--json')) {
         process.stdout.write(JSON.stringify({ error: e instanceof BaseError ? e : e.toString() }));
       } else {
-        process.stderr.write(e instanceof BaseError ? e.message : (e.stack ? e.stack : String(e)));
+        process.stderr.write(e instanceof BaseError ? `ERROR: ${e.message}` : (e.stack ? e.stack : String(e)));
       }
     }
   }

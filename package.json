@@ -55,6 +55,7 @@
     "@types/elementtree": "^0.1.0",
     "@types/fs-extra": "^7.0.0",
     "@types/jest": "^24.0.12",
+    "@types/node": "~8.9.5",
     "@types/sharp": "^0.22.1",
     "husky": "^2.1.0",
     "jest": "^23.6.0",

@@ -12,7 +12,7 @@ export interface BadImageFormatValidationErrorDetails {
   type: ResourceType;
   code: ValidationErrorCode.BAD_IMAGE_FORMAT;
   format: string | undefined;
-  requiredFormat: string;
+  requiredFormats: string[];
 }
 
 export interface BadImageSizeValidationErrorDetails {
@@ -43,10 +43,6 @@ export class BaseError extends Error {
     );
   }
 
-  inspect(): string {
-    return this.toString();
-  }
-
   toJSON(): { [key: string]: any; } {
     return { code: 'UNKNOWN', message: this.toString() };
   }
@@ -55,6 +51,10 @@ export class BaseError extends Error {
 export class ValidationError extends BaseError {
   constructor(readonly message: string, readonly details: ValidationErrorDetails) {
     super(message);
+  }
+
+  toString(): string {
+    return this.message;
   }
 
   toJSON() {

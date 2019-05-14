@@ -1,8 +1,8 @@
 # Resource Generator
 
-This tool will crop and resize PNG source images to generate images for modern iOS and Android devices.
+This tool will crop and resize JPEG and PNG source images to generate images for modern iOS and Android devices.
 
-`cordova-res` must run at the root of a standard Cordova project setup, such as:
+`cordova-res` must run at the root of a Cordova project, such as:
 
 ```
 resources/

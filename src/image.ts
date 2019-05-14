@@ -1,10 +1,10 @@
 import { readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
-import sharp, { Sharp } from 'sharp';
+import sharp, { Metadata, Sharp } from 'sharp';
 import util from 'util';
 
 import { ResolveSourceImageError, ValidationError } from './error';
-import { RESOURCE_VALIDATORS, ResourceType } from './resources';
+import { Format, RESOURCE_VALIDATORS, ResourceType } from './resources';
 
 const debug = Debug('cordova-res:image');
 
@@ -13,15 +13,17 @@ const debug = Debug('cordova-res:image');
  *
  * @return Promise<[path to source image, buffer of source image]>
  */
-export async function resolveSourceImage(type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<[string, Sharp]> {
-  const errors: [string, Error][] = [];
+export async function resolveSourceImage(type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<[string, Sharp, Metadata]> {
+  const errors: [string, NodeJS.ErrnoException][] = [];
 
   for (const source of sources) {
     try {
       const image = sharp(await readFile(source));
-      await RESOURCE_VALIDATORS[type](source, image);
+      const metadata = await RESOURCE_VALIDATORS[type](source, image);
 
-      return [source, image];
+      debug('Source image for %s: %O', type, metadata);
+
+      return [source, image, metadata];
     } catch (e) {
       errors.push([source, e]);
     }
@@ -29,8 +31,12 @@ export async function resolveSourceImage(type: ResourceType, sources: string[], 
 
   if (errstream) {
     for (const [ source, error ] of errors) {
-      const message = util.format('WARN: Error with source file %s: %s', source, error);
-      errstream.write(`${message}\n`);
+      if (error.code === 'ENOENT') {
+        debug('Source file missing: %s', source);
+      } else {
+        const message = util.format('WARN: Error with source file %s: %s', source, error);
+        errstream.write(`${message}\n`);
+      }
     }
   }
 
@@ -41,17 +47,36 @@ export async function resolveSourceImage(type: ResourceType, sources: string[], 
 }
 
 export interface ImageSchema {
+  format: Format;
   width: number;
   height: number;
 }
 
-export async function generateImage(image: ImageSchema, src: Sharp, dest: string): Promise<void> {
+export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, dest: string, errstream?: NodeJS.WritableStream): Promise<void> {
   debug('Generating %o (%ox%o)', dest, image.width, image.height);
 
-  const pipeline = transformImage(image, src);
+  if (errstream) {
+    if (metadata.format !== image.format) {
+      errstream.write(`WARN: Must perform conversion from ${metadata.format} to png.\n`);
+    }
+  }
+
+  const pipeline = applyFormatConversion(image.format, transformImage(image, src));
+
   await writeFile(dest, await pipeline.toBuffer());
 }
 
 export function transformImage(image: ImageSchema, src: Sharp): Sharp {
   return src.resize(image.width, image.height);
+}
+
+export function applyFormatConversion(format: Format, src: Sharp): Sharp {
+  switch (format) {
+    case Format.PNG:
+      return src.png();
+    case Format.JPEG:
+      return src.jpeg();
+  }
+
+  return src;
 }

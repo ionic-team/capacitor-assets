@@ -40,7 +40,19 @@ export function parseIconOptions(platform: Platform, resourcesDirectory: string,
     iconOptions.sources = [iconSourceOption];
   }
 
-  return { ...{ sources: [`${resourcesDirectory}/${platform}/icon.png`, `${resourcesDirectory}/icon.png`] }, ...iconOptions };
+  return {
+    ...{
+      sources: [
+        `${resourcesDirectory}/${platform}/icon.png`,
+        `${resourcesDirectory}/${platform}/icon.jpg`,
+        `${resourcesDirectory}/${platform}/icon.jpeg`,
+        `${resourcesDirectory}/icon.png`,
+        `${resourcesDirectory}/icon.jpg`,
+        `${resourcesDirectory}/icon.jpeg`,
+      ],
+    },
+    ...iconOptions,
+  };
 }
 
 export function parseSplashOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): RunPlatformOptions[ResourceType.SPLASH] {
@@ -51,5 +63,17 @@ export function parseSplashOptions(platform: Platform, resourcesDirectory: strin
     splashOptions.sources = [splashSourceOption];
   }
 
-  return { ...{ sources: [`${resourcesDirectory}/${platform}/splash.png`, `${resourcesDirectory}/splash.png`] }, ...splashOptions };
+  return {
+    ...{
+      sources: [
+        `${resourcesDirectory}/${platform}/splash.png`,
+        `${resourcesDirectory}/${platform}/splash.jpg`,
+        `${resourcesDirectory}/${platform}/splash.jpeg`,
+        `${resourcesDirectory}/splash.png`,
+        `${resourcesDirectory}/splash.jpg`,
+        `${resourcesDirectory}/splash.jpeg`,
+      ],
+    },
+    ...splashOptions,
+  };
 }

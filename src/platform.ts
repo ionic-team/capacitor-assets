@@ -50,7 +50,7 @@ export async function run(platform: Platform, resourcesPath: string, options: Re
 export async function runType(platform: Platform, type: ResourceType, resourcesPath: string, options: Readonly<RunPlatformResourceTypeOptions>, errstream?: NodeJS.WritableStream): Promise<GeneratedImage[]> {
   debug('Building %s resources for %s platform', type, platform);
 
-  const [ src, pipeline ] = await resolveSourceImage(type, options.sources, errstream);
+  const [ src, pipeline, metadata ] = await resolveSourceImage(type, options.sources, errstream);
 
   debug('Using %O for %s source image for %s', src, type, platform);
 
@@ -60,7 +60,7 @@ export async function runType(platform: Platform, type: ResourceType, resourcesP
 
   const images = await Promise.all(config.images.map(async image => {
     const dest = pathlib.join(dir, image.name);
-    await generateImage(image, pipeline.clone(), dest);
+    await generateImage(image, pipeline.clone(), metadata, dest, errstream);
 
     return {
       src,

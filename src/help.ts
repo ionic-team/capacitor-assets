@@ -3,6 +3,10 @@ const help = `
 
     Generate Cordova resources for one or all platforms.
 
+    Without specifying options for source images, this tool will look for
+    'icon.(png|jpg)' and 'splash.(png|jpg)' files inside 'resources/'. To use
+    'res/' for the resources directory, specify '--resources res'.
+
     To generate platform-specific icons and splash screens, place source images
     in the platform's directory, e.g. 'resources/android/icon.png'.
 
