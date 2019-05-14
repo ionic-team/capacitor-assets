@@ -134,16 +134,16 @@ namespace CordovaRes {
       const images = await run(options);
 
       if (args.includes('--json')) {
-        process.stdout.write(JSON.stringify({ images }));
+        process.stdout.write(JSON.stringify({ images }, undefined, '\t'));
       }
     } catch (e) {
       debug('Caught fatal error: %O', e);
       process.exitCode = 1;
 
       if (args.includes('--json')) {
-        process.stdout.write(JSON.stringify({ error: e instanceof BaseError ? e : e.toString() }));
+        process.stdout.write(JSON.stringify({ error: e instanceof BaseError ? e : e.toString() }, undefined, '\t'));
       } else {
-        process.stderr.write(e instanceof BaseError ? `ERROR: ${e.message}` : (e.stack ? e.stack : String(e)));
+        process.stderr.write(e instanceof BaseError ? `ERROR: ${e.toString()}` : (e.stack ? e.stack : String(e)));
       }
     }
   }
