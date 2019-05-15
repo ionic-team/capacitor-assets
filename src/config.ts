@@ -1,63 +1,160 @@
-import { readFile, writeFile } from '@ionic/utils-fs';
+import { ensureDir, readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
 import et from 'elementtree';
 import pathlib from 'path';
 
-import { GeneratedImage, Platform } from './platform';
-import { ResourceKey } from './resources';
+import { BadInputError } from './error';
+import { GeneratedResource, Platform } from './platform';
+import { ResolvedColorSource, ResolvedSource, ResourceType, SourceType } from './resources';
 
 const debug = Debug('cordova-res:config');
 
-export function run(configPath: string, images: ReadonlyArray<GeneratedImage>, doc: et.ElementTree): void {
-  const root = doc.getroot();
-  const orientation = getPreference(doc, 'Orientation') || 'default';
-  const platforms = groupImages(images);
+export async function run(configPath: string, resourcesDirectory: string, sources: ReadonlyArray<ResolvedSource>, resources: ReadonlyArray<GeneratedResource>): Promise<void> {
+  const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
+  const config = await read(configPath);
 
-  for (const [ platform, platformImages ] of platforms) {
-    let platformElement = root.find(`platform[@name='${platform}']`);
+  const androidPlatformElement = resolvePlatformElement(config.getroot(), Platform.ANDROID);
 
-    if (!platformElement) {
-      debug('Creating node for %o', platform);
-      platformElement = et.SubElement(root, 'platform', { name: platform });
+  if (colors.length > 0) {
+    debug('Color sources found--generating colors document.');
+
+    const colorsPath = pathlib.join(resourcesDirectory, 'values', 'colors.xml');
+    await runColorsConfig(colorsPath, colors);
+
+    let resourceFileElement = androidPlatformElement.find(`resource-file[@src='${colorsPath}']`);
+
+    if (!resourceFileElement) {
+      resourceFileElement = et.SubElement(androidPlatformElement, 'resource-file');
     }
 
-    const filteredImages = platformImages.filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation);
+    resourceFileElement.set('src', colorsPath);
+    resourceFileElement.set('target', '/app/src/main/res/values/colors.xml');
+  }
 
-    for (const image of filteredImages) {
-      // We force the use of forward slashes here to provide cross-platform
-      // compatibility for paths.
-      const dest = pathlib.relative(pathlib.dirname(configPath), image.dest).replace(/\\/g, '/');
+  if (resources.find(resource => resource.type === ResourceType.ADAPTIVE_ICON)) {
+    debug('Adaptive Icon resources found--removing any regular icon nodes.');
 
-      let imgElement = platformElement.find(`${image.nodeName}[@src='${dest}']`);
+    const regularIconElements = androidPlatformElement.findall('icon[@src]');
 
-      if (!imgElement) {
-        // We didn't find the element using forward slashes, so let's try to
-        // find it with backslashes.
-        imgElement = platformElement.find(`${image.nodeName}[@src='${dest.replace(/\//g, '\\')}']`);
-      }
+    for (const element of regularIconElements) {
+      androidPlatformElement.remove(element);
+    }
+  } else {
+    debug('No Adaptive Icon resources found--removing any adaptive icon nodes.');
 
-      if (!imgElement) {
-        debug('Creating %O node for %o', image.nodeName, dest);
-        imgElement = et.SubElement(platformElement, image.nodeName);
-      }
+    const regularIconElements = androidPlatformElement.findall('icon[@foreground]');
 
-      for (const attr of image.nodeAttributes) {
-        let v = image[attr];
+    for (const element of regularIconElements) {
+      androidPlatformElement.remove(element);
+    }
+  }
 
-        if (attr === ResourceKey.SRC) {
-          v = dest;
-        }
+  runConfig(configPath, resources, config);
 
-        if (v) {
-          imgElement.set(attr, v.toString());
-        }
-      }
+  await write(configPath, config);
+}
+
+export async function resolveColorsDocument(colorsPath: string): Promise<et.ElementTree> {
+  try {
+    return await read(colorsPath);
+  } catch (e) {
+    if (e.code !== 'ENOENT') {
+      throw e;
+    }
+
+    const element = et.Element('resources');
+    return new et.ElementTree(element);
+  }
+}
+
+export async function runColorsConfig(colorsPath: string, colors: ReadonlyArray<ResolvedColorSource>): Promise<void> {
+  await ensureDir(pathlib.dirname(colorsPath));
+  const colorsDocument = await resolveColorsDocument(colorsPath);
+  const root = colorsDocument.getroot();
+
+  for (const color of colors) {
+    let colorElement = root.find(`color[@name='${color.name}']`);
+
+    if (!colorElement) {
+      debug('Creating node for %o', color.name);
+      colorElement = et.SubElement(root, 'color');
+    }
+
+    colorElement.set('name', color.name);
+    colorElement.text = color.color;
+  }
+
+  await write(colorsPath, colorsDocument);
+}
+
+export function runConfig(configPath: string, resources: ReadonlyArray<GeneratedResource>, doc: et.ElementTree): void {
+  const root = doc.getroot();
+  const orientation = getPreference(doc, 'Orientation') || 'default';
+  const platforms = groupImages(resources);
+
+  for (const [ platform, platformResources ] of platforms) {
+    const platformElement = resolvePlatformElement(root, platform);
+    const filteredResources = platformResources.filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation);
+
+    for (const resource of filteredResources) {
+      runResource(configPath, resource, platformElement);
     }
   }
 }
 
-export function groupImages(images: ReadonlyArray<GeneratedImage>): Map<Platform, GeneratedImage[]> {
-  const platforms = new Map<Platform, GeneratedImage[]>();
+export function runResource(configPath: string, resource: GeneratedResource, container: et.Element): void {
+  const src = resource[resource.srckey];
+
+  if (typeof src !== 'string') {
+    throw new BadInputError(`Bad value for src key: ${resource.srckey}`);
+  }
+
+  // We force the use of forward slashes here to provide cross-platform
+  // compatibility for paths.
+  const value = pathlib.relative(pathlib.dirname(configPath), src).replace(/\\/g, '/');
+  const imgElement = resolveResourceElement(container, resource.nodeName, resource.srckey, value);
+
+  for (const attr of resource.nodeAttributes) {
+    const v = resource[attr];
+
+    if (v) {
+      imgElement.set(attr, v.toString());
+    }
+  }
+}
+
+export function resolvePlatformElement(container: et.Element, platform: Platform): et.Element {
+  const platformElement = container.find(`platform[@name='${platform}']`);
+
+  if (platformElement) {
+    return platformElement;
+  }
+
+  debug('Creating node for %o', platform);
+  return et.SubElement(container, 'platform', { name: platform });
+}
+
+export function resolveResourceElement(container: et.Element, nodeName: string, pathAttr: string, pathAttrValue: string): et.Element {
+  const imgElement = container.find(`${nodeName}[@${pathAttr}='${pathAttrValue}']`);
+
+  if (imgElement) {
+    return imgElement;
+  }
+
+  // We didn't find the element using forward slashes, so let's try to
+  // find it with backslashes.
+  const imgElementByBackslashes = container.find(`${nodeName}[@${pathAttr}='${pathAttrValue.replace(/\//g, '\\')}']`);
+
+  if (imgElementByBackslashes) {
+    return imgElementByBackslashes;
+  }
+
+  debug('Creating %O node for %o', nodeName, pathAttrValue);
+  return et.SubElement(container, nodeName);
+}
+
+export function groupImages(images: ReadonlyArray<GeneratedResource>): Map<Platform, GeneratedResource[]> {
+  const platforms = new Map<Platform, GeneratedResource[]>();
 
   for (const image of images) {
     let platformImages = platforms.get(image.platform);

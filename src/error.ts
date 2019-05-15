@@ -1,5 +1,3 @@
-import util from 'util';
-
 import { ResourceType } from './resources';
 
 export const enum ValidationErrorCode {
@@ -12,7 +10,7 @@ export interface BadImageFormatValidationErrorDetails {
   type: ResourceType;
   code: ValidationErrorCode.BAD_IMAGE_FORMAT;
   format: string | undefined;
-  requiredFormats: string[];
+  requiredFormats: ReadonlyArray<string>;
 }
 
 export interface BadImageSizeValidationErrorDetails {
@@ -30,44 +28,55 @@ export type ValidationErrorDetails = (
   BadImageSizeValidationErrorDetails
 );
 
-export class BaseError extends Error {
+export abstract class BaseError extends Error {
+  abstract readonly name: string;
+  abstract readonly code: string;
+
   constructor(readonly message: string) {
     super(message);
     this.stack = (new Error()).stack || '';
     this.message = message;
   }
 
-  toString(): string {
-    return (
-      `Error: ${this.message} ${util.inspect(this, { breakLength: Infinity })}`
-    );
+  toString() {
+    return `${this.message}\n`;
   }
 
   toJSON(): { [key: string]: any; } {
-    return { code: 'UNKNOWN', message: this.toString() };
+    return {
+      code: this.code,
+      message: this.message,
+    };
   }
 }
 
+export class BadInputError extends BaseError {
+  readonly name = 'BadInputError';
+  readonly code = 'BAD_INPUT';
+}
+
 export class ValidationError extends BaseError {
+  readonly name = 'ValidationError';
+  readonly code = 'BAD_SOURCE';
+
   constructor(readonly message: string, readonly details: ValidationErrorDetails) {
     super(message);
   }
 
-  toString(): string {
-    return this.message;
-  }
-
   toJSON() {
-    return { code: 'BAD_SOURCE', details: this.details };
+    return { ...super.toJSON(), details: this.details };
   }
 }
 
 export class ResolveSourceImageError extends BaseError {
+  readonly name = 'ResolveSourceImageError';
+  readonly code = 'BAD_SOURCES';
+
   constructor(readonly message: string, readonly errors: ReadonlyArray<ValidationError>) {
     super(message);
   }
 
   toJSON() {
-    return { code: 'BAD_SOURCES', sourceErrors: this.errors };
+    return { ...super.toJSON(), sourceErrors: this.errors };
   }
 }

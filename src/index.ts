@@ -2,21 +2,31 @@ import Debug from 'debug';
 import path from 'path';
 
 import { generateRunOptions, parseOptions } from './cli';
-import { read as readConfig, run as runConfig, write as writeConfig } from './config';
+import { run as runConfig } from './config';
 import { BaseError } from './error';
-import { GeneratedImage, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
-import { DEFAULT_RESOURCES_DIRECTORY, Density, Orientation } from './resources';
+import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
+import { DEFAULT_RESOURCES_DIRECTORY, Density, Orientation, ResolvedSource, SourceType } from './resources';
 
 const debug = Debug('cordova-res');
 
-interface ResultImage {
-  src: string;
-  dest: string;
-  platform: Platform;
-  width: number;
-  height: number;
+interface Result {
+  resources: ResultResource[];
+  sources: ResultSource[];
+}
+
+interface ResultResource {
+  src?: string;
+  dest?: string;
+  platform?: Platform;
+  width?: number;
+  height?: number;
   density?: Density;
   orientation?: Orientation;
+}
+
+interface ResultSource {
+  type: SourceType;
+  value: string;
 }
 
 async function CordovaRes({
@@ -28,42 +38,52 @@ async function CordovaRes({
     [Platform.ANDROID]: generateRunOptions(Platform.ANDROID, resourcesDirectory, []),
     [Platform.IOS]: generateRunOptions(Platform.IOS, resourcesDirectory, []),
   },
-}: CordovaRes.Options = {}): Promise<ResultImage[]> {
+}: CordovaRes.Options = {}): Promise<Result> {
   const configPath = path.resolve(directory, 'config.xml');
-  const resourcesPath = path.isAbsolute(resourcesDirectory) ? resourcesDirectory : path.resolve(directory, resourcesDirectory);
 
-  debug('Paths: (config: %O) (resources: %O)', configPath, resourcesPath);
+  debug('Paths: (config: %O) (resources dir: %O)', configPath, resourcesDirectory);
 
-  const config = await readConfig(configPath);
-  const images: GeneratedImage[] = [];
+  const resources: GeneratedResource[] = [];
+  const sources: ResolvedSource[] = [];
 
   for (const platform of PLATFORMS) {
     const platformOptions = platforms[platform];
 
     if (platformOptions) {
-      const platformImages = await runPlatform(platform, resourcesPath, platformOptions, errstream);
-      logstream.write(`Generated ${platformImages.length} images for ${platform}\n`);
-      images.push(...platformImages);
+      const platformResult = await runPlatform(platform, resourcesDirectory, platformOptions, errstream);
+      logstream.write(`Generated ${platformResult.resources.length} resources for ${platform}\n`);
+      resources.push(...platformResult.resources);
+      sources.push(...platformResult.sources);
     }
   }
 
-  runConfig(configPath, images, config);
-  await writeConfig(configPath, config);
+  await runConfig(configPath, resourcesDirectory, sources, resources);
   logstream.write(`Wrote to config.xml\n`);
 
-  return images.map(image => {
-    const { src, dest, platform, width, height, density, orientation } = image;
+  return {
+    resources: resources.map(resource => {
+      const { src, foreground, background, platform, width, height, density, orientation } = resource;
 
-    return {
-      src,
-      dest,
-      platform,
-      width,
-      height,
-      density,
-      orientation,
-    };
-  });
+      return {
+        src,
+        foreground,
+        background,
+        platform,
+        width,
+        height,
+        density,
+        orientation,
+      };
+    }),
+    sources: sources.map(source => {
+      switch (source.type) {
+        case SourceType.RASTER:
+          return { type: SourceType.RASTER, value: source.src };
+        case SourceType.COLOR:
+          return { type: SourceType.COLOR, name: source.name, value: source.color };
+      }
+    }),
+  };
 }
 
 namespace CordovaRes {
@@ -131,10 +151,10 @@ namespace CordovaRes {
 
     try {
       const options = parseOptions(args);
-      const images = await run(options);
+      const result = await run(options);
 
       if (args.includes('--json')) {
-        process.stdout.write(JSON.stringify({ images }, undefined, '\t'));
+        process.stdout.write(JSON.stringify(result, undefined, '\t'));
       }
     } catch (e) {
       debug('Caught fatal error: %O', e);

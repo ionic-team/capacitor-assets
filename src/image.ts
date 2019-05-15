@@ -4,56 +4,69 @@ import sharp, { Metadata, Sharp } from 'sharp';
 import util from 'util';
 
 import { ResolveSourceImageError, ValidationError } from './error';
-import { Format, RESOURCE_VALIDATORS, ResourceType } from './resources';
+import { Format, RASTER_RESOURCE_VALIDATORS, ResolvedImageSource, ResourceType, SourceType } from './resources';
 
 const debug = Debug('cordova-res:image');
 
 /**
  * Check an array of source files, returning the first viable image.
- *
- * @return Promise<[path to source image, buffer of source image]>
  */
-export async function resolveSourceImage(type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<[string, Sharp, Metadata]> {
+export async function resolveSourceImage(type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
   const errors: [string, NodeJS.ErrnoException][] = [];
 
   for (const source of sources) {
     try {
-      const image = sharp(await readFile(source));
-      const metadata = await RESOURCE_VALIDATORS[type](source, image);
-
-      debug('Source image for %s: %O', type, metadata);
-
-      return [source, image, metadata];
+      return await readSourceImage(type, source, errstream);
     } catch (e) {
       errors.push([source, e]);
     }
   }
 
-  if (errstream) {
-    for (const [ source, error ] of errors) {
-      if (error.code === 'ENOENT') {
-        debug('Source file missing: %s', source);
-      } else {
-        const message = util.format('WARN: Error with source file %s: %s', source, error);
-        errstream.write(`${message}\n`);
-      }
-    }
+  for (const [ source, error ] of errors) {
+    debugSourceImage(source, error, errstream);
   }
 
   throw new ResolveSourceImageError(
-    `Could not find suitable source image. Looked at: ${sources.join(', ')}`,
+    `Missing source image for "${type}" (sources: ${sources.join(', ')})`,
     errors.map(([, error]) => error).filter((e): e is ValidationError => e instanceof ValidationError)
   );
 }
 
+export async function readSourceImage(type: ResourceType, src: string, errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
+  const image = sharp(await readFile(src));
+  const metadata = await RASTER_RESOURCE_VALIDATORS[type](src, image);
+
+  debug('Source image for %s: %O', type, metadata);
+
+  return {
+    type: SourceType.RASTER,
+    src,
+    image: { src, pipeline: image, metadata },
+  };
+}
+
+export function debugSourceImage(src: string, error: NodeJS.ErrnoException, errstream?: NodeJS.WritableStream): void {
+  if (error.code === 'ENOENT') {
+    debug('Source file missing: %s', src);
+  } else {
+    if (errstream) {
+      const message = util.format('WARN: Error with source file %s: %s', src, error);
+      errstream.write(`${message}\n`);
+    } else {
+      debug('Error with source file %s: %O', src, error);
+    }
+  }
+}
+
 export interface ImageSchema {
+  src: string;
   format: Format;
   width: number;
   height: number;
 }
 
-export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, dest: string, errstream?: NodeJS.WritableStream): Promise<void> {
-  debug('Generating %o (%ox%o)', dest, image.width, image.height);
+export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, errstream?: NodeJS.WritableStream): Promise<void> {
+  debug('Generating %o (%ox%o)', image.src, image.width, image.height);
 
   if (errstream) {
     if (metadata.format !== image.format) {
@@ -63,7 +76,7 @@ export async function generateImage(image: ImageSchema, src: Sharp, metadata: Me
 
   const pipeline = applyFormatConversion(image.format, transformImage(image, src));
 
-  await writeFile(dest, await pipeline.toBuffer());
+  await writeFile(image.src, await pipeline.toBuffer());
 }
 
 export function transformImage(image: ImageSchema, src: Sharp): Sharp {

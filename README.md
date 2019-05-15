@@ -14,6 +14,15 @@ config.xml
 * `resources/icon.png` must be at least 1024×1024px
 * `resources/splash.png` must be at least 2732×2732px
 
+Android [Adaptive Icons](https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive) are also supported. If you choose to use them, create the following additional file(s):
+
+* `resources/android/icon-foreground.png` must be at least 432×432px
+* `resources/android/icon-background.png` must be at least 432×432px
+
+If adaptive icons are used, regular Android icons are not generated.
+
+A color may also be used for the icon background by specifying the `--icon-background-source` option with a hex color code, e.g. `--icon-background-source #FFFFFF`.
+
 ## Install
 
 ```bash
