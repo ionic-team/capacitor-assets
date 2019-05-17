@@ -21,7 +21,7 @@ Android [Adaptive Icons](https://developer.android.com/guide/practices/ui_guidel
 
 If adaptive icons are used, regular Android icons are not generated.
 
-A color may also be used for the icon background by specifying the `--icon-background-source` option with a hex color code, e.g. `--icon-background-source #FFFFFF`.
+A color may also be used for the icon background by specifying the `--icon-background-source` option with a hex color code, e.g. `--icon-background-source '#FFFFFF'`.
 
 ## Install
 
