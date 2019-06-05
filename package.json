@@ -44,7 +44,7 @@
     "splash screen"
   ],
   "dependencies": {
-    "@ionic/utils-fs": "^1.0.0",
+    "@ionic/utils-fs": "^2.0.1",
     "debug": "^4.1.1",
     "elementtree": "^0.1.7",
     "sharp": "^0.22.1",
