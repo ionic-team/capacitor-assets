@@ -64,6 +64,7 @@ const options: Options = {
     android: { icon: { sources: ['resources/icon.png'] } },
     ios: { splash: { sources: ['resources/splash.png'] } },
   },
+  ignoreConfigXML: false
 };
 
 await run(options);

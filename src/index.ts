@@ -38,6 +38,7 @@ async function CordovaRes({
     [Platform.ANDROID]: generateRunOptions(Platform.ANDROID, resourcesDirectory, []),
     [Platform.IOS]: generateRunOptions(Platform.IOS, resourcesDirectory, []),
   },
+  ignoreConfigXML = false,
 }: CordovaRes.Options = {}): Promise<Result> {
   const configPath = path.resolve(directory, 'config.xml');
 
@@ -57,8 +58,10 @@ async function CordovaRes({
     }
   }
 
-  await runConfig(configPath, resourcesDirectory, sources, resources);
-  logstream.write(`Wrote to config.xml\n`);
+  if (ignoreConfigXML === false) {
+    await runConfig(configPath, resourcesDirectory, sources, resources);
+    logstream.write(`Wrote to config.xml\n`);
+  }
 
   return {
     resources: resources.map(resource => {
@@ -135,6 +138,13 @@ namespace CordovaRes {
      * provided, resources are generated in an explicit, opt-in manner.
      */
     readonly platforms?: Readonly<PlatformOptions>;
+
+    /**
+     * Ignore `config.xml` file
+     *
+     * Generate images without interacting with `config.xml` file
+     */
+    readonly ignoreConfigXML?: boolean;
   }
 
   export async function runCommandLine(args: ReadonlyArray<string>): Promise<void> {
