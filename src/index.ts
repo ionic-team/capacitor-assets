@@ -1,3 +1,4 @@
+import { existsSync } from '@ionic/utils-fs';
 import Debug from 'debug';
 import path from 'path';
 
@@ -57,8 +58,16 @@ async function CordovaRes({
     }
   }
 
-  await runConfig(configPath, resourcesDirectory, sources, resources);
-  logstream.write(`Wrote to config.xml\n`);
+  if (existsSync(configPath)) {
+    await runConfig(configPath, resourcesDirectory, sources, resources);
+    logstream.write(`Wrote to config.xml\n`);
+  } else {
+    if (errstream) {
+      errstream.write(`WARN: Did not find config.xml file at ${directory}\n`);
+    } else {
+      debug('WARN: Did not find config.xml file at %s', directory);
+    }
+  }
 
   return {
     resources: resources.map(resource => {
