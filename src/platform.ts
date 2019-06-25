@@ -63,7 +63,7 @@ export async function run(platform: Platform, resourcesDirectory: string, option
     resources.push(...adaptiveResult.resources);
     sources.push(...adaptiveResult.sources);
   } else {
-    const iconResult = await runType(ResourceType.ICON, platform, resourcesDirectory, options[ResourceType.ICON]);
+    const iconResult = await runType(ResourceType.ICON, platform, resourcesDirectory, options[ResourceType.ICON], errstream);
 
     if (iconResult) {
       resources.push(...iconResult.resources);
@@ -71,7 +71,7 @@ export async function run(platform: Platform, resourcesDirectory: string, option
     }
   }
 
-  const splashResult = await runType(ResourceType.SPLASH, platform, resourcesDirectory, options[ResourceType.SPLASH]);
+  const splashResult = await runType(ResourceType.SPLASH, platform, resourcesDirectory, options[ResourceType.SPLASH], errstream);
 
   if (splashResult) {
     resources.push(...splashResult.resources);
@@ -188,7 +188,7 @@ export async function resolveSource(type: ResourceType, name: string, sources: (
 }
 
 export async function runAdaptiveSource(resourcesDirectory: string, sources: string[], type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, errstream?: NodeJS.WritableStream): Promise<RunTypeResult> {
-  const source = await resolveSourceImage(ResourceType.ADAPTIVE_ICON, sources);
+  const source = await resolveSourceImage(ResourceType.ADAPTIVE_ICON, sources, errstream);
 
   debug('Using %O for %s source image for %s', source.image.src, ResourceType.ADAPTIVE_ICON, Platform.ANDROID);
 

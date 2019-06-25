@@ -39,7 +39,7 @@ export abstract class BaseError extends Error {
   }
 
   toString() {
-    return `${this.message}\n`;
+    return this.message;
   }
 
   toJSON(): { [key: string]: any; } {
