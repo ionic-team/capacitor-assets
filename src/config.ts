@@ -111,13 +111,17 @@ export function runResource(configPath: string, resource: GeneratedResource, con
 
   // We force the use of forward slashes here to provide cross-platform
   // compatibility for paths.
-  const value = pathlib.relative(pathlib.dirname(configPath), src).replace(/\\/g, '/');
-  const imgElement = resolveResourceElement(container, resource.nodeName, resource.srckey, value);
+  const dest = pathlib.relative(pathlib.dirname(configPath), src).replace(/\\/g, '/');
+  const imgElement = resolveResourceElement(container, resource.nodeName, resource.srckey, dest);
 
   for (const attr of resource.nodeAttributes) {
-    const v = resource[attr];
+    let v = resource[attr];
 
     if (v) {
+      if (attr === resource.srckey) {
+        v = dest;
+      }
+
       imgElement.set(attr, v.toString());
     }
   }
