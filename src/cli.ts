@@ -28,91 +28,92 @@ export function generateRunOptions(platform: Platform, resourcesDirectory: strin
   const types = validateResourceTypes(typeOption ? [typeOption] : RESOURCE_TYPES);
 
   return {
-    [ResourceType.ADAPTIVE_ICON]: types.includes(ResourceType.ADAPTIVE_ICON) ? parseAdaptiveIconOptions(platform, resourcesDirectory, args) : undefined,
-    [ResourceType.ICON]: types.includes(ResourceType.ICON) ? parseIconOptions(platform, resourcesDirectory, args) : undefined,
-    [ResourceType.SPLASH]: types.includes(ResourceType.SPLASH) ? parseSplashOptions(platform, resourcesDirectory, args) : undefined,
+    [ResourceType.ADAPTIVE_ICON]: types.includes(ResourceType.ADAPTIVE_ICON) ? parseAdaptiveIconResourceOptions(platform, resourcesDirectory, args) : undefined,
+    [ResourceType.ICON]: types.includes(ResourceType.ICON) ? parseSimpleResourceOptions(platform, ResourceType.ICON, resourcesDirectory, args) : undefined,
+    [ResourceType.SPLASH]: types.includes(ResourceType.SPLASH) ? parseSimpleResourceOptions(platform, ResourceType.SPLASH, resourcesDirectory, args) : undefined,
   };
 }
 
-export function parseAdaptiveIconOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions | undefined {
+export function parseAdaptiveIconResourceOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions | undefined {
   if (platform !== Platform.ANDROID) {
     return;
   }
 
   return {
-    foreground: parseAdaptiveIconTypeOptions(ResourceKey.FOREGROUND, resourcesDirectory, args),
-    background: parseAdaptiveIconTypeOptions(ResourceKey.BACKGROUND, resourcesDirectory, args),
+    icon: parseSimpleResourceOptions(platform, ResourceType.ICON, resourcesDirectory, args),
+    foreground: parseAdaptiveIconForegroundOptions(resourcesDirectory, args),
+    background: parseAdaptiveIconBackgroundOptions(resourcesDirectory, args),
   };
 }
 
-export function parseAdaptiveIconTypeOptions(type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions[typeof type] {
+export function parseAdaptiveIconForegroundOptions(resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions['foreground'] {
+  const source = parseAdaptiveIconSourceFromArgs(ResourceKey.FOREGROUND, args);
+
+  if (source && source.type !== SourceType.RASTER) {
+    throw new BadInputError('Adaptive icon foreground must be an image.');
+  }
+
+  return {
+    sources: source
+      ? [source]
+      : getDefaultAdaptiveIconSources(ResourceKey.FOREGROUND, resourcesDirectory),
+  };
+}
+
+export function parseAdaptiveIconBackgroundOptions(resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions['background'] {
+  const source = parseAdaptiveIconSourceFromArgs(ResourceKey.BACKGROUND, args);
+
+  return {
+    sources: source
+      ? [source]
+      : getDefaultAdaptiveIconSources(ResourceKey.BACKGROUND, resourcesDirectory),
+  };
+}
+
+export function parseSimpleResourceOptions(platform: Platform, type: ResourceType.ICON | ResourceType.SPLASH, resourcesDirectory: string, args: ReadonlyArray<string>): SimpleResourceOptions {
+  const source = parseSourceFromArgs(type, args);
+  return { sources: source ? [source] : getDefaultSources(platform, type, resourcesDirectory) };
+}
+
+export function parseAdaptiveIconSourceFromArgs(type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, args: ReadonlyArray<string>): Source | undefined {
   const sourceOption = getOptionValue(args, `--icon-${type}-source`);
-  const options: Partial<AdaptiveIconResourceOptions[typeof type]> = {};
 
-  if (sourceOption) {
-    const source: Source = sourceOption.startsWith('#')
-      ? { type: SourceType.COLOR, color: sourceOption }
-      : { type: SourceType.RASTER, src: sourceOption };
-
-    if (type === ResourceKey.FOREGROUND && source.type !== SourceType.RASTER) {
-      throw new BadInputError('Adaptive icon foreground must be an image.');
-    }
-
-    options.sources = [source];
+  if (!sourceOption) {
+    return;
   }
 
-  return {
-    sources: [
-      `${resourcesDirectory}/android/icon-${type}.png`,
-      `${resourcesDirectory}/android/icon-${type}.jpg`,
-      `${resourcesDirectory}/android/icon-${type}.jpeg`,
-    ],
-    ...options,
-  };
+  return parseSource(sourceOption);
 }
 
-export function parseIconOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): SimpleResourceOptions {
-  const sourceOption = getOptionValue(args, '--icon-source');
-  const options: Partial<SimpleResourceOptions> = {};
+export function parseSourceFromArgs(type: ResourceType.ICON | ResourceType.SPLASH, args: ReadonlyArray<string>): string | undefined {
+  const sourceOption = getOptionValue(args, `--${type}-source`);
 
   if (sourceOption) {
-    options.sources = [sourceOption];
+    return sourceOption;
   }
-
-  return {
-    ...{
-      sources: [
-        `${resourcesDirectory}/${platform}/icon.png`,
-        `${resourcesDirectory}/${platform}/icon.jpg`,
-        `${resourcesDirectory}/${platform}/icon.jpeg`,
-        `${resourcesDirectory}/icon.png`,
-        `${resourcesDirectory}/icon.jpg`,
-        `${resourcesDirectory}/icon.jpeg`,
-      ],
-    },
-    ...options,
-  };
 }
 
-export function parseSplashOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): SimpleResourceOptions {
-  const sourceOption = getOptionValue(args, '--splash-source');
-  const options: Partial<SimpleResourceOptions> = {};
+export function parseSource(sourceOption: string): Source {
+  return sourceOption.startsWith('#')
+    ? { type: SourceType.COLOR, color: sourceOption }
+    : { type: SourceType.RASTER, src: sourceOption };
+}
 
-  if (sourceOption) {
-    options.sources = [sourceOption];
-  }
+export function getDefaultSources(platform: Platform, type: ResourceType, resourcesDirectory: string): string[] {
+  return [
+    `${resourcesDirectory}/${platform}/${type}.png`,
+    `${resourcesDirectory}/${platform}/${type}.jpg`,
+    `${resourcesDirectory}/${platform}/${type}.jpeg`,
+    `${resourcesDirectory}/${type}.png`,
+    `${resourcesDirectory}/${type}.jpg`,
+    `${resourcesDirectory}/${type}.jpeg`,
+  ];
+}
 
-  return {
-    ...{
-      sources: [
-        `${resourcesDirectory}/${platform}/splash.png`,
-        `${resourcesDirectory}/${platform}/splash.jpg`,
-        `${resourcesDirectory}/${platform}/splash.jpeg`,
-        `${resourcesDirectory}/splash.png`,
-        `${resourcesDirectory}/splash.jpg`,
-        `${resourcesDirectory}/splash.jpeg`,
-      ],
-    },
-    ...options,
-  };
+export function getDefaultAdaptiveIconSources(type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, resourcesDirectory: string): string[] {
+  return [
+    `${resourcesDirectory}/android/icon-${type}.png`,
+    `${resourcesDirectory}/android/icon-${type}.jpg`,
+    `${resourcesDirectory}/android/icon-${type}.jpeg`,
+  ];
 }

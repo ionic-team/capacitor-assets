@@ -5,7 +5,7 @@ import pathlib from 'path';
 
 import { BadInputError } from './error';
 import { GeneratedResource, Platform } from './platform';
-import { ResolvedColorSource, ResolvedSource, ResourceType, SourceType } from './resources';
+import { ResolvedColorSource, ResolvedSource, ResourceNodeAttribute, ResourceNodeAttributeType, SourceType } from './resources';
 
 const debug = Debug('cordova-res:config');
 
@@ -29,24 +29,6 @@ export async function run(configPath: string, resourcesDirectory: string, source
 
     resourceFileElement.set('src', colorsPath);
     resourceFileElement.set('target', '/app/src/main/res/values/colors.xml');
-  }
-
-  if (resources.find(resource => resource.type === ResourceType.ADAPTIVE_ICON)) {
-    debug('Adaptive Icon resources found--removing any regular icon nodes.');
-
-    const regularIconElements = androidPlatformElement.findall('icon[@src]');
-
-    for (const element of regularIconElements) {
-      androidPlatformElement.remove(element);
-    }
-  } else {
-    debug('No Adaptive Icon resources found--removing any adaptive icon nodes.');
-
-    const regularIconElements = androidPlatformElement.findall('icon[@foreground]');
-
-    for (const element of regularIconElements) {
-      androidPlatformElement.remove(element);
-    }
   }
 
   runConfig(configPath, resources, config);
@@ -102,27 +84,26 @@ export function runConfig(configPath: string, resources: ReadonlyArray<Generated
   }
 }
 
+export function conformPath(configPath: string, value: string | number): string {
+  return pathlib.relative(pathlib.dirname(configPath), value.toString()).replace(/\\/g, '/');
+}
+
 export function runResource(configPath: string, resource: GeneratedResource, container: et.Element): void {
-  const src = resource[resource.srckey];
+  const src = resource[resource.indexAttribute.key];
 
   if (typeof src !== 'string') {
-    throw new BadInputError(`Bad value for src key: ${resource.srckey}`);
+    throw new BadInputError(`Bad value for index "${resource.indexAttribute.key}": ${src}`);
   }
 
   // We force the use of forward slashes here to provide cross-platform
   // compatibility for paths.
-  const dest = pathlib.relative(pathlib.dirname(configPath), src).replace(/\\/g, '/');
-  const imgElement = resolveResourceElement(container, resource.nodeName, resource.srckey, dest);
+  const imgElement = resolveResourceElement(container, resource.nodeName, resource.indexAttribute, conformPath(configPath, src));
 
   for (const attr of resource.nodeAttributes) {
-    let v = resource[attr];
+    const v = resource[attr.key];
 
     if (v) {
-      if (attr === resource.srckey) {
-        v = dest;
-      }
-
-      imgElement.set(attr, v.toString());
+      imgElement.set(attr.key, attr.type === ResourceNodeAttributeType.PATH ? conformPath(configPath, v) : v.toString());
     }
   }
 }
@@ -138,22 +119,24 @@ export function resolvePlatformElement(container: et.Element, platform: Platform
   return et.SubElement(container, 'platform', { name: platform });
 }
 
-export function resolveResourceElement(container: et.Element, nodeName: string, pathAttr: string, pathAttrValue: string): et.Element {
-  const imgElement = container.find(`${nodeName}[@${pathAttr}='${pathAttrValue}']`);
+export function resolveResourceElement(container: et.Element, nodeName: string, indexAttr: ResourceNodeAttribute, index: string): et.Element {
+  const imgElement = container.find(`${nodeName}[@${indexAttr.key}='${index}']`);
 
   if (imgElement) {
     return imgElement;
   }
 
-  // We didn't find the element using forward slashes, so let's try to
-  // find it with backslashes.
-  const imgElementByBackslashes = container.find(`${nodeName}[@${pathAttr}='${pathAttrValue.replace(/\//g, '\\')}']`);
+  if (indexAttr.type === ResourceNodeAttributeType.PATH) {
+    // We didn't find the element using forward slashes, so let's try to
+    // find it with backslashes if the index is a path.
+    const imgElementByBackslashes = container.find(`${nodeName}[@${indexAttr.key}='${index.replace(/\//g, '\\')}']`);
 
-  if (imgElementByBackslashes) {
-    return imgElementByBackslashes;
+    if (imgElementByBackslashes) {
+      return imgElementByBackslashes;
+    }
   }
 
-  debug('Creating %O node for %o', nodeName, pathAttrValue);
+  debug('Creating %O node for %o', nodeName, index);
   return et.SubElement(container, nodeName);
 }
 

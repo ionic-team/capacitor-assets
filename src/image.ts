@@ -4,6 +4,7 @@ import sharp, { Metadata, Sharp } from 'sharp';
 import util from 'util';
 
 import { ResolveSourceImageError, ValidationError } from './error';
+import { Platform } from './platform';
 import { Format, RASTER_RESOURCE_VALIDATORS, ResolvedImageSource, ResourceType, SourceType } from './resources';
 
 const debug = Debug('cordova-res:image');
@@ -11,12 +12,12 @@ const debug = Debug('cordova-res:image');
 /**
  * Check an array of source files, returning the first viable image.
  */
-export async function resolveSourceImage(type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
+export async function resolveSourceImage(platform: Platform, type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
   const errors: [string, NodeJS.ErrnoException][] = [];
 
   for (const source of sources) {
     try {
-      return await readSourceImage(type, source, errstream);
+      return await readSourceImage(platform, type, source, errstream);
     } catch (e) {
       errors.push([source, e]);
     }
@@ -32,13 +33,15 @@ export async function resolveSourceImage(type: ResourceType, sources: string[], 
   );
 }
 
-export async function readSourceImage(type: ResourceType, src: string, errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
+export async function readSourceImage(platform: Platform, type: ResourceType, src: string, errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
   const image = sharp(await readFile(src));
   const metadata = await RASTER_RESOURCE_VALIDATORS[type](src, image);
 
   debug('Source image for %s: %O', type, metadata);
 
   return {
+    platform,
+    resource: type,
     type: SourceType.RASTER,
     src,
     image: { src, pipeline: image, metadata },

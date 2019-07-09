@@ -10,6 +10,7 @@ describe('cordova-res', () => {
       it('should provide defaults with no args', async () => {
         expect(generateRunOptions(Platform.ANDROID, 'resources', [])).toEqual({
           'adaptive-icon': {
+            icon: { sources: ['resources/android/icon.png', 'resources/android/icon.jpg', 'resources/android/icon.jpeg', 'resources/icon.png', 'resources/icon.jpg', 'resources/icon.jpeg'] },
             foreground: { sources: ['resources/android/icon-foreground.png', 'resources/android/icon-foreground.jpg', 'resources/android/icon-foreground.jpeg'] },
             background: { sources: ['resources/android/icon-background.png', 'resources/android/icon-background.jpg', 'resources/android/icon-background.jpeg'] },
           },

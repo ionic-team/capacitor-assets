@@ -71,13 +71,14 @@ async function CordovaRes({
 
   return {
     resources: resources.map(resource => {
-      const { src, foreground, background, platform, width, height, density, orientation } = resource;
+      const { platform, type, src, foreground, background, width, height, density, orientation } = resource;
 
       return {
+        platform,
+        type,
         src,
         foreground,
         background,
-        platform,
         width,
         height,
         density,
@@ -87,9 +88,9 @@ async function CordovaRes({
     sources: sources.map(source => {
       switch (source.type) {
         case SourceType.RASTER:
-          return { type: SourceType.RASTER, value: source.src };
+          return { platform: source.platform, resource: source.resource, type: SourceType.RASTER, value: source.src };
         case SourceType.COLOR:
-          return { type: SourceType.COLOR, name: source.name, value: source.color };
+          return { platform: source.platform, resource: source.resource, type: SourceType.COLOR, value: source.color, name: source.name };
       }
     }),
   };

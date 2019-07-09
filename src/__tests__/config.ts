@@ -1,8 +1,10 @@
 import * as et from 'elementtree';
 
 import { runResource } from '../config';
-import { ResourceKey, ResourceType } from '../resources';
 import { GeneratedResource, Platform } from '../platform';
+import { ResourceKey, ResourceNodeAttributeType, ResourceType } from '../resources';
+
+const SRC_ATTRIBUTE = { key: ResourceKey.SRC, type: ResourceNodeAttributeType.PATH };
 
 describe('cordova-res', () => {
 
@@ -13,10 +15,10 @@ describe('cordova-res', () => {
       const resource: GeneratedResource = {
         [ResourceKey.SRC]: '/path/to/resources/icon.png',
         type: ResourceType.ICON,
-        srckey: ResourceKey.SRC,
         platform: Platform.ANDROID,
         nodeName: 'icon',
-        nodeAttributes: [ResourceKey.SRC],
+        nodeAttributes: [SRC_ATTRIBUTE],
+        indexAttribute: SRC_ATTRIBUTE,
       };
 
       it('should insert node for empty container', async () => {

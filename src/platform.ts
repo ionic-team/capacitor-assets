@@ -4,7 +4,7 @@ import pathlib from 'path';
 
 import { BadInputError, ResolveSourceImageError } from './error';
 import { ImageSchema, debugSourceImage, generateImage, readSourceImage, resolveSourceImage } from './image';
-import { COLOR_REGEX, ImageSourceData, ResolvedSource, ResourceKey, ResourceKeyValues, ResourceType, ResourcesTypeConfig, Source, SourceType, getResourcesConfig } from './resources';
+import { COLOR_REGEX, ColorSource, ImageSource, ImageSourceData, ResolvedImageSource, ResolvedSource, ResourceKey, ResourceKeyValues, ResourceNodeAttribute, ResourceType, ResourcesTypeConfig, SourceType, getResourcesConfig } from './resources';
 
 const debug = Debug('cordova-res:platform');
 
@@ -15,18 +15,19 @@ export const enum Platform {
 
 export const PLATFORMS: ReadonlyArray<Platform> = [Platform.ANDROID, Platform.IOS];
 
-export type Sources = (string | Source)[];
-
 export interface GeneratedResource extends ResourceKeyValues {
   type: ResourceType;
-  srckey: ResourceKey;
   platform: Platform;
   nodeName: string;
-  nodeAttributes: ReadonlyArray<ResourceKey>;
+  nodeAttributes: ReadonlyArray<ResourceNodeAttribute>;
+  indexAttribute: ResourceNodeAttribute;
 }
 
 export interface SimpleResourceOptions {
-  sources: string[];
+  /**
+   * Paths to source images to use for this resource.
+   */
+  sources: (string | ImageSource)[];
 }
 
 export interface SimpleResourceResult {
@@ -35,11 +36,28 @@ export interface SimpleResourceResult {
 }
 
 export interface AdaptiveIconResourceOptions {
-  foreground: {
-    sources: Sources;
-  };
+
+  /**
+   * Provides options for an optional fallback for Android devices that do not support adaptive icons.
+   *
+   * @see https://cordova.apache.org/docs/en/dev/config_ref/images.html#adaptive-icons
+   */
+  icon?: SimpleResourceOptions;
+
+  /**
+   * Options for the foreground portion of adaptive icons.
+   */
+  foreground: SimpleResourceOptions;
+
+  /**
+   * Options for the background portion of adaptive icons.
+   */
   background: {
-    sources: Sources;
+
+    /**
+     * Paths to source images or colors to use for this resource.
+     */
+    sources: (string | ImageSource | ColorSource)[];
   };
 }
 
@@ -90,6 +108,28 @@ export async function run(platform: Platform, resourcesDirectory: string, option
 }
 
 /**
+ * Attempt to generate icons or splash screens for any platform.
+ *
+ * If there are no options given for this resource or if the source images are
+ * not suitable, this function resolves with `undefined`.
+ */
+export async function safelyGenerateSimpleResources(type: ResourceType.ICON | ResourceType.SPLASH, platform: Platform, resourcesDirectory: string, options?: Readonly<SimpleResourceOptions>, errstream?: NodeJS.WritableStream): Promise<SimpleResourceResult | undefined> {
+  if (!options) {
+    return;
+  }
+
+  try {
+    return await generateSimpleResources(type, platform, resourcesDirectory, options, errstream);
+  } catch (e) {
+    debug('Error with %O resources for %O: %O', type, platform, e);
+
+    if (!(e instanceof ResolveSourceImageError)) {
+      throw e;
+    }
+  }
+}
+
+/**
  * Generate simple icons or splash screens.
  *
  * Icon and Splash Screen generation is "simple" because there's one source
@@ -105,7 +145,7 @@ export async function generateSimpleResources(type: ResourceType.ICON | Resource
 
   debug('Building %s resources for %s platform', type, platform);
 
-  const source = await resolveSourceImage(type, options.sources, errstream);
+  const source = await resolveSourceImage(platform, type, options.sources.map(s => imageSourceToPath(s)), errstream);
 
   debug('Using %O for %s source image for %s', source.image.src, type, platform);
 
@@ -113,7 +153,7 @@ export async function generateSimpleResources(type: ResourceType.ICON | Resource
   const resources = await Promise.all(config.resources.map(
     async (resource): Promise<GeneratedResource> => ({
       ...resource,
-      ...await generateImageResource(type, platform, resourcesDirectory, config, source.image, resource, ResourceKey.SRC, errstream),
+      ...await generateImageResource(type, platform, resourcesDirectory, config, source.image, resource, errstream),
     })
   ));
 
@@ -130,7 +170,7 @@ export async function generateSimpleResources(type: ResourceType.ICON | Resource
  * source images are not suitable, this function resolves with `undefined`.
  */
 export async function safelyGenerateAdaptiveIconResources(platform: Platform, resourcesDirectory: string, options?: Readonly<AdaptiveIconResourceOptions>, errstream?: NodeJS.WritableStream): Promise<RunPlatformResult | undefined> {
-  if (platform !== Platform.ANDROID || !options) {
+  if (!options || platform !== Platform.ANDROID) {
     return;
   }
 
@@ -153,46 +193,59 @@ export async function generateAdaptiveIconResources(resourcesDirectory: string, 
     throw new BadInputError('Adaptive icons require sources for both foreground and background.');
   }
 
-  const foregroundSources = options.foreground.sources
-    .map(source => typeof source === 'string' ? source : source.type === SourceType.RASTER ? source.src : undefined)
-    .filter((source): source is string => typeof source === 'string');
-
-  if (foregroundSources.length === 0) {
-    throw new BadInputError('Adaptive icon foreground source must be an image.');
-  }
-
   debug('Building %s resources', ResourceType.ADAPTIVE_ICON);
 
-  const { resources: foregroundResources, source: foregroundSource } = await generateAdaptiveIconType(resourcesDirectory, foregroundSources, ResourceKey.FOREGROUND, errstream);
-  const resolvedBackgroundSource = await resolveSource(ResourceType.ADAPTIVE_ICON, ResourceKey.BACKGROUND, options.background.sources, errstream);
-  const config = getResourcesConfig(Platform.ANDROID, ResourceType.ADAPTIVE_ICON);
+  const { resources: iconResources = [], source: iconSource } = (await safelyGenerateSimpleResources(ResourceType.ICON, Platform.ANDROID, resourcesDirectory, options.icon, errstream)) || { source: undefined };
+  const { resources: foregroundResources, source: foregroundSource } = await generateAdaptiveIconResourcesPortion(resourcesDirectory, ResourceKey.FOREGROUND, options.foreground.sources, errstream);
+  const resolvedBackgroundSource = await resolveSource(Platform.ANDROID, ResourceType.ADAPTIVE_ICON, ResourceKey.BACKGROUND, options.background.sources, errstream);
+  const backgroundResources = resolvedBackgroundSource.type === SourceType.RASTER
+    ? await generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory, ResourceKey.BACKGROUND, resolvedBackgroundSource, errstream)
+    : foregroundResources.map(resource => ({ ...resource, src: '@color/background' }));
 
-  const resources = resolvedBackgroundSource.type === SourceType.RASTER
-    ? await Promise.all(foregroundResources.map(async resource => {
-        const { background, format, width, height } = resource;
-
-        if (!background || !format || !width || !height) {
-          throw new BadInputError(`Bad adaptive icon image schema: (background: ${background}, format: ${format}, width: ${width}, height: ${height})`);
-        }
-
-        const backgroundResource = await generateImageResource(ResourceType.ADAPTIVE_ICON, Platform.ANDROID, resourcesDirectory, config, resolvedBackgroundSource.image, { src: background, format, width, height }, ResourceKey.BACKGROUND, errstream);
-
-        return { ...resource, background: backgroundResource.background };
-      }))
-    : foregroundResources.map(resource => ({ ...resource, background: '@color/background' }));
+  const resources = await consolidateAdaptiveIconResources(foregroundResources, backgroundResources);
 
   return {
-    resources,
-    sources: [foregroundSource, resolvedBackgroundSource],
+    resources: [...iconResources, ...resources],
+    sources: [...iconSource ? [iconSource] : [], foregroundSource, resolvedBackgroundSource],
   };
 }
 
-/**
- * Generate the foreground or background portion of Adaptive Icons.
- */
-export async function generateAdaptiveIconType(resourcesDirectory: string, sources: string[], type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, errstream?: NodeJS.WritableStream): Promise<SimpleResourceResult> {
-  const source = await resolveSourceImage(ResourceType.ADAPTIVE_ICON, sources, errstream);
+export async function consolidateAdaptiveIconResources(foregrounds: ReadonlyArray<GeneratedResource>, backgrounds: ReadonlyArray<GeneratedResource>): Promise<GeneratedResource[]> {
+  return foregrounds.map(foreground => {
+    const background = backgrounds.find(r => r[r.indexAttribute.key] === foreground[foreground.indexAttribute.key]);
 
+    if (!background) {
+      throw new BadInputError(`Cannot consolidate adaptive icon resources: No background for foreground: ${foreground.src}`);
+    }
+
+    return {
+      platform: foreground.platform,
+      type: foreground.type,
+      foreground: foreground.src,
+      background: background.src,
+      density: foreground.density,
+      width: foreground.width,
+      height: foreground.height,
+      nodeName: foreground.nodeName,
+      nodeAttributes: foreground.nodeAttributes,
+      indexAttribute: foreground.indexAttribute,
+    };
+  });
+}
+
+/**
+ * Generate the foreground of Adaptive Icons.
+ */
+export async function generateAdaptiveIconResourcesPortion(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, sources: (string | ImageSource)[], errstream?: NodeJS.WritableStream): Promise<SimpleResourceResult> {
+  const source = await resolveSourceImage(Platform.ANDROID, ResourceType.ADAPTIVE_ICON, sources.map(s => imageSourceToPath(s)), errstream);
+
+  return {
+    resources: await generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory, type, source, errstream),
+    source,
+  };
+}
+
+export async function generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, source: ResolvedImageSource, errstream?: NodeJS.WritableStream): Promise<GeneratedResource[]> {
   debug('Using %O for %s source image for %s', source.image.src, ResourceType.ADAPTIVE_ICON, Platform.ANDROID);
 
   const config = getResourcesConfig(Platform.ANDROID, ResourceType.ADAPTIVE_ICON);
@@ -206,18 +259,14 @@ export async function generateAdaptiveIconType(resourcesDirectory: string, sourc
       config,
       source.image,
       { ...resource, src: resource[type] },
-      type,
       errstream
     ),
   })));
 
-  return {
-    resources,
-    source,
-  };
+  return resources;
 }
 
-export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<unknown>, image: ImageSourceData, schema: ImageSchema, key: ResourceKey, errstream?: NodeJS.WritableStream): Promise<GeneratedResource> {
+export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<unknown>, image: ImageSourceData, schema: ImageSchema, errstream?: NodeJS.WritableStream): Promise<GeneratedResource> {
   const { pipeline, metadata } = image;
   const { src, format, width, height } = schema;
 
@@ -230,21 +279,25 @@ export async function generateImageResource(type: ResourceType, platform: Platfo
     format,
     width,
     height,
-    srckey: key,
-    [key]: dest,
+    src: dest,
     platform,
     nodeName: config.nodeName,
     nodeAttributes: config.nodeAttributes,
+    indexAttribute: config.indexAttribute,
   };
 }
 
-export async function resolveSource(type: ResourceType, name: string, sources: Sources, errstream?: NodeJS.WritableStream): Promise<ResolvedSource> {
+export function imageSourceToPath(source: string | ImageSource): string {
+  return typeof source === 'string' ? source : source.src;
+}
+
+export async function resolveSource(platform: Platform, type: ResourceType, name: string, sources: ReadonlyArray<string | ImageSource | ColorSource>, errstream?: NodeJS.WritableStream): Promise<ResolvedSource> {
   for (const source of sources) {
     if (typeof source === 'string' || source.type === SourceType.RASTER) {
-      const src = typeof source === 'string' ? source : source.src;
+      const src = imageSourceToPath(source);
 
       try {
-        return await readSourceImage(type, src);
+        return await readSourceImage(platform, type, src);
       } catch (e) {
         debugSourceImage(src, e, errstream);
       }
@@ -255,7 +308,7 @@ export async function resolveSource(type: ResourceType, name: string, sources: S
         throw new BadInputError(`Color ${color} does not match regex ${COLOR_REGEX}.`);
       }
 
-      return { type: SourceType.COLOR, name, color };
+      return { platform, resource: type, type: SourceType.COLOR, name, color };
     }
   }
 

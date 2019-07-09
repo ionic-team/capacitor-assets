@@ -51,10 +51,14 @@ export interface ImageSourceData {
 }
 
 export interface ResolvedImageSource extends ImageSource {
+  platform: Platform;
+  resource: ResourceType;
   image: ImageSourceData;
 }
 
 export interface ResolvedColorSource extends ColorSource {
+  platform: Platform;
+  resource: ResourceType;
   name: string;
 }
 
@@ -183,10 +187,26 @@ export interface AndroidAdaptiveIconConfig {
   readonly [ResourceKey.DENSITY]?: Density;
 }
 
+export const enum ResourceNodeAttributeType {
+  PATH = 'path',
+}
+
+export interface ResourceNodeAttribute {
+  readonly key: ResourceKey;
+  readonly type?: ResourceNodeAttributeType;
+}
+
 export interface ResourcesTypeConfig<C = ResourcesImageConfig> {
   readonly resources: ReadonlyArray<C>;
   readonly nodeName: string;
-  readonly nodeAttributes: ReadonlyArray<ResourceKey>;
+  readonly nodeAttributes: ReadonlyArray<ResourceNodeAttribute>;
+
+  /**
+   * Uniquely identifies a node.
+   *
+   * Use `nodeName` and this attribute to look up existing nodes in Cordova config.
+   */
+  readonly indexAttribute: ResourceNodeAttribute;
 }
 
 export type ResourcesPlatform = { readonly [T in ResourceType.ICON | ResourceType.SPLASH]: ResourcesTypeConfig; };
@@ -210,6 +230,15 @@ export function isSupportedResourceType(type: any): type is ResourceType {
   return RESOURCE_TYPES.includes(type);
 }
 
+const NodeAttributes = {
+  FOREGROUND: { key: ResourceKey.FOREGROUND, type: ResourceNodeAttributeType.PATH },
+  BACKGROUND: { key: ResourceKey.BACKGROUND, type: ResourceNodeAttributeType.PATH },
+  SRC: { key: ResourceKey.SRC, type: ResourceNodeAttributeType.PATH },
+  DENSITY: { key: ResourceKey.DENSITY },
+  WIDTH: { key: ResourceKey.WIDTH },
+  HEIGHT: { key: ResourceKey.HEIGHT },
+};
+
 export function getResourcesConfig(platform: Platform.ANDROID, type: ResourceType.ADAPTIVE_ICON): ResourcesTypeConfig<AndroidAdaptiveIconConfig>;
 export function getResourcesConfig(platform: Platform, type: ResourceType): ResourcesTypeConfig;
 export function getResourcesConfig(platform: Platform, type: ResourceType): ResourcesTypeConfig | ResourcesTypeConfig<AndroidAdaptiveIconConfig> {
@@ -224,7 +253,8 @@ export function getResourcesConfig(platform: Platform, type: ResourceType): Reso
         { foreground: 'android/icon/xxxhdpi-foreground.png', background: 'android/icon/xxxhdpi-background.png', format: Format.PNG, width: 432, height: 432, density: Density.XXXHDPI },
       ],
       nodeName: 'icon',
-      nodeAttributes: [ResourceKey.FOREGROUND, ResourceKey.DENSITY, ResourceKey.BACKGROUND],
+      nodeAttributes: [NodeAttributes.FOREGROUND, NodeAttributes.DENSITY, NodeAttributes.BACKGROUND],
+      indexAttribute: NodeAttributes.DENSITY,
     };
   }
 
@@ -243,7 +273,8 @@ const RESOURCES: ResourcesConfig = {
         { src: 'android/icon/drawable-xxxhdpi-icon.png', format: Format.PNG, width: 192, height: 192, density: Density.XXXHDPI },
       ],
       nodeName: 'icon',
-      nodeAttributes: [ResourceKey.SRC, ResourceKey.DENSITY],
+      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.DENSITY],
+      indexAttribute: NodeAttributes.DENSITY,
     },
     [ResourceType.SPLASH]: {
       resources: [
@@ -261,7 +292,8 @@ const RESOURCES: ResourcesConfig = {
         { src: 'android/splash/drawable-port-xxxhdpi-screen.png', format: Format.PNG, width: 1280, height: 1920, density: Density.PORT_XXXHDPI, orientation: Orientation.PORTRAIT },
       ],
       nodeName: 'splash',
-      nodeAttributes: [ResourceKey.SRC, ResourceKey.DENSITY],
+      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.DENSITY],
+      indexAttribute: NodeAttributes.DENSITY,
     },
   },
   [Platform.IOS]: {
@@ -299,7 +331,8 @@ const RESOURCES: ResourcesConfig = {
         { src: 'ios/icon/icon-1024.png', format: Format.PNG, width: 1024, height: 1024 },
       ],
       nodeName: 'icon',
-      nodeAttributes: [ResourceKey.SRC, ResourceKey.WIDTH, ResourceKey.HEIGHT],
+      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
+      indexAttribute: NodeAttributes.SRC,
     },
     [ResourceType.SPLASH]: {
       resources: [
@@ -320,7 +353,8 @@ const RESOURCES: ResourcesConfig = {
         { src: 'ios/splash/Default@2x~universal~anyany.png', format: Format.PNG, width: 2732, height: 2732 },
       ],
       nodeName: 'splash',
-      nodeAttributes: [ResourceKey.SRC, ResourceKey.WIDTH, ResourceKey.HEIGHT],
+      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
+      indexAttribute: NodeAttributes.SRC,
     },
   },
 };
