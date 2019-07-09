@@ -1,6 +1,6 @@
 import { Options, PlatformOptions } from '.';
 import { BadInputError } from './error';
-import { AndroidAdaptiveIconsRunOptions, PLATFORMS, Platform, ResourceTypeRunOptions, RunPlatformOptions, validatePlatforms } from './platform';
+import { AdaptiveIconResourceOptions, PLATFORMS, Platform, RunPlatformOptions, SimpleResourceOptions, validatePlatforms } from './platform';
 import { DEFAULT_RESOURCES_DIRECTORY, RESOURCE_TYPES, ResourceKey, ResourceType, Source, SourceType, validateResourceTypes } from './resources';
 import { getOptionValue } from './utils/cli';
 
@@ -34,7 +34,7 @@ export function generateRunOptions(platform: Platform, resourcesDirectory: strin
   };
 }
 
-export function parseAdaptiveIconOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): AndroidAdaptiveIconsRunOptions | undefined {
+export function parseAdaptiveIconOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions | undefined {
   if (platform !== Platform.ANDROID) {
     return;
   }
@@ -45,9 +45,9 @@ export function parseAdaptiveIconOptions(platform: Platform, resourcesDirectory:
   };
 }
 
-export function parseAdaptiveIconTypeOptions(type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, resourcesDirectory: string, args: ReadonlyArray<string>): AndroidAdaptiveIconsRunOptions[typeof type] {
+export function parseAdaptiveIconTypeOptions(type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions[typeof type] {
   const sourceOption = getOptionValue(args, `--icon-${type}-source`);
-  const options: Partial<AndroidAdaptiveIconsRunOptions[typeof type]> = {};
+  const options: Partial<AdaptiveIconResourceOptions[typeof type]> = {};
 
   if (sourceOption) {
     const source: Source = sourceOption.startsWith('#')
@@ -71,9 +71,9 @@ export function parseAdaptiveIconTypeOptions(type: ResourceKey.FOREGROUND | Reso
   };
 }
 
-export function parseIconOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): ResourceTypeRunOptions {
+export function parseIconOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): SimpleResourceOptions {
   const sourceOption = getOptionValue(args, '--icon-source');
-  const options: Partial<ResourceTypeRunOptions> = {};
+  const options: Partial<SimpleResourceOptions> = {};
 
   if (sourceOption) {
     options.sources = [sourceOption];
@@ -94,9 +94,9 @@ export function parseIconOptions(platform: Platform, resourcesDirectory: string,
   };
 }
 
-export function parseSplashOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): ResourceTypeRunOptions {
+export function parseSplashOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): SimpleResourceOptions {
   const sourceOption = getOptionValue(args, '--splash-source');
-  const options: Partial<ResourceTypeRunOptions> = {};
+  const options: Partial<SimpleResourceOptions> = {};
 
   if (sourceOption) {
     options.sources = [sourceOption];
