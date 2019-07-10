@@ -2,6 +2,14 @@
 
 This tool will crop and resize JPEG and PNG source images to generate images for modern iOS and Android devices.
 
+## Install
+
+```bash
+$ npm install -g cordova-res
+```
+
+## Usage
+
 `cordova-res` must run at the root of a Cordova project, such as:
 
 ```
@@ -14,27 +22,42 @@ config.xml
 * `resources/icon.png` must be at least 1024×1024px
 * `resources/splash.png` must be at least 2732×2732px
 
+To generate resources with all the default options, just run:
+
+```bash
+$ cordova-res
+```
+
+See the help documentation on the command line with the `--help` flag.
+
+```bash
+$ cordova-res --help
+```
+
+### Adaptive Icons
+
 Android [Adaptive Icons](https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive) are also supported. If you choose to use them, create the following additional file(s):
 
 * `resources/android/icon-foreground.png` must be at least 432×432px
 * `resources/android/icon-background.png` must be at least 432×432px
 
-If adaptive icons are used, regular Android icons are not generated.
-
 A color may also be used for the icon background by specifying the `--icon-background-source` option with a hex color code, e.g. `--icon-background-source '#FFFFFF'`.
 
-## Install
+Regular Android icons will still be generated as a fallback for Android devices that do not support adaptive icons.
 
-```bash
-$ npm install -g cordova-res
+### Tips
+
+#### .gitignore
+
+To avoid committing large generated images to your repository, you can add the
+following lines to your `.gitignore`:
+
 ```
-
-## Usage
-
-See the help documentation on the command line with the `--help` option.
-
-```bash
-$ cordova-res --help
+resources/android/icon
+resources/android/splash
+resources/android/xml
+resources/ios/icon
+resources/ios/splash
 ```
 
 ### Programmatic API
@@ -68,3 +91,8 @@ const options: Options = {
 
 await run(options);
 ```
+
+### Cordova Reference Documentation
+
+- Icons: https://cordova.apache.org/docs/en/latest/config_ref/images.html
+- Splash Screens: https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-splashscreen/
