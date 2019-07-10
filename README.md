@@ -55,7 +55,6 @@ following lines to your `.gitignore`:
 ```
 resources/android/icon
 resources/android/splash
-resources/android/xml
 resources/ios/icon
 resources/ios/splash
 ```
