@@ -59,7 +59,7 @@ async function CordovaRes({
   }
 
   if (await pathWritable(configPath)) {
-    await runConfig(configPath, resourcesDirectory, sources, resources);
+    await runConfig(configPath, resourcesDirectory, sources, resources, errstream);
     logstream.write(`Wrote to config.xml\n`);
   } else {
     debug('File missing/not writable: %O', configPath);

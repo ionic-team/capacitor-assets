@@ -9,7 +9,7 @@ import { ResolvedColorSource, ResolvedSource, ResourceNodeAttribute, ResourceNod
 
 const debug = Debug('cordova-res:config');
 
-export async function run(configPath: string, resourcesDirectory: string, sources: ReadonlyArray<ResolvedSource>, resources: ReadonlyArray<GeneratedResource>): Promise<void> {
+export async function run(configPath: string, resourcesDirectory: string, sources: ReadonlyArray<ResolvedSource>, resources: ReadonlyArray<GeneratedResource>, errstream?: NodeJS.WritableStream): Promise<void> {
   const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
   const config = await read(configPath);
 
@@ -31,7 +31,7 @@ export async function run(configPath: string, resourcesDirectory: string, source
     resourceFileElement.set('target', '/app/src/main/res/values/colors.xml');
   }
 
-  runConfig(configPath, resources, config);
+  runConfig(configPath, resources, config, errstream);
 
   await write(configPath, config);
 }
@@ -69,9 +69,17 @@ export async function runColorsConfig(colorsPath: string, colors: ReadonlyArray<
   await write(colorsPath, colorsDocument);
 }
 
-export function runConfig(configPath: string, resources: ReadonlyArray<GeneratedResource>, doc: et.ElementTree): void {
+export function runConfig(configPath: string, resources: ReadonlyArray<GeneratedResource>, doc: et.ElementTree, errstream?: NodeJS.WritableStream): void {
   const root = doc.getroot();
-  const orientation = getPreference(doc, 'Orientation') || 'default';
+  const orientationPreference = getPreference(doc, 'Orientation');
+  debug('Orientation preference: %O', orientationPreference);
+
+  const orientation = orientationPreference || 'default';
+
+  if (orientation !== 'default' && errstream) {
+    errstream.write(`WARN: Orientation preference set to '${orientation}'. Only configuring ${orientation} resources.\n`);
+  }
+
   const platforms = groupImages(resources);
 
   for (const [ platform, platformResources ] of platforms) {
