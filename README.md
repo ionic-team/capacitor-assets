@@ -45,6 +45,8 @@ A color may also be used for the icon background by specifying the `--icon-backg
 
 Regular Android icons will still be generated as a fallback for Android devices that do not support adaptive icons.
 
+:memo: **Note**: Cordova 9+ and `cordova-android` 8+ is required.
+
 ### Tips
 
 #### .gitignore
