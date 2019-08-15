@@ -24,6 +24,23 @@ export const enum SourceType {
   // TODO: support vectors via Android XML
 }
 
+/**
+ * Windows targets
+ * @see https://cordova.apache.org/docs/en/latest/config_ref/images.html#windows
+ *
+ */
+export const enum WindowsTarget {
+  STORE_LOGO = 'StoreLogo',
+  SQUARE_30_X_30_LOGO = 'Square30x30Logo',
+  SQUARE_44_X_44_LOGO = 'Square44x44Logo',
+  SQUARE_70_X_70_LOGO = 'Square70x70Logo',
+  SQUARE_71_X_71_LOGO = 'Square71x71Logo',
+  SQUARE_150_X_150_LOGO = 'Square150x150Logo',
+  SQUARE_310_X_310_LOGO = 'Square310x310Logo',
+  WIDE_310_X_150_LOGO = 'Wide310x150Logo',
+  SPLASH_SCREEN = 'SplashScreen',
+}
+
 export interface ImageSource {
   type: SourceType.RASTER;
 
@@ -119,6 +136,7 @@ export const RASTER_RESOURCE_VALIDATORS: { readonly [T in ResourceType]: Resourc
 export const enum Format {
   PNG = 'png',
   JPEG = 'jpeg',
+  NONE = 'none',
 }
 
 export const enum Orientation {
@@ -156,6 +174,7 @@ export const enum ResourceKey {
   HEIGHT = 'height',
   DENSITY = 'density',
   ORIENTATION = 'orientation',
+  TARGET = 'target',
 }
 
 export interface ResourceKeyValues {
@@ -167,6 +186,7 @@ export interface ResourceKeyValues {
   readonly [ResourceKey.HEIGHT]?: number;
   readonly [ResourceKey.DENSITY]?: Density;
   readonly [ResourceKey.ORIENTATION]?: Orientation;
+  readonly [ResourceKey.TARGET]?: string;
 }
 
 export interface ResourcesImageConfig {
@@ -176,6 +196,7 @@ export interface ResourcesImageConfig {
   readonly [ResourceKey.HEIGHT]: number;
   readonly [ResourceKey.DENSITY]?: Density;
   readonly [ResourceKey.ORIENTATION]?: Orientation;
+  readonly [ResourceKey.TARGET]?: string;
 }
 
 export interface AndroidAdaptiveIconConfig {
@@ -237,6 +258,7 @@ const NodeAttributes = {
   DENSITY: { key: ResourceKey.DENSITY },
   WIDTH: { key: ResourceKey.WIDTH },
   HEIGHT: { key: ResourceKey.HEIGHT },
+  TARGET: { key: ResourceKey.TARGET },
 };
 
 export function getResourcesConfig(platform: Platform.ANDROID, type: ResourceType.ADAPTIVE_ICON): ResourcesTypeConfig<AndroidAdaptiveIconConfig>;
@@ -262,6 +284,97 @@ export function getResourcesConfig(platform: Platform, type: ResourceType): Reso
 }
 
 const RESOURCES: ResourcesConfig = {
+  [Platform.WINDOWS]: {
+    [ResourceType.ICON]: {
+      resources: [
+        /* @see https://cordova.apache.org/docs/en/latest/config_ref/images.html#windows */
+        /* @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos */
+        /* @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos#icon-types-locations-and-scale-factors */
+
+        /* App Icon: App list in start menu, task bar, task manager */
+        { src : 'windows/icon/Square44x44Logo.png', format: Format.NONE, width: 44, height: 44, target: WindowsTarget.SQUARE_44_X_44_LOGO },
+        { src : 'windows/icon/Square44x44Logo.scale-100.png', format: Format.PNG, width: 44, height: 44 },
+        { src : 'windows/icon/Square44x44Logo.scale-125.png', format: Format.PNG, width: 55, height: 55 },
+        { src : 'windows/icon/Square44x44Logo.scale-140.png', format: Format.PNG, width: 62, height: 62 },
+        { src : 'windows/icon/Square44x44Logo.scale-150.png', format: Format.PNG, width: 66, height: 66 },
+        { src : 'windows/icon/Square44x44Logo.scale-200.png', format: Format.PNG, width: 88, height: 88 },
+        { src : 'windows/icon/Square44x44Logo.scale-240.png', format: Format.PNG, width: 106, height: 106 },
+        { src : 'windows/icon/Square44x44Logo.scale-400.png', format: Format.PNG, width: 176, height: 176 },
+
+        /* Small tile: Start menu */
+        { src : 'windows/icon/SmallTile.png', format: Format.NONE, width: 71, height: 71, target: WindowsTarget.SQUARE_71_X_71_LOGO },
+        { src : 'windows/icon/SmallTile.scale-100.png', format: Format.PNG, width: 71, height: 71 },
+        { src : 'windows/icon/SmallTile.scale-125.png', format: Format.PNG, width: 89, height: 89 },
+        { src : 'windows/icon/SmallTile.scale-140.png', format: Format.PNG, width: 99, height: 99 },
+        { src : 'windows/icon/SmallTile.scale-150.png', format: Format.PNG, width: 107, height: 107 },
+        { src : 'windows/icon/SmallTile.scale-200.png', format: Format.PNG, width: 142, height: 142 },
+        { src : 'windows/icon/SmallTile.scale-240.png', format: Format.PNG, width: 170, height: 170 },
+        { src : 'windows/icon/SmallTile.scale-400.png', format: Format.PNG, width: 284, height: 284 },
+
+        /* Medium Tile: For Start menu, Microsoft Store listing */
+        { src : 'windows/icon/Square150x150Logo.png', format: Format.NONE, width: 150, height: 150, target: WindowsTarget.SQUARE_150_X_150_LOGO },
+        { src : 'windows/icon/Square150x150Logo.scale-100.png', format: Format.PNG, width: 150, height: 150 },
+        { src : 'windows/icon/Square150x150Logo.scale-125.png', format: Format.PNG, width: 188, height: 188 },
+        { src : 'windows/icon/Square150x150Logo.scale-140.png', format: Format.PNG, width: 210, height: 210 },
+        { src : 'windows/icon/Square150x150Logo.scale-150.png', format: Format.PNG, width: 225, height: 225 },
+        { src : 'windows/icon/Square150x150Logo.scale-200.png', format: Format.PNG, width: 300, height: 300 },
+        { src : 'windows/icon/Square150x150Logo.scale-240.png', format: Format.PNG, width: 360, height: 360 },
+        { src : 'windows/icon/Square150x150Logo.scale-400.png', format: Format.PNG, width: 600, height: 600 },
+
+        /* Large Tile: Start Menu */
+        { src : 'windows/icon/Square310x310Logo.png', format: Format.NONE, width: 310, height: 310, target: WindowsTarget.SQUARE_310_X_310_LOGO },
+        { src : 'windows/icon/Square310x310Logo.scale-100.png', format: Format.PNG, width: 310, height: 310 },
+        { src : 'windows/icon/Square310x310Logo.scale-125.png', format: Format.PNG, width: 388, height: 388 },
+        { src : 'windows/icon/Square310x310Logo.scale-140.png', format: Format.PNG, width: 434, height: 434 },
+        { src : 'windows/icon/Square310x310Logo.scale-150.png', format: Format.PNG, width: 465, height: 465 },
+        { src : 'windows/icon/Square310x310Logo.scale-180.png', format: Format.PNG, width: 558, height: 558 },
+        { src : 'windows/icon/Square310x310Logo.scale-200.png', format: Format.PNG, width: 620, height: 620 },
+        { src : 'windows/icon/Square310x310Logo.scale-400.png', format: Format.PNG, width: 1240, height: 1240 },
+
+        /* Wide Tile: Start Menu */
+        { src : 'windows/icon/Wide310x150Logo.png', format: Format.NONE, width: 248, height : 120, target: WindowsTarget.WIDE_310_X_150_LOGO },
+        { src : 'windows/icon/Wide310x150Logo.scale-80.png', format: Format.PNG, width: 248, height : 120 },
+        { src : 'windows/icon/Wide310x150Logo.scale-100.png', format: Format.PNG, width: 310, height : 150 },
+        { src : 'windows/icon/Wide310x150Logo.scale-125.png', format: Format.PNG, width: 388, height : 188 },
+        { src : 'windows/icon/Wide310x150Logo.scale-140.png', format: Format.PNG, width: 434, height : 210 },
+        { src : 'windows/icon/Wide310x150Logo.scale-150.png', format: Format.PNG, width: 465, height : 225 },
+        { src : 'windows/icon/Wide310x150Logo.scale-180.png', format: Format.PNG, width: 558, height : 270 },
+        { src : 'windows/icon/Wide310x150Logo.scale-200.png', format: Format.PNG, width: 620, height : 300 },
+        { src : 'windows/icon/Wide310x150Logo.scale-240.png', format: Format.PNG, width: 744, height : 360 },
+        { src : 'windows/icon/Wide310x150Logo.scale-400.png', format: Format.PNG, width: 1240, height : 600 },
+
+        /* Store Logo: App installer, Partner Center, the "Report an app" option in the Store, the "Write a review" option in the Store */
+        { src : 'windows/icon/StoreLogo.png', format: Format.NONE, width: 50, height: 50, target: WindowsTarget.STORE_LOGO },
+        { src : 'windows/icon/StoreLogo.scale-100.png', format: Format.PNG, width: 50, height: 50 },
+        { src : 'windows/icon/StoreLogo.scale-125.png', format: Format.PNG, width: 63, height: 63 },
+        { src : 'windows/icon/StoreLogo.scale-140.png', format: Format.PNG, width: 70, height: 70 },
+        { src : 'windows/icon/StoreLogo.scale-150.png', format: Format.PNG, width: 75, height: 75 },
+        { src : 'windows/icon/StoreLogo.scale-180.png', format: Format.PNG, width: 90, height: 90 },
+        { src : 'windows/icon/StoreLogo.scale-200.png', format: Format.PNG, width: 100, height: 100 },
+        { src : 'windows/icon/StoreLogo.scale-240.png', format: Format.PNG, width: 120, height: 120 },
+        { src : 'windows/icon/StoreLogo.scale-400.png', format: Format.PNG, width: 200, height: 200 },
+
+      ],
+      nodeName: 'icon',
+      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET], /* NodeAttributes.WIDTH, NodeAttributes.HEIGHT, */
+      indexAttribute: NodeAttributes.SRC,
+    },
+    [ResourceType.SPLASH]: {
+      resources: [
+        /* @see https://msdn.microsoft.com/en-us/windows/desktop/hh465338 */
+        /* @see https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-splashscreen/index.html#windows-specific-information */
+        { src: 'windows/splash/Splash.png', format: Format.PNG, width: 620, height: 300, orientation: Orientation.LANDSCAPE, target: WindowsTarget.SPLASH_SCREEN },
+        { src: 'windows/splash/Splash.scale-100.png', format: Format.PNG, width: 620, height: 300, orientation: Orientation.LANDSCAPE },
+        { src: 'windows/splash/Splash.scale-125.png', format: Format.PNG, width: 775, height: 375, orientation: Orientation.LANDSCAPE },
+        { src: 'windows/splash/Splash.scale-150.png', format: Format.PNG, width: 930, height: 450, orientation: Orientation.LANDSCAPE },
+        { src: 'windows/splash/Splash.scale-200.png', format: Format.PNG, width: 1240, height: 600, orientation: Orientation.LANDSCAPE },
+        { src: 'windows/splash/Splash.scale-400.png', format: Format.PNG, width: 2480, height: 1200, orientation: Orientation.LANDSCAPE },
+      ],
+      nodeName: 'splash',
+      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET], /* NodeAttributes.WIDTH, NodeAttributes.HEIGHT, */
+      indexAttribute: NodeAttributes.SRC,
+    },
+  },
   [Platform.ANDROID]: {
     [ResourceType.ICON]: {
       resources: [

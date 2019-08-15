@@ -11,9 +11,10 @@ const debug = Debug('cordova-res:platform');
 export const enum Platform {
   ANDROID = 'android',
   IOS = 'ios',
+  WINDOWS = 'windows',
 }
 
-export const PLATFORMS: ReadonlyArray<Platform> = [Platform.ANDROID, Platform.IOS];
+export const PLATFORMS: ReadonlyArray<Platform> = [Platform.ANDROID, Platform.IOS, Platform.WINDOWS];
 
 export interface GeneratedResource extends ResourceKeyValues {
   type: ResourceType;

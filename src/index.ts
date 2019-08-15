@@ -23,6 +23,7 @@ interface ResultResource {
   height?: number;
   density?: Density;
   orientation?: Orientation;
+  target?: string;
 }
 
 interface ResultSource {
@@ -38,6 +39,7 @@ async function CordovaRes({
   platforms = {
     [Platform.ANDROID]: generateRunOptions(Platform.ANDROID, resourcesDirectory, []),
     [Platform.IOS]: generateRunOptions(Platform.IOS, resourcesDirectory, []),
+    [Platform.WINDOWS]: generateRunOptions(Platform.WINDOWS, resourcesDirectory, []),
   },
 }: CordovaRes.Options = {}): Promise<Result> {
   const configPath = path.resolve(directory, 'config.xml');

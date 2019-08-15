@@ -57,6 +57,8 @@ resources/android/icon
 resources/android/splash
 resources/ios/icon
 resources/ios/splash
+resources/windows/icon
+resources/windows/splash
 ```
 
 ### Programmatic API
