@@ -1,6 +1,6 @@
 # Resource Generator
 
-This tool will crop and resize JPEG and PNG source images to generate images for modern iOS and Android devices.
+This tool will crop and resize JPEG and PNG source images to generate images for modern iOS and Android devices. It will also register the generated images in `config.xml` so that Cordova projects are updated accordingly.
 
 ## Install
 
