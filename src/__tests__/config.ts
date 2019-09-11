@@ -25,7 +25,7 @@ describe('cordova-res', () => {
         const src = 'resources/icon.png';
         const container = et.Element('platform');
 
-        runResource('/path/to/config.xml', resource, container);
+        runResource('/path/to/config.xml', container, resource);
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);
@@ -38,7 +38,7 @@ describe('cordova-res', () => {
         const container = et.Element('platform');
         et.SubElement(container, 'icon', { src });
 
-        runResource('/path/to/config.xml', resource, container);
+        runResource('/path/to/config.xml', container, resource);
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);
@@ -51,7 +51,7 @@ describe('cordova-res', () => {
         const container = et.Element('platform');
         et.SubElement(container, 'icon', { src: 'resources\\icon.png' });
 
-        runResource('/path/to/config.xml', resource, container);
+        runResource('/path/to/config.xml', container, resource);
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);

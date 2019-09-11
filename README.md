@@ -28,6 +28,16 @@ To generate resources with all the default options, just run:
 $ cordova-res
 ```
 
+`cordova-res` accepts a platform for the first argument. If specified, resources are generated only for that platform:
+
+```bash
+$ cordova-res ios
+```
+
+Otherwise, `cordova-res` looks for platforms in `config.xml` (e.g. `<platform name="ios">`) and generates resources only for them.
+
+#### Documentation
+
 See the help documentation on the command line with the `--help` flag.
 
 ```bash

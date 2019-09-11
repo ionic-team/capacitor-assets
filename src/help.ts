@@ -1,7 +1,11 @@
 const help = `
   Usage: cordova-res [ios|android] [options]
 
-    Generate Cordova resources for one or all platforms.
+    Generate Cordova resources for native platforms.
+
+    This tool writes to 'config.xml' to register resources with Cordova. Valid
+    platform definitions are required. See the Cordova docs[1] for more
+    information.
 
     By default, this tool will look for 'icon.(png|jpg)' and 'splash.(png|jpg)'
     files inside 'resources/'. If an 'icon-foreground.(png|jpg)' file is found
@@ -17,6 +21,8 @@ const help = `
     background may be an image or a color. To use an image, place an
     'icon-background.(png|jpg)' file in 'resources/android/'. To use a color,
     specify a hex color, e.g. '--icon-background-source #FF0000'.
+
+    [1]: https://cordova.apache.org/docs/en/latest/config_ref/index.html#platform
 
   Options:
 

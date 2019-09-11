@@ -1,12 +1,14 @@
 import { pathWritable } from '@ionic/utils-fs';
 import Debug from 'debug';
+import et from 'elementtree';
 import path from 'path';
 
-import { generateRunOptions, parseOptions } from './cli';
-import { run as runConfig } from './config';
+import { generateRunOptions, getDirectory, resolveOptions } from './cli';
+import { getConfigPath, read as readConfig, run as runConfig, write as writeConfig } from './config';
 import { BaseError } from './error';
 import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
 import { DEFAULT_RESOURCES_DIRECTORY, Density, Orientation, ResolvedSource, SourceType } from './resources';
+import { tryFn } from './utils/fn';
 
 const debug = Debug('cordova-res');
 
@@ -32,7 +34,7 @@ interface ResultSource {
 }
 
 async function CordovaRes({
-  directory = process.cwd(),
+  directory = getDirectory(),
   resourcesDirectory = DEFAULT_RESOURCES_DIRECTORY,
   logstream = process.stdout,
   errstream = process.stderr,
@@ -42,12 +44,23 @@ async function CordovaRes({
     [Platform.WINDOWS]: generateRunOptions(Platform.WINDOWS, resourcesDirectory, []),
   },
 }: CordovaRes.Options = {}): Promise<Result> {
-  const configPath = path.resolve(directory, 'config.xml');
+  const configPath = getConfigPath(directory);
 
   debug('Paths: (config: %O) (resources dir: %O)', configPath, resourcesDirectory);
 
+  let config: et.ElementTree | undefined;
   const resources: GeneratedResource[] = [];
   const sources: ResolvedSource[] = [];
+
+  if (await pathWritable(configPath)) {
+    config = await readConfig(configPath);
+  } else {
+    debug('File missing/not writable: %O', configPath);
+
+    if (errstream) {
+      errstream.write(`WARN: No config.xml file in directory. Skipping config.\n`);
+    }
+  }
 
   for (const platform of PLATFORMS) {
     const platformOptions = platforms[platform];
@@ -60,15 +73,11 @@ async function CordovaRes({
     }
   }
 
-  if (await pathWritable(configPath)) {
-    await runConfig(configPath, resourcesDirectory, sources, resources, errstream);
-    logstream.write(`Wrote to config.xml\n`);
-  } else {
-    debug('File missing/not writable: %O', configPath);
+  if (config) {
+    await runConfig(configPath, resourcesDirectory, config, sources, resources, errstream);
+    await writeConfig(configPath, config);
 
-    if (errstream) {
-      errstream.write(`WARN: No config.xml file in directory. Skipping config.\n`);
-    }
+    logstream.write(`Wrote to config.xml\n`);
   }
 
   return {
@@ -162,7 +171,10 @@ namespace CordovaRes {
     }
 
     try {
-      const options = parseOptions(args);
+      const directory = getDirectory();
+      const configPath = getConfigPath(directory);
+      const config = await tryFn(() => readConfig(configPath));
+      const options = await resolveOptions(args, directory, config);
       const result = await run(options);
 
       if (args.includes('--json')) {

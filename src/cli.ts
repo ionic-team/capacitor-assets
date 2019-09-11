@@ -1,26 +1,47 @@
+import et from 'elementtree';
+
 import { Options, PlatformOptions } from '.';
+import { getPlatforms } from './config';
 import { BadInputError } from './error';
-import { AdaptiveIconResourceOptions, PLATFORMS, Platform, RunPlatformOptions, SimpleResourceOptions, validatePlatforms } from './platform';
+import { AdaptiveIconResourceOptions, Platform, RunPlatformOptions, SimpleResourceOptions, validatePlatforms } from './platform';
 import { DEFAULT_RESOURCES_DIRECTORY, RESOURCE_TYPES, ResourceKey, ResourceType, Source, SourceType, validateResourceTypes } from './resources';
 import { getOptionValue } from './utils/cli';
 
-export function parseOptions(args: ReadonlyArray<string>): Options {
-  const platformArg = args[0] ? args[0] : undefined;
-  const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : PLATFORMS);
-  const platforms: PlatformOptions = {};
-  const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
-  const json = args.includes('--json');
+export function getDirectory(): string {
+  return process.cwd();
+}
+
+export async function resolveOptions(args: ReadonlyArray<string>, directory: string, config?: et.ElementTree): Promise<Options> {
+  const doc = config ? config.getroot() : undefined;
+  const platformList = validatePlatforms(doc ? getPlatforms(doc) : []);
+  const parsedOptions = parseOptions(args);
+  const { resourcesDirectory = DEFAULT_RESOURCES_DIRECTORY } = parsedOptions;
 
   return {
-    directory: process.cwd(),
+    ...{ directory, ...platformList.length > 0 ? { platforms: generatePlatformOptions(platformList, resourcesDirectory, args) } : {} },
+    ...parsedOptions,
+  };
+}
+
+export function parseOptions(args: ReadonlyArray<string>): Options {
+  const json = args.includes('--json');
+  const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
+  const platformArg = args[0] ? args[0] : undefined;
+  const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : []);
+
+  return {
     resourcesDirectory,
     logstream: json ? process.stderr : process.stdout,
     errstream: process.stderr,
-    platforms: platformList.reduce((acc, platform) => {
-      acc[platform] = generateRunOptions(platform, resourcesDirectory, args);
-      return acc;
-    }, platforms),
+    ...platformList.length > 0 ? { platforms: generatePlatformOptions(platformList, resourcesDirectory, args) } : {},
   };
+}
+
+export function generatePlatformOptions(platforms: ReadonlyArray<Platform>, resourcesDirectory: string, args: ReadonlyArray<string>): PlatformOptions {
+  return platforms.reduce((acc, platform) => {
+    acc[platform] = generateRunOptions(platform, resourcesDirectory, args);
+    return acc;
+  }, {} as PlatformOptions);
 }
 
 export function generateRunOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): RunPlatformOptions {

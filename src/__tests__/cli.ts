@@ -1,9 +1,49 @@
-import { generateRunOptions } from '../cli';
+import { Options } from '..';
+import { generateRunOptions, parseOptions } from '../cli';
 import { Platform } from '../platform';
 
 describe('cordova-res', () => {
 
   describe('cli', () => {
+
+    describe('parseOptions', () => {
+
+      const DEFAULT_OPTIONS: Options = {
+        logstream: process.stdout,
+        errstream: process.stderr,
+        resourcesDirectory: 'resources',
+      };
+
+      it('should parse default options with no arguments', () => {
+        const result = parseOptions([]);
+        expect(result).toEqual(DEFAULT_OPTIONS);
+      });
+
+      it('should parse options for android', () => {
+        const args = ['android'];
+        const result = parseOptions(args);
+        expect(result).toEqual({ ...DEFAULT_OPTIONS, platforms: { android: generateRunOptions(Platform.ANDROID, 'resources', args) } });
+      });
+
+      it('should parse default options when the first argument is not a platform', () => {
+        const args = ['--help', 'android'];
+        const result = parseOptions(args);
+        expect(result).toEqual(DEFAULT_OPTIONS);
+      });
+
+      it('should accept --resources flag', () => {
+        const args = ['--resources', 'res'];
+        const result = parseOptions(args);
+        expect(result).toEqual({ ...DEFAULT_OPTIONS, resourcesDirectory: 'res' });
+      });
+
+      it('should log to stderr with --json flag', () => {
+        const args = ['--json'];
+        const result = parseOptions(args);
+        expect(result).toEqual({ ...DEFAULT_OPTIONS, logstream: process.stderr });
+      });
+
+    });
 
     describe('generateRunOptions', () => {
 

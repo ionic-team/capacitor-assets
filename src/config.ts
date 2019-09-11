@@ -9,11 +9,14 @@ import { ResolvedColorSource, ResolvedSource, ResourceNodeAttribute, ResourceNod
 
 const debug = Debug('cordova-res:config');
 
-export async function run(configPath: string, resourcesDirectory: string, sources: ReadonlyArray<ResolvedSource>, resources: ReadonlyArray<GeneratedResource>, errstream?: NodeJS.WritableStream): Promise<void> {
-  const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
-  const config = await read(configPath);
+export function getConfigPath(directory: string): string {
+  return pathlib.resolve(directory, 'config.xml');
+}
 
-  const androidPlatformElement = resolvePlatformElement(config.getroot(), Platform.ANDROID);
+export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: ReadonlyArray<ResolvedSource>, resources: ReadonlyArray<GeneratedResource>, errstream?: NodeJS.WritableStream): Promise<void> {
+  const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
+
+  const androidPlatformElement = resolvePlatformElement(doc.getroot(), Platform.ANDROID);
 
   if (colors.length > 0) {
     debug('Color sources found--generating colors document.');
@@ -31,9 +34,7 @@ export async function run(configPath: string, resourcesDirectory: string, source
     resourceFileElement.set('target', '/app/src/main/res/values/colors.xml');
   }
 
-  runConfig(configPath, resources, config, errstream);
-
-  await write(configPath, config);
+  runConfig(configPath, doc, resources, errstream);
 }
 
 export async function resolveColorsDocument(colorsPath: string): Promise<et.ElementTree> {
@@ -69,9 +70,9 @@ export async function runColorsConfig(colorsPath: string, colors: ReadonlyArray<
   await write(colorsPath, colorsDocument);
 }
 
-export function runConfig(configPath: string, resources: ReadonlyArray<GeneratedResource>, doc: et.ElementTree, errstream?: NodeJS.WritableStream): void {
+export function runConfig(configPath: string, doc: et.ElementTree, resources: ReadonlyArray<GeneratedResource>, errstream?: NodeJS.WritableStream): void {
   const root = doc.getroot();
-  const orientationPreference = getPreference(doc, 'Orientation');
+  const orientationPreference = getPreference(root, 'Orientation');
   debug('Orientation preference: %O', orientationPreference);
 
   const orientation = orientationPreference || 'default';
@@ -89,7 +90,7 @@ export function runConfig(configPath: string, resources: ReadonlyArray<Generated
       filteredResources = filteredResources.filter(img => typeof img.target === 'string');
     }
     for (const resource of filteredResources) {
-      runResource(configPath, resource, platformElement);
+      runResource(configPath, platformElement, resource);
     }
   }
 }
@@ -98,7 +99,7 @@ export function conformPath(configPath: string, value: string | number): string 
   return pathlib.relative(pathlib.dirname(configPath), value.toString()).replace(/\\/g, '/');
 }
 
-export function runResource(configPath: string, resource: GeneratedResource, container: et.Element): void {
+export function runResource(configPath: string, container: et.Element, resource: GeneratedResource): void {
   const src = resource[resource.indexAttribute.key];
 
   if (typeof src !== 'string') {
@@ -181,9 +182,15 @@ export async function write(path: string, doc: et.ElementTree): Promise<void> {
   await writeFile(path, contents, 'utf8');
 }
 
-export function getPreference(doc: et.ElementTree, name: string): string | undefined {
-  const root = doc.getroot();
-  const preferenceElement = root.find(`preference[@name='${name}']`);
+export function getPlatforms(container: et.Element): string[] {
+  const platformElements = container.findall('platform');
+  const platforms = platformElements.map(el => el.get('name'));
+
+  return platforms.filter((p): p is string => typeof p === 'string');
+}
+
+export function getPreference(container: et.Element, name: string): string | undefined {
+  const preferenceElement = container.find(`preference[@name='${name}']`);
 
   if (!preferenceElement) {
     return undefined;
