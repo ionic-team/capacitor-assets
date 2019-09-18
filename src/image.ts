@@ -71,6 +71,10 @@ export interface ImageSchema {
 export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, errstream?: NodeJS.WritableStream): Promise<void> {
   debug('Generating %o (%ox%o)', image.src, image.width, image.height);
 
+  if (image.format === Format.NONE) {
+    return;
+  }
+
   if (errstream) {
     if (metadata.format !== image.format) {
       errstream.write(`WARN: Must perform conversion from ${metadata.format} to png.\n`);

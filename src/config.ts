@@ -84,8 +84,10 @@ export function runConfig(configPath: string, resources: ReadonlyArray<Generated
 
   for (const [ platform, platformResources ] of platforms) {
     const platformElement = resolvePlatformElement(root, platform);
-    const filteredResources = platformResources.filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation);
-
+    let filteredResources = platformResources.filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation);
+    if (platform === Platform.WINDOWS) {
+      filteredResources = filteredResources.filter(img => typeof img.target === 'string');
+    }
     for (const resource of filteredResources) {
       runResource(configPath, resource, platformElement);
     }

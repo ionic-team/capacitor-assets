@@ -62,6 +62,37 @@ describe('cordova-res', () => {
         expect(result.resources.length).toEqual(generatedImages.length);
       });
 
+      it('should run through windows icons with successful result', async () => {
+        const pipeline: any = { clone: jest.fn(() => pipeline) };
+        imageMock.resolveSourceImage.mockImplementation(async () => ({ src: 'test.png', image: { src: 'test.png', pipeline, metadata: {} } }));
+
+        const result = await platform.run(Platform.WINDOWS, 'resources', {
+          [ResourceType.ICON]: { sources: ['icon.png'] },
+        });
+
+        const generatedImages = getResourcesConfig(Platform.WINDOWS, ResourceType.ICON).resources;
+
+        expect(imageMock.resolveSourceImage).toHaveBeenCalledTimes(1);
+        expect(imageMock.resolveSourceImage).toHaveBeenCalledWith('windows', 'icon', ['icon.png'], undefined);
+        expect(imageMock.generateImage).toHaveBeenCalledTimes(generatedImages.length);
+
+        for (const generatedImage of generatedImages) {
+          expect(imageMock.generateImage).toHaveBeenCalledWith(
+              {
+                src: path.join('resources', generatedImage.src),
+                format: generatedImage.format,
+                width: generatedImage.width,
+                height: generatedImage.height,
+              },
+              expect.anything(),
+              expect.anything(),
+              undefined
+          );
+        }
+
+        expect(result.resources.length).toEqual(generatedImages.length);
+      });
+
     });
 
     describe('isSupportedPlatform', () => {
