@@ -425,6 +425,7 @@ const RESOURCES: ResourcesConfig = {
         { src: 'ios/icon/icon-44@2x.png', format: Format.PNG, width: 88, height: 88 },
         { src: 'ios/icon/icon-86@2x.png', format: Format.PNG, width: 172, height: 172 },
         { src: 'ios/icon/icon-98@2x.png', format: Format.PNG, width: 196, height: 196 },
+        { src: 'ios/icon/icon-108@2x.png', format: Format.PNG, width: 216, height: 216 },
         { src: 'ios/icon/icon-40.png', format: Format.PNG, width: 40, height: 40 },
         { src: 'ios/icon/icon-40@2x.png', format: Format.PNG, width: 80, height: 80 },
         { src: 'ios/icon/icon-40@3x.png', format: Format.PNG, width: 120, height: 120 },
@@ -451,6 +452,10 @@ const RESOURCES: ResourcesConfig = {
       resources: [
         { src: 'ios/splash/Default-568h@2x~iphone.png', format: Format.PNG, width: 640, height: 1136, orientation: Orientation.PORTRAIT },
         { src: 'ios/splash/Default-667h.png', format: Format.PNG, width: 750, height: 1334, orientation: Orientation.PORTRAIT },
+        { src: 'ios/splash/Default-2688h~iphone.png', format: Format.PNG, width: 1242, height: 2688, orientation: Orientation.PORTRAIT },
+        { src: 'ios/splash/Default-Landscape-2688h~iphone.png', format: Format.PNG, width: 2688, height: 1242, orientation: Orientation.LANDSCAPE },
+        { src: 'ios/splash/Default-1792h~iphone.png', format: Format.PNG, width: 828, height: 1792, orientation: Orientation.PORTRAIT },
+        { src: 'ios/splash/Default-Landscape-1792h~iphone.png', format: Format.PNG, width: 1792, height: 828, orientation: Orientation.LANDSCAPE },
         { src: 'ios/splash/Default-2436h.png', format: Format.PNG, width: 1125, height: 2436, orientation: Orientation.PORTRAIT },
         { src: 'ios/splash/Default-Landscape-2436h.png', format: Format.PNG, width: 2436, height: 1125, orientation: Orientation.LANDSCAPE },
         { src: 'ios/splash/Default-736h.png', format: Format.PNG, width: 1242, height: 2208, orientation: Orientation.PORTRAIT },
