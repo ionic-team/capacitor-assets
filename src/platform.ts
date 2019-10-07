@@ -330,6 +330,10 @@ export function validatePlatforms(platforms: ReadonlyArray<string>): Platform[] 
   return result;
 }
 
+export function filterSupportedPlatforms(platforms: ReadonlyArray<string>): Platform[] {
+  return platforms.filter(isSupportedPlatform);
+}
+
 export function isSupportedPlatform(platform: any): platform is Platform {
   return PLATFORMS.includes(platform);
 }

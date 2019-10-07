@@ -3,7 +3,7 @@ import et from 'elementtree';
 import { Options, PlatformOptions } from '.';
 import { getPlatforms } from './config';
 import { BadInputError } from './error';
-import { AdaptiveIconResourceOptions, Platform, RunPlatformOptions, SimpleResourceOptions, validatePlatforms } from './platform';
+import { AdaptiveIconResourceOptions, Platform, RunPlatformOptions, SimpleResourceOptions, filterSupportedPlatforms, validatePlatforms } from './platform';
 import { DEFAULT_RESOURCES_DIRECTORY, RESOURCE_TYPES, ResourceKey, ResourceType, Source, SourceType, validateResourceTypes } from './resources';
 import { getOptionValue } from './utils/cli';
 
@@ -13,7 +13,7 @@ export function getDirectory(): string {
 
 export async function resolveOptions(args: ReadonlyArray<string>, directory: string, config?: et.ElementTree): Promise<Options> {
   const doc = config ? config.getroot() : undefined;
-  const platformList = validatePlatforms(doc ? getPlatforms(doc) : []);
+  const platformList = filterSupportedPlatforms(doc ? getPlatforms(doc) : []);
   const parsedOptions = parseOptions(args);
   const { resourcesDirectory = DEFAULT_RESOURCES_DIRECTORY } = parsedOptions;
 
