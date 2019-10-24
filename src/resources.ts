@@ -11,7 +11,7 @@ export const enum ResourceType {
   SPLASH = 'splash',
 }
 
-export const RESOURCE_TYPES: ReadonlyArray<ResourceType> = [
+export const RESOURCE_TYPES: readonly ResourceType[] = [
   ResourceType.ADAPTIVE_ICON,
   ResourceType.ICON,
   ResourceType.SPLASH,
@@ -81,8 +81,8 @@ export interface ResolvedColorSource extends ColorSource {
 
 export type ResolvedSource = ResolvedImageSource | ResolvedColorSource;
 
-export const RESOURCE_FORMATS: ReadonlyArray<Format> = [Format.JPEG, Format.PNG];
-export const RESOURCE_RASTER_FORMATS: ReadonlyArray<Format> = [Format.JPEG, Format.PNG];
+export const RESOURCE_FORMATS: readonly Format[] = [Format.JPEG, Format.PNG];
+export const RESOURCE_RASTER_FORMATS: readonly Format[] = [Format.JPEG, Format.PNG];
 
 export type ResourceValidator = (source: string, pipeline: Sharp) => Promise<Metadata>;
 
@@ -218,9 +218,9 @@ export interface ResourceNodeAttribute {
 }
 
 export interface ResourcesTypeConfig<C = ResourcesImageConfig> {
-  readonly resources: ReadonlyArray<C>;
+  readonly resources: readonly C[];
   readonly nodeName: string;
-  readonly nodeAttributes: ReadonlyArray<ResourceNodeAttribute>;
+  readonly nodeAttributes: readonly ResourceNodeAttribute[];
 
   /**
    * Uniquely identifies a node.
@@ -233,7 +233,7 @@ export interface ResourcesTypeConfig<C = ResourcesImageConfig> {
 export type ResourcesPlatform = { readonly [T in ResourceType.ICON | ResourceType.SPLASH]: ResourcesTypeConfig; };
 export type ResourcesConfig = { readonly [P in Platform]: ResourcesPlatform; };
 
-export function validateResourceTypes(types: ReadonlyArray<string>): ResourceType[] {
+export function validateResourceTypes(types: readonly string[]): ResourceType[] {
   const result: ResourceType[] = [];
 
   for (const type of types) {

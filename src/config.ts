@@ -13,7 +13,7 @@ export function getConfigPath(directory: string): string {
   return pathlib.resolve(directory, 'config.xml');
 }
 
-export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: ReadonlyArray<ResolvedSource>, resources: ReadonlyArray<GeneratedResource>, errstream?: NodeJS.WritableStream): Promise<void> {
+export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: readonly ResolvedSource[], resources: readonly GeneratedResource[], errstream?: NodeJS.WritableStream): Promise<void> {
   const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
 
   const androidPlatformElement = resolvePlatformElement(doc.getroot(), Platform.ANDROID);
@@ -50,7 +50,7 @@ export async function resolveColorsDocument(colorsPath: string): Promise<et.Elem
   }
 }
 
-export async function runColorsConfig(colorsPath: string, colors: ReadonlyArray<ResolvedColorSource>): Promise<void> {
+export async function runColorsConfig(colorsPath: string, colors: readonly ResolvedColorSource[]): Promise<void> {
   await ensureDir(pathlib.dirname(colorsPath));
   const colorsDocument = await resolveColorsDocument(colorsPath);
   const root = colorsDocument.getroot();
@@ -70,7 +70,7 @@ export async function runColorsConfig(colorsPath: string, colors: ReadonlyArray<
   await write(colorsPath, colorsDocument);
 }
 
-export function runConfig(configPath: string, doc: et.ElementTree, resources: ReadonlyArray<GeneratedResource>, errstream?: NodeJS.WritableStream): void {
+export function runConfig(configPath: string, doc: et.ElementTree, resources: readonly GeneratedResource[], errstream?: NodeJS.WritableStream): void {
   const root = doc.getroot();
   const orientationPreference = getPreference(root, 'Orientation');
   debug('Orientation preference: %O', orientationPreference);
@@ -151,7 +151,7 @@ export function resolveResourceElement(container: et.Element, nodeName: string, 
   return et.SubElement(container, nodeName);
 }
 
-export function groupImages(images: ReadonlyArray<GeneratedResource>): Map<Platform, GeneratedResource[]> {
+export function groupImages(images: readonly GeneratedResource[]): Map<Platform, GeneratedResource[]> {
   const platforms = new Map<Platform, GeneratedResource[]>();
 
   for (const image of images) {

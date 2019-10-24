@@ -10,7 +10,7 @@ export interface BadImageFormatValidationErrorDetails {
   type: ResourceType;
   code: ValidationErrorCode.BAD_IMAGE_FORMAT;
   format: string | undefined;
-  requiredFormats: ReadonlyArray<string>;
+  requiredFormats: readonly string[];
 }
 
 export interface BadImageSizeValidationErrorDetails {
@@ -72,7 +72,7 @@ export class ResolveSourceImageError extends BaseError {
   readonly name = 'ResolveSourceImageError';
   readonly code = 'BAD_SOURCES';
 
-  constructor(readonly message: string, readonly errors: ReadonlyArray<ValidationError>) {
+  constructor(readonly message: string, readonly errors: readonly ValidationError[]) {
     super(message);
   }
 

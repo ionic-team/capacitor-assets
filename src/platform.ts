@@ -14,13 +14,13 @@ export const enum Platform {
   WINDOWS = 'windows',
 }
 
-export const PLATFORMS: ReadonlyArray<Platform> = [Platform.ANDROID, Platform.IOS, Platform.WINDOWS];
+export const PLATFORMS: readonly Platform[] = [Platform.ANDROID, Platform.IOS, Platform.WINDOWS];
 
 export interface GeneratedResource extends ResourceKeyValues {
   type: ResourceType;
   platform: Platform;
   nodeName: string;
-  nodeAttributes: ReadonlyArray<ResourceNodeAttribute>;
+  nodeAttributes: readonly ResourceNodeAttribute[];
   indexAttribute: ResourceNodeAttribute;
 }
 
@@ -211,7 +211,7 @@ export async function generateAdaptiveIconResources(resourcesDirectory: string, 
   };
 }
 
-export async function consolidateAdaptiveIconResources(foregrounds: ReadonlyArray<GeneratedResource>, backgrounds: ReadonlyArray<GeneratedResource>): Promise<GeneratedResource[]> {
+export async function consolidateAdaptiveIconResources(foregrounds: readonly GeneratedResource[], backgrounds: readonly GeneratedResource[]): Promise<GeneratedResource[]> {
   return foregrounds.map(foreground => {
     const background = backgrounds.find(r => r[r.indexAttribute.key] === foreground[foreground.indexAttribute.key]);
 
@@ -292,7 +292,7 @@ export function imageSourceToPath(source: string | ImageSource): string {
   return typeof source === 'string' ? source : source.src;
 }
 
-export async function resolveSource(platform: Platform, type: ResourceType, name: string, sources: ReadonlyArray<string | ImageSource | ColorSource>, errstream?: NodeJS.WritableStream): Promise<ResolvedSource> {
+export async function resolveSource(platform: Platform, type: ResourceType, name: string, sources: readonly (string | ImageSource | ColorSource)[], errstream?: NodeJS.WritableStream): Promise<ResolvedSource> {
   for (const source of sources) {
     if (typeof source === 'string' || source.type === SourceType.RASTER) {
       const src = imageSourceToPath(source);
@@ -316,7 +316,7 @@ export async function resolveSource(platform: Platform, type: ResourceType, name
   throw new BadInputError(`Missing source for "${type}" (sources: ${sources.join(', ')})`);
 }
 
-export function validatePlatforms(platforms: ReadonlyArray<string>): Platform[] {
+export function validatePlatforms(platforms: readonly string[]): Platform[] {
   const result: Platform[] = [];
 
   for (const platform of platforms) {
@@ -330,7 +330,7 @@ export function validatePlatforms(platforms: ReadonlyArray<string>): Platform[] 
   return result;
 }
 
-export function filterSupportedPlatforms(platforms: ReadonlyArray<string>): Platform[] {
+export function filterSupportedPlatforms(platforms: readonly string[]): Platform[] {
   return platforms.filter(isSupportedPlatform);
 }
 

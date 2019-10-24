@@ -158,7 +158,7 @@ namespace CordovaRes {
     readonly platforms?: Readonly<PlatformOptions>;
   }
 
-  export async function runCommandLine(args: ReadonlyArray<string>): Promise<void> {
+  export async function runCommandLine(args: readonly string[]): Promise<void> {
     if (args.includes('--version')) {
       const pkg = await import(path.resolve(__dirname, '../package.json'));
       process.stdout.write(pkg.version + '\n');

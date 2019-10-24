@@ -11,7 +11,7 @@ export function getDirectory(): string {
   return process.cwd();
 }
 
-export async function resolveOptions(args: ReadonlyArray<string>, directory: string, config?: et.ElementTree): Promise<Options> {
+export async function resolveOptions(args: readonly string[], directory: string, config?: et.ElementTree): Promise<Options> {
   const doc = config ? config.getroot() : undefined;
   const platformList = filterSupportedPlatforms(doc ? getPlatforms(doc) : []);
   const parsedOptions = parseOptions(args);
@@ -23,7 +23,7 @@ export async function resolveOptions(args: ReadonlyArray<string>, directory: str
   };
 }
 
-export function parseOptions(args: ReadonlyArray<string>): Options {
+export function parseOptions(args: readonly string[]): Options {
   const json = args.includes('--json');
   const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
   const platformArg = args[0] ? args[0] : undefined;
@@ -37,14 +37,14 @@ export function parseOptions(args: ReadonlyArray<string>): Options {
   };
 }
 
-export function generatePlatformOptions(platforms: ReadonlyArray<Platform>, resourcesDirectory: string, args: ReadonlyArray<string>): PlatformOptions {
+export function generatePlatformOptions(platforms: readonly Platform[], resourcesDirectory: string, args: readonly string[]): PlatformOptions {
   return platforms.reduce((acc, platform) => {
     acc[platform] = generateRunOptions(platform, resourcesDirectory, args);
     return acc;
   }, {} as PlatformOptions);
 }
 
-export function generateRunOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): RunPlatformOptions {
+export function generateRunOptions(platform: Platform, resourcesDirectory: string, args: readonly string[]): RunPlatformOptions {
   const typeOption = getOptionValue(args, '--type');
   const types = validateResourceTypes(typeOption ? [typeOption] : RESOURCE_TYPES);
 
@@ -55,7 +55,7 @@ export function generateRunOptions(platform: Platform, resourcesDirectory: strin
   };
 }
 
-export function parseAdaptiveIconResourceOptions(platform: Platform, resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions | undefined {
+export function parseAdaptiveIconResourceOptions(platform: Platform, resourcesDirectory: string, args: readonly string[]): AdaptiveIconResourceOptions | undefined {
   if (platform !== Platform.ANDROID) {
     return;
   }
@@ -67,7 +67,7 @@ export function parseAdaptiveIconResourceOptions(platform: Platform, resourcesDi
   };
 }
 
-export function parseAdaptiveIconForegroundOptions(resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions['foreground'] {
+export function parseAdaptiveIconForegroundOptions(resourcesDirectory: string, args: readonly string[]): AdaptiveIconResourceOptions['foreground'] {
   const source = parseAdaptiveIconSourceFromArgs(ResourceKey.FOREGROUND, args);
 
   if (source && source.type !== SourceType.RASTER) {
@@ -81,7 +81,7 @@ export function parseAdaptiveIconForegroundOptions(resourcesDirectory: string, a
   };
 }
 
-export function parseAdaptiveIconBackgroundOptions(resourcesDirectory: string, args: ReadonlyArray<string>): AdaptiveIconResourceOptions['background'] {
+export function parseAdaptiveIconBackgroundOptions(resourcesDirectory: string, args: readonly string[]): AdaptiveIconResourceOptions['background'] {
   const source = parseAdaptiveIconSourceFromArgs(ResourceKey.BACKGROUND, args);
 
   return {
@@ -91,12 +91,12 @@ export function parseAdaptiveIconBackgroundOptions(resourcesDirectory: string, a
   };
 }
 
-export function parseSimpleResourceOptions(platform: Platform, type: ResourceType.ICON | ResourceType.SPLASH, resourcesDirectory: string, args: ReadonlyArray<string>): SimpleResourceOptions {
+export function parseSimpleResourceOptions(platform: Platform, type: ResourceType.ICON | ResourceType.SPLASH, resourcesDirectory: string, args: readonly string[]): SimpleResourceOptions {
   const source = parseSourceFromArgs(type, args);
   return { sources: source ? [source] : getDefaultSources(platform, type, resourcesDirectory) };
 }
 
-export function parseAdaptiveIconSourceFromArgs(type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, args: ReadonlyArray<string>): Source | undefined {
+export function parseAdaptiveIconSourceFromArgs(type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, args: readonly string[]): Source | undefined {
   const sourceOption = getOptionValue(args, `--icon-${type}-source`);
 
   if (!sourceOption) {
@@ -106,7 +106,7 @@ export function parseAdaptiveIconSourceFromArgs(type: ResourceKey.FOREGROUND | R
   return parseSource(sourceOption);
 }
 
-export function parseSourceFromArgs(type: ResourceType.ICON | ResourceType.SPLASH, args: ReadonlyArray<string>): string | undefined {
+export function parseSourceFromArgs(type: ResourceType.ICON | ResourceType.SPLASH, args: readonly string[]): string | undefined {
   const sourceOption = getOptionValue(args, `--${type}-source`);
 
   if (sourceOption) {
