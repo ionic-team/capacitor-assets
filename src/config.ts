@@ -16,10 +16,10 @@ export function getConfigPath(directory: string): string {
 export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: readonly ResolvedSource[], resources: readonly GeneratedResource[], errstream?: NodeJS.WritableStream): Promise<void> {
   const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
 
-  const androidPlatformElement = resolvePlatformElement(doc.getroot(), Platform.ANDROID);
-
   if (colors.length > 0) {
     debug('Color sources found--generating colors document.');
+
+    const androidPlatformElement = resolvePlatformElement(doc.getroot(), Platform.ANDROID);
 
     const colorsPath = pathlib.join(resourcesDirectory, 'values', 'colors.xml');
     await runColorsConfig(colorsPath, colors);
