@@ -6,6 +6,7 @@ import path from 'path';
 import { generateRunOptions, getDirectory, resolveOptions } from './cli';
 import { getConfigPath, read as readConfig, run as runConfig, write as writeConfig } from './config';
 import { BaseError } from './error';
+import { copyToNativeProject } from './native';
 import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
 import { DEFAULT_RESOURCES_DIRECTORY, Density, Orientation, ResolvedSource, SourceType } from './resources';
 import { tryFn } from './utils/fn';
@@ -43,6 +44,7 @@ async function CordovaRes({
     [Platform.IOS]: generateRunOptions(Platform.IOS, resourcesDirectory, []),
     [Platform.WINDOWS]: generateRunOptions(Platform.WINDOWS, resourcesDirectory, []),
   },
+  nativeProjectDirectory = '',
 }: CordovaRes.Options = {}): Promise<Result> {
   const configPath = getConfigPath(directory);
 
@@ -70,6 +72,9 @@ async function CordovaRes({
       logstream.write(`Generated ${platformResult.resources.length} resources for ${platform}\n`);
       resources.push(...platformResult.resources);
       sources.push(...platformResult.sources);
+      if (nativeProjectDirectory.trim() !== '') {
+        copyToNativeProject(platform, nativeProjectDirectory);
+      }
     }
   }
 
@@ -156,6 +161,13 @@ namespace CordovaRes {
      * provided, resources are generated in an explicit, opt-in manner.
      */
     readonly platforms?: Readonly<PlatformOptions>;
+
+    /**
+     * Specify target native project directory.
+     *
+     * This is for copying all generated resources directly.
+     */
+    readonly nativeProjectDirectory?: string;
   }
 
   export async function runCommandLine(args: readonly string[]): Promise<void> {

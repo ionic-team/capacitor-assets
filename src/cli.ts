@@ -28,12 +28,14 @@ export function parseOptions(args: readonly string[]): Options {
   const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
   const platformArg = args[0] ? args[0] : undefined;
   const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : []);
+  const nativeProjectDirectory = getOptionValue(args, '--nativeProjDir', '');
 
   return {
     resourcesDirectory,
     logstream: json ? process.stderr : process.stdout,
     errstream: process.stderr,
     ...platformList.length > 0 ? { platforms: generatePlatformOptions(platformList, resourcesDirectory, args) } : {},
+    nativeProjectDirectory,
   };
 }
 

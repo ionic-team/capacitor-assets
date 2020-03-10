@@ -12,6 +12,7 @@ describe('cordova-res', () => {
         logstream: process.stdout,
         errstream: process.stderr,
         resourcesDirectory: 'resources',
+        nativeProjectDirectory: '',
       };
 
       it('should parse default options with no arguments', () => {
