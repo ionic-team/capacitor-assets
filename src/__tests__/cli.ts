@@ -12,7 +12,11 @@ describe('cordova-res', () => {
         logstream: process.stdout,
         errstream: process.stderr,
         resourcesDirectory: 'resources',
-        nativeProjectDirectory: '',
+        nativeProject: {
+          enabled: false,
+          androidProjectDirectory: '',
+          iosProjectDirectory: '',
+        },
       };
 
       it('should parse default options with no arguments', () => {

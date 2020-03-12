@@ -37,6 +37,10 @@ const help = `
     -h, --help ........................... Print help for the platform, then quit
     --version ............................ Print version, then quit
     --verbose ............................ Print verbose output to stderr
+
+    --native-project ..................... Enable process of copying generated resources to native projects
+    --android-project-dir ................ Use specified directory for Android native project, default to 'android' if not specified
+    --ios-project-dir .................... Use specified directory for iOS native project, default to 'ios' if not specified
 `;
 
 export async function run() {

@@ -3,6 +3,7 @@ import et from 'elementtree';
 import { Options, PlatformOptions } from '.';
 import { getPlatforms } from './config';
 import { BadInputError } from './error';
+import { NativeProject } from './native';
 import { AdaptiveIconResourceOptions, Platform, RunPlatformOptions, SimpleResourceOptions, filterSupportedPlatforms, validatePlatforms } from './platform';
 import { DEFAULT_RESOURCES_DIRECTORY, RESOURCE_TYPES, ResourceKey, ResourceType, Source, SourceType, validateResourceTypes } from './resources';
 import { getOptionValue } from './utils/cli';
@@ -28,14 +29,18 @@ export function parseOptions(args: readonly string[]): Options {
   const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
   const platformArg = args[0] ? args[0] : undefined;
   const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : []);
-  const nativeProjectDirectory = getOptionValue(args, '--nativeProjDir', '');
+  const nativeProject: Readonly<NativeProject> = {
+    enabled: args.includes('--native-project'),
+    androidProjectDirectory: getOptionValue(args, '--android-project-dir', ''),
+    iosProjectDirectory: getOptionValue(args, '--ios-project-dir', ''),
+  };
 
   return {
     resourcesDirectory,
     logstream: json ? process.stderr : process.stdout,
     errstream: process.stderr,
     ...platformList.length > 0 ? { platforms: generatePlatformOptions(platformList, resourcesDirectory, args) } : {},
-    nativeProjectDirectory,
+    nativeProject,
   };
 }
 

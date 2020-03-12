@@ -1,9 +1,14 @@
-import fs from 'fs';
+import { copy } from '@ionic/utils-fs';
+import path from 'path';
 
-import { BadInputError } from './error';
 import { Platform } from './platform';
 
-interface Icon {
+export interface NativeProject {
+  enabled?: boolean;
+  androidProjectDirectory?: string;
+  iosProjectDirectory?: string;
+}
+interface ProcessItem {
   source: string;
   target: string;
 }
@@ -20,7 +25,7 @@ const SOURCE_ANDROID_SPLASH = 'resources/android/splash/';
 const TARGET_ANDROID_ICON = '/app/src/main/res/';
 const TARGET_ANDROID_SPLASH = '/app/src/main/res/';
 
-const IOS_ICONS = [
+const IOS_ICONS: readonly ProcessItem[] = [
   { source: 'icon-20.png', target: 'AppIcon-20x20@1x.png' },
   { source: 'icon-20@2x.png', target: 'AppIcon-20x20@2x.png' },
   { source: 'icon-20@2x.png', target: 'AppIcon-20x20@2x-1.png' },
@@ -40,13 +45,13 @@ const IOS_ICONS = [
   { source: 'icon-83.5@2x.png', target: 'AppIcon-83.5x83.5@2x.png' },
   { source: 'icon-1024.png', target: 'AppIcon-512@2x.png' },
 ];
-const IOS_SPLASHES = [
+const IOS_SPLASHES: readonly ProcessItem[] = [
   { source: 'Default-Portrait@~ipadpro.png', target: 'splash-2732x2732.png' },
   { source: 'Default-Portrait@~ipadpro.png', target: 'splash-2732x2732-1.png' },
   { source: 'Default-Portrait@~ipadpro.png', target: 'splash-2732x2732-2.png' },
 ];
 
-const ANDROID_ICONS = [
+const ANDROID_ICONS: readonly ProcessItem[] = [
   { source: 'drawable-ldpi-icon.png', target: 'drawable-hdpi-icon.png' },
   { source: 'drawable-mdpi-icon.png', target: 'mipmap-mdpi/ic_launcher.png' },
   {
@@ -100,7 +105,7 @@ const ANDROID_ICONS = [
     target: 'mipmap-xxxhdpi/ic_launcher_foreground.png',
   },
 ];
-const ANDROID_SPLASHES = [
+const ANDROID_SPLASHES: readonly ProcessItem[] = [
   { source: 'drawable-land-mdpi-screen.png', target: 'drawable/splash.png' },
   {
     source: 'drawable-land-mdpi-screen.png',
@@ -144,31 +149,23 @@ const ANDROID_SPLASHES = [
   },
 ];
 
-function copyImages(sourcePath: string, targetPath: string, images: Icon[]) {
-  for (const icon of images) {
-    const source = sourcePath + icon.source;
-    const target = targetPath + icon.target;
-    fs.copyFile(source, target, err => {
-      if (err) {
-        throw err;
-      }
-    });
-  }
+async function copyImages(sourcePath: string, targetPath: string, images: readonly ProcessItem[], logstream: NodeJS.WritableStream) {
+  await Promise.all(images.map(async item => {
+    const source = path.join(sourcePath, item.source);
+    const target = path.join(targetPath, item.target);
+    await copy(source, target);
+    logstream.write(`Copied resource item from ${source} to ${target}\n`);
+  }));
 }
 
-export function copyToNativeProject(platform: Platform, nativeProjectDirectory: string) {
-  if (nativeProjectDirectory === '') {
-    throw new BadInputError('Native project directory must be specified.');
-  }
-  if (nativeProjectDirectory.slice(-1) === '/') {
-    nativeProjectDirectory = nativeProjectDirectory.slice(0, nativeProjectDirectory.length - 1);
-  }
-
+export async function copyToNativeProject(platform: Platform, nativeProject: NativeProject, logstream: NodeJS.WritableStream) {
   if (platform === Platform.IOS) {
-    copyImages(SOURCE_IOS_ICON, `${nativeProjectDirectory}${TARGET_IOS_ICON}`, IOS_ICONS);
-    copyImages(SOURCE_IOS_SPLASH, `${nativeProjectDirectory}${TARGET_IOS_SPLASH}`, IOS_SPLASHES);
+    const iosProjectDirectory = nativeProject.iosProjectDirectory || 'ios';
+    await copyImages(SOURCE_IOS_ICON, path.join(iosProjectDirectory, TARGET_IOS_ICON), IOS_ICONS, logstream);
+    await copyImages(SOURCE_IOS_SPLASH, path.join(iosProjectDirectory, TARGET_IOS_SPLASH), IOS_SPLASHES, logstream);
   } else if (platform === Platform.ANDROID) {
-    copyImages(SOURCE_ANDROID_ICON, `${nativeProjectDirectory}${TARGET_ANDROID_ICON}`, ANDROID_ICONS);
-    copyImages(SOURCE_ANDROID_SPLASH, `${nativeProjectDirectory}${TARGET_ANDROID_SPLASH}`, ANDROID_SPLASHES);
+    const androidProjectDirectory = nativeProject.iosProjectDirectory || 'android';
+    await copyImages(SOURCE_ANDROID_ICON, path.join(androidProjectDirectory, TARGET_ANDROID_ICON), ANDROID_ICONS, logstream);
+    await copyImages(SOURCE_ANDROID_SPLASH, path.join(androidProjectDirectory, TARGET_ANDROID_SPLASH), ANDROID_SPLASHES, logstream);
   }
 }
