@@ -40,7 +40,7 @@ const help = `
 
     --native-project ..................... Enable process of copying generated resources to native projects
     --android-project <path> ............. Use specified directory for Android native project (default: 'android')
-    --ios-project-dir .................... Use specified directory for iOS native project, default to 'ios' if not specified
+    --ios-project <path> ................. Use specified directory for iOS native project (default: 'ios')
 `;
 
 export async function run() {
