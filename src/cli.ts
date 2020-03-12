@@ -30,9 +30,9 @@ export function parseOptions(args: readonly string[]): Options {
   const platformArg = args[0] ? args[0] : undefined;
   const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : []);
   const nativeProject: Readonly<NativeProject> = {
-    enabled: args.includes('--native-project'),
-    androidProjectDirectory: getOptionValue(args, '--android-project-dir', ''),
-    iosProjectDirectory: getOptionValue(args, '--ios-project-dir', ''),
+    enabled: args.includes('--copy'),
+    androidProjectDirectory: getOptionValue(args, '--android-project', ''),
+    iosProjectDirectory: getOptionValue(args, '--ios-project', ''),
   };
 
   return {

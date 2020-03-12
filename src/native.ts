@@ -1,4 +1,5 @@
 import { copy } from '@ionic/utils-fs';
+import Debug from 'debug';
 import path from 'path';
 
 import { Platform } from './platform';
@@ -12,6 +13,8 @@ interface ProcessItem {
   source: string;
   target: string;
 }
+
+const debug = Debug('cordova-res:native');
 
 const SOURCE_IOS_ICON = 'resources/ios/icon/';
 const SOURCE_IOS_SPLASH = 'resources/ios/splash/';
@@ -149,23 +152,25 @@ const ANDROID_SPLASHES: readonly ProcessItem[] = [
   },
 ];
 
-async function copyImages(sourcePath: string, targetPath: string, images: readonly ProcessItem[], logstream: NodeJS.WritableStream) {
+async function copyImages(sourcePath: string, targetPath: string, images: readonly ProcessItem[]) {
   await Promise.all(images.map(async item => {
     const source = path.join(sourcePath, item.source);
     const target = path.join(targetPath, item.target);
     await copy(source, target);
-    logstream.write(`Copied resource item from ${source} to ${target}\n`);
+    debug(`Copied resource item from ${source} to ${target}\n`);
   }));
 }
 
 export async function copyToNativeProject(platform: Platform, nativeProject: NativeProject, logstream: NodeJS.WritableStream) {
   if (platform === Platform.IOS) {
     const iosProjectDirectory = nativeProject.iosProjectDirectory || 'ios';
-    await copyImages(SOURCE_IOS_ICON, path.join(iosProjectDirectory, TARGET_IOS_ICON), IOS_ICONS, logstream);
-    await copyImages(SOURCE_IOS_SPLASH, path.join(iosProjectDirectory, TARGET_IOS_SPLASH), IOS_SPLASHES, logstream);
+    await copyImages(SOURCE_IOS_ICON, path.join(iosProjectDirectory, TARGET_IOS_ICON), IOS_ICONS);
+    await copyImages(SOURCE_IOS_SPLASH, path.join(iosProjectDirectory, TARGET_IOS_SPLASH), IOS_SPLASHES);
+    logstream.write(`Copied ${IOS_ICONS.length + IOS_SPLASHES.length} resource items to iOS project`);
   } else if (platform === Platform.ANDROID) {
     const androidProjectDirectory = nativeProject.iosProjectDirectory || 'android';
-    await copyImages(SOURCE_ANDROID_ICON, path.join(androidProjectDirectory, TARGET_ANDROID_ICON), ANDROID_ICONS, logstream);
-    await copyImages(SOURCE_ANDROID_SPLASH, path.join(androidProjectDirectory, TARGET_ANDROID_SPLASH), ANDROID_SPLASHES, logstream);
+    await copyImages(SOURCE_ANDROID_ICON, path.join(androidProjectDirectory, TARGET_ANDROID_ICON), ANDROID_ICONS);
+    await copyImages(SOURCE_ANDROID_SPLASH, path.join(androidProjectDirectory, TARGET_ANDROID_SPLASH), ANDROID_SPLASHES);
+    logstream.write(`Copied ${ANDROID_ICONS.length + ANDROID_SPLASHES.length} resource items to Android project`);
   }
 }
