@@ -157,7 +157,7 @@ async function copyImages(sourcePath: string, targetPath: string, images: readon
     const source = path.join(sourcePath, item.source);
     const target = path.join(targetPath, item.target);
     await copy(source, target);
-    debug(`Copied resource item from ${source} to ${target}\n`);
+    debug('Copied resource item from %s to %s', source, target);
   }));
 }
 
