@@ -34,6 +34,10 @@ const help = `
     --icon-foreground-source <path> ...... Use file for foreground of adaptive icon
     --icon-background-source <path|hex> .. Use file or color for background of adaptive icon
 
+    --copy ............................... Enable process of copying generated resources to native projects
+    --android-project <path> ............. Use specified directory for Android native project (default: 'android')
+    --ios-project <path> ................. Use specified directory for iOS native project (default: 'ios')
+
     -h, --help ........................... Print help for the platform, then quit
     --version ............................ Print version, then quit
     --verbose ............................ Print verbose output to stderr
