@@ -1,5 +1,5 @@
 const help = `
-  Usage: cordova-res [ios|android] [options]
+  Usage: cordova-res [ios|android|windows] [options]
 
     Generate Cordova resources for native platforms.
 
@@ -28,15 +28,16 @@ const help = `
 
     --type <icon|splash|adaptive-icon> ... Only generate one type of resource
     --resources <path> ................... Use specified directory as resources directory
+    --skip-config ........................ Skip reading/writing to 'config.xml'
 
     --icon-source <path> ................. Use specified file for icon source image
     --splash-source <path> ............... Use specified file for splash source image
     --icon-foreground-source <path> ...... Use file for foreground of adaptive icon
     --icon-background-source <path|hex> .. Use file or color for background of adaptive icon
 
-    --copy ............................... Enable process of copying generated resources to native projects
-    --android-project <path> ............. Use specified directory for Android native project (default: 'android')
+    --copy ............................... Copy generated resources to native projects
     --ios-project <path> ................. Use specified directory for iOS native project (default: 'ios')
+    --android-project <path> ............. Use specified directory for Android native project (default: 'android')
 
     -h, --help ........................... Print help for the platform, then quit
     --version ............................ Print version, then quit

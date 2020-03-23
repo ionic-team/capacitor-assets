@@ -2,6 +2,103 @@ import { Options } from '..';
 import { generateRunOptions, parseOptions } from '../cli';
 import { Platform } from '../platform';
 
+function generatePlatformsConfig(resourcesDirectory: string) {
+  return {
+    android: {
+      'adaptive-icon': {
+        background: {
+          sources: [
+            `${resourcesDirectory}/android/icon-background.png`,
+            `${resourcesDirectory}/android/icon-background.jpg`,
+            `${resourcesDirectory}/android/icon-background.jpeg`,
+          ],
+        },
+        foreground: {
+          sources: [
+            `${resourcesDirectory}/android/icon-foreground.png`,
+            `${resourcesDirectory}/android/icon-foreground.jpg`,
+            `${resourcesDirectory}/android/icon-foreground.jpeg`,
+          ],
+        },
+        icon: {
+          sources: [
+            `${resourcesDirectory}/android/icon.png`,
+            `${resourcesDirectory}/android/icon.jpg`,
+            `${resourcesDirectory}/android/icon.jpeg`,
+            `${resourcesDirectory}/icon.png`,
+            `${resourcesDirectory}/icon.jpg`,
+            `${resourcesDirectory}/icon.jpeg`,
+          ],
+        },
+      },
+      icon: {
+        sources: [
+          `${resourcesDirectory}/android/icon.png`,
+          `${resourcesDirectory}/android/icon.jpg`,
+          `${resourcesDirectory}/android/icon.jpeg`,
+          `${resourcesDirectory}/icon.png`,
+          `${resourcesDirectory}/icon.jpg`,
+          `${resourcesDirectory}/icon.jpeg`,
+        ],
+      },
+      splash: {
+        sources: [
+          `${resourcesDirectory}/android/splash.png`,
+          `${resourcesDirectory}/android/splash.jpg`,
+          `${resourcesDirectory}/android/splash.jpeg`,
+          `${resourcesDirectory}/splash.png`,
+          `${resourcesDirectory}/splash.jpg`,
+          `${resourcesDirectory}/splash.jpeg`,
+        ],
+      },
+    },
+    ios: {
+      icon: {
+        sources: [
+          `${resourcesDirectory}/ios/icon.png`,
+          `${resourcesDirectory}/ios/icon.jpg`,
+          `${resourcesDirectory}/ios/icon.jpeg`,
+          `${resourcesDirectory}/icon.png`,
+          `${resourcesDirectory}/icon.jpg`,
+          `${resourcesDirectory}/icon.jpeg`,
+        ],
+      },
+      splash: {
+        sources: [
+          `${resourcesDirectory}/ios/splash.png`,
+          `${resourcesDirectory}/ios/splash.jpg`,
+          `${resourcesDirectory}/ios/splash.jpeg`,
+          `${resourcesDirectory}/splash.png`,
+          `${resourcesDirectory}/splash.jpg`,
+          `${resourcesDirectory}/splash.jpeg`,
+        ],
+      },
+    },
+    windows: {
+      icon: {
+        sources: [
+          `${resourcesDirectory}/windows/icon.png`,
+          `${resourcesDirectory}/windows/icon.jpg`,
+          `${resourcesDirectory}/windows/icon.jpeg`,
+          `${resourcesDirectory}/icon.png`,
+          `${resourcesDirectory}/icon.jpg`,
+          `${resourcesDirectory}/icon.jpeg`,
+        ],
+      },
+      splash: {
+        sources: [
+          `${resourcesDirectory}/windows/splash.png`,
+          `${resourcesDirectory}/windows/splash.jpg`,
+          `${resourcesDirectory}/windows/splash.jpeg`,
+          `${resourcesDirectory}/splash.png`,
+          `${resourcesDirectory}/splash.jpg`,
+          `${resourcesDirectory}/splash.jpeg`,
+        ],
+      },
+    },
+  };
+}
+
 describe('cordova-res', () => {
 
   describe('cli', () => {
@@ -9,14 +106,18 @@ describe('cordova-res', () => {
     describe('parseOptions', () => {
 
       const DEFAULT_OPTIONS: Options = {
+        directory: process.cwd(),
         logstream: process.stdout,
         errstream: process.stderr,
         resourcesDirectory: 'resources',
-        nativeProject: {
-          enabled: false,
-          androidProjectDirectory: '',
-          iosProjectDirectory: '',
+        platforms: generatePlatformsConfig('resources'),
+        projectConfig: {
+          android: { directory: 'android' },
+          ios: { directory: 'ios' },
+          windows: { directory: 'windows' },
         },
+        skipConfig: false,
+        copy: false,
       };
 
       it('should parse default options with no arguments', () => {
@@ -27,7 +128,7 @@ describe('cordova-res', () => {
       it('should parse options for android', () => {
         const args = ['android'];
         const result = parseOptions(args);
-        expect(result).toEqual({ ...DEFAULT_OPTIONS, platforms: { android: generateRunOptions(Platform.ANDROID, 'resources', args) } });
+        expect(result).toEqual({ ...DEFAULT_OPTIONS, platforms: { android: generateRunOptions(Platform.ANDROID, 'resources', args), }, projectConfig: { android: { directory: 'android' } } });
       });
 
       it('should parse default options when the first argument is not a platform', () => {
@@ -39,7 +140,7 @@ describe('cordova-res', () => {
       it('should accept --resources flag', () => {
         const args = ['--resources', 'res'];
         const result = parseOptions(args);
-        expect(result).toEqual({ ...DEFAULT_OPTIONS, resourcesDirectory: 'res' });
+        expect(result).toEqual({ ...DEFAULT_OPTIONS, platforms: generatePlatformsConfig('res'), resourcesDirectory: 'res' });
       });
 
       it('should log to stderr with --json flag', () => {

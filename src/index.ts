@@ -3,12 +3,12 @@ import Debug from 'debug';
 import et from 'elementtree';
 import path from 'path';
 
-import { generateRunOptions, getDirectory, resolveOptions } from './cli';
+import { getDirectory, parseOptions, resolveOptions } from './cli';
 import { getConfigPath, read as readConfig, run as runConfig, write as writeConfig } from './config';
 import { BaseError } from './error';
-import { NativeProject, copyToNativeProject } from './native';
+import { NativeProjectConfig, copyToNativeProject } from './native';
 import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
-import { DEFAULT_RESOURCES_DIRECTORY, Density, Orientation, ResolvedSource, SourceType } from './resources';
+import { Density, Orientation, ResolvedSource, SourceType } from './resources';
 import { tryFn } from './utils/fn';
 
 const debug = Debug('cordova-res');
@@ -34,22 +34,19 @@ interface ResultSource {
   value: string;
 }
 
-async function CordovaRes({
-  directory = getDirectory(),
-  resourcesDirectory = DEFAULT_RESOURCES_DIRECTORY,
-  logstream = process.stdout,
-  errstream = process.stderr,
-  platforms = {
-    [Platform.ANDROID]: generateRunOptions(Platform.ANDROID, resourcesDirectory, []),
-    [Platform.IOS]: generateRunOptions(Platform.IOS, resourcesDirectory, []),
-    [Platform.WINDOWS]: generateRunOptions(Platform.WINDOWS, resourcesDirectory, []),
-  },
-  nativeProject = {
-    enabled: false,
-    androidProjectDirectory: '',
-    iosProjectDirectory: '',
-  },
-}: CordovaRes.Options = {}): Promise<Result> {
+async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
+  const defaultOptions = parseOptions([]);
+  const {
+    directory,
+    resourcesDirectory,
+    logstream,
+    errstream,
+    platforms,
+    projectConfig,
+    skipConfig,
+    copy,
+  } = { ...defaultOptions, ...options };
+
   const configPath = getConfigPath(directory);
 
   debug('Paths: (config: %O) (resources dir: %O)', configPath, resourcesDirectory);
@@ -58,26 +55,32 @@ async function CordovaRes({
   const resources: GeneratedResource[] = [];
   const sources: ResolvedSource[] = [];
 
-  if (await pathWritable(configPath)) {
-    config = await readConfig(configPath);
-  } else {
-    debug('File missing/not writable: %O', configPath);
+  if (!skipConfig) {
+    if (await pathWritable(configPath)) {
+      config = await readConfig(configPath);
+    } else {
+      debug('File missing/not writable: %O', configPath);
 
-    if (errstream) {
-      errstream.write(`WARN: No config.xml file in directory. Skipping config.\n`);
+      if (errstream) {
+        errstream.write(`WARN: No config.xml file in directory. Skipping config.\n`);
+      }
     }
   }
 
   for (const platform of PLATFORMS) {
     const platformOptions = platforms[platform];
+    const nativeProject = projectConfig[platform];
 
     if (platformOptions) {
       const platformResult = await runPlatform(platform, resourcesDirectory, platformOptions, errstream);
+
       logstream.write(`Generated ${platformResult.resources.length} resources for ${platform}\n`);
+
       resources.push(...platformResult.resources);
       sources.push(...platformResult.sources);
-      if (nativeProject.enabled) {
-        await copyToNativeProject(platform, nativeProject, logstream);
+
+      if (copy && nativeProject) {
+        await copyToNativeProject(platform, nativeProject, logstream, errstream);
       }
     }
   }
@@ -117,9 +120,10 @@ async function CordovaRes({
 }
 
 namespace CordovaRes {
-  export type PlatformOptions = { [P in Platform]?: Readonly<RunPlatformOptions>; };
-
   export const run = CordovaRes;
+
+  export type PlatformOptions = { [P in Platform]?: Readonly<RunPlatformOptions>; };
+  export type NativeProjectConfigByPlatform = { [P in Platform]?: Readonly<NativeProjectConfig>; };
 
   /**
    * Options for `cordova-res`.
@@ -167,11 +171,19 @@ namespace CordovaRes {
     readonly platforms?: Readonly<PlatformOptions>;
 
     /**
-     * Specify target native project directory.
-     *
-     * This is for copying all generated resources directly.
+     * Config for the native projects by platform.
      */
-    readonly nativeProject?: Readonly<NativeProject>;
+    readonly projectConfig?: Readonly<NativeProjectConfigByPlatform>;
+
+    /**
+     * Do not use the Cordova config.xml file.
+     */
+    readonly skipConfig?: boolean;
+
+    /**
+     * Copy generated resources to native project directories.
+     */
+    readonly copy?: boolean;
   }
 
   export async function runCommandLine(args: readonly string[]): Promise<void> {

@@ -1,6 +1,6 @@
 # Resource Generator
 
-This tool will crop and resize JPEG and PNG source images to generate images for modern iOS and Android devices. It will also register the generated images in `config.xml` so that Cordova projects are updated accordingly.
+This tool will crop and resize JPEG and PNG source images to generate icons and splash screens for modern iOS, Android, and Windows. `cordova-res` was developed for use with Cordova, but Capacitor and other native runtimes are supported.
 
 ## Install
 
@@ -10,7 +10,7 @@ $ npm install -g cordova-res
 
 ## Usage
 
-`cordova-res` must run at the root of a Cordova project, such as:
+`cordova-res` expects a Cordova project structure such as:
 
 ```
 resources/
@@ -19,8 +19,9 @@ resources/
 config.xml
 ```
 
-* `resources/icon.png` must be at least 1024×1024px
-* `resources/splash.png` must be at least 2732×2732px
+* `resources/icon.(png|jpg)` must be at least 1024×1024px
+* `resources/splash.(png|jpg)` must be at least 2732×2732px
+* `config.xml` is optional. If present, the generated images are registered accordingly
 
 To generate resources with all the default options, just run:
 
@@ -34,7 +35,7 @@ $ cordova-res
 $ cordova-res ios
 ```
 
-Otherwise, `cordova-res` looks for platforms in `config.xml` (e.g. `<platform name="ios">`) and generates resources only for them.
+Otherwise, if `config.xml` exists, `cordova-res` will look for platforms (e.g. `<platform name="ios">`) and generate resources only for the configured platforms.
 
 #### Documentation
 
@@ -55,7 +56,20 @@ A color may also be used for the icon background by specifying the `--icon-backg
 
 Regular Android icons will still be generated as a fallback for Android devices that do not support adaptive icons.
 
-:memo: **Note**: Cordova 9+ and `cordova-android` 8+ is required.
+:memo: **Note**: For Cordova apps, Cordova 9+ and `cordova-android` 8+ is required.
+
+### Capacitor
+
+To use `cordova-res` in Capacitor and other native runtimes, it is recommended to use `--skip-config` (skips reading & writing to Cordova's `config.xml` file) and `--copy` (copies generated resources into native projects).
+
+For example, to generate icons and splash screens for iOS and Android in Capacitor, run:
+
+```bash
+$ cordova-res ios --skip-config --copy
+$ cordova-res android --skip-config --copy
+```
+
+You can use `--ios-project` and `--android-project` to specify the native project directories into which these resources are copied. By default, `cordova-res` copies Android resources into `android/` and iOS resources into `ios/` (the directories Capacitor uses).
 
 ### Tips
 

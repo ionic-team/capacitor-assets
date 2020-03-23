@@ -1,10 +1,10 @@
 import et from 'elementtree';
 
-import { Options, PlatformOptions } from '.';
+import type { NativeProjectConfigByPlatform, Options, PlatformOptions } from '.';
 import { getPlatforms } from './config';
 import { BadInputError } from './error';
-import { NativeProject } from './native';
-import { AdaptiveIconResourceOptions, Platform, RunPlatformOptions, SimpleResourceOptions, filterSupportedPlatforms, validatePlatforms } from './platform';
+import { NativeProjectConfig } from './native';
+import { AdaptiveIconResourceOptions, PLATFORMS, Platform, RunPlatformOptions, SimpleResourceOptions, filterSupportedPlatforms, validatePlatforms } from './platform';
 import { DEFAULT_RESOURCES_DIRECTORY, RESOURCE_TYPES, ResourceKey, ResourceType, Source, SourceType, validateResourceTypes } from './resources';
 import { getOptionValue } from './utils/cli';
 
@@ -24,23 +24,21 @@ export async function resolveOptions(args: readonly string[], directory: string,
   };
 }
 
-export function parseOptions(args: readonly string[]): Options {
+export function parseOptions(args: readonly string[]): Required<Options> {
   const json = args.includes('--json');
   const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
   const platformArg = args[0] ? args[0] : undefined;
-  const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : []);
-  const nativeProject: Readonly<NativeProject> = {
-    enabled: args.includes('--copy'),
-    androidProjectDirectory: getOptionValue(args, '--android-project', ''),
-    iosProjectDirectory: getOptionValue(args, '--ios-project', ''),
-  };
+  const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : PLATFORMS);
 
   return {
+    directory: getDirectory(),
     resourcesDirectory,
     logstream: json ? process.stderr : process.stdout,
     errstream: process.stderr,
-    ...platformList.length > 0 ? { platforms: generatePlatformOptions(platformList, resourcesDirectory, args) } : {},
-    nativeProject,
+    platforms: generatePlatformOptions(platformList, resourcesDirectory, args),
+    projectConfig: generatePlatformProjectOptions(platformList, args),
+    skipConfig: parseSkipConfigOption(args),
+    copy: parseCopyOption(args),
   };
 }
 
@@ -49,6 +47,13 @@ export function generatePlatformOptions(platforms: readonly Platform[], resource
     acc[platform] = generateRunOptions(platform, resourcesDirectory, args);
     return acc;
   }, {} as PlatformOptions);
+}
+
+export function generatePlatformProjectOptions(platforms: readonly Platform[], args: readonly string[]): NativeProjectConfigByPlatform {
+  return platforms.reduce((acc, platform) => {
+    acc[platform] = generateNativeProjectConfig(platform, args);
+    return acc;
+  }, {} as NativeProjectConfigByPlatform);
 }
 
 export function generateRunOptions(platform: Platform, resourcesDirectory: string, args: readonly string[]): RunPlatformOptions {
@@ -60,6 +65,20 @@ export function generateRunOptions(platform: Platform, resourcesDirectory: strin
     [ResourceType.ICON]: types.includes(ResourceType.ICON) ? parseSimpleResourceOptions(platform, ResourceType.ICON, resourcesDirectory, args) : undefined,
     [ResourceType.SPLASH]: types.includes(ResourceType.SPLASH) ? parseSimpleResourceOptions(platform, ResourceType.SPLASH, resourcesDirectory, args) : undefined,
   };
+}
+
+export function generateNativeProjectConfig(platform: Platform, args: readonly string[]): NativeProjectConfig {
+  const directory = getOptionValue(args, `--${platform}-project`, platform);
+
+  return { directory };
+}
+
+export function parseCopyOption(args: readonly string[]): boolean {
+  return args.includes('--copy');
+}
+
+export function parseSkipConfigOption(args: readonly string[]): boolean {
+  return args.includes('--skip-config');
 }
 
 export function parseAdaptiveIconResourceOptions(platform: Platform, resourcesDirectory: string, args: readonly string[]): AdaptiveIconResourceOptions | undefined {
