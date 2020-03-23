@@ -168,7 +168,7 @@ export async function copyToNativeProject(platform: Platform, nativeProject: Nat
     await copyImages(SOURCE_IOS_SPLASH, path.join(iosProjectDirectory, TARGET_IOS_SPLASH), IOS_SPLASHES);
     logstream.write(`Copied ${IOS_ICONS.length + IOS_SPLASHES.length} resource items to iOS project`);
   } else if (platform === Platform.ANDROID) {
-    const androidProjectDirectory = nativeProject.iosProjectDirectory || 'android';
+    const androidProjectDirectory = nativeProject.androidProjectDirectory || 'android';
     await copyImages(SOURCE_ANDROID_ICON, path.join(androidProjectDirectory, TARGET_ANDROID_ICON), ANDROID_ICONS);
     await copyImages(SOURCE_ANDROID_SPLASH, path.join(androidProjectDirectory, TARGET_ANDROID_SPLASH), ANDROID_SPLASHES);
     logstream.write(`Copied ${ANDROID_ICONS.length + ANDROID_SPLASHES.length} resource items to Android project`);
