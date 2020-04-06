@@ -187,7 +187,7 @@ namespace CordovaRes {
   }
 
   export async function runCommandLine(args: readonly string[]): Promise<void> {
-    if (args.includes('--version')) {
+    if (args.includes('--version') || args.includes('-v')) {
       const pkg = await import(path.resolve(__dirname, '../package.json'));
       process.stdout.write(pkg.version + '\n');
       return;
