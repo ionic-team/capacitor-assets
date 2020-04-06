@@ -219,15 +219,30 @@ export interface ResourceNodeAttribute {
 
 export interface ResourcesTypeConfig<C = ResourcesImageConfig> {
   readonly resources: readonly C[];
-  readonly nodeName: string;
-  readonly nodeAttributes: readonly ResourceNodeAttribute[];
 
   /**
-   * Uniquely identifies a node.
-   *
-   * Use `nodeName` and this attribute to look up existing nodes in Cordova config.
+   * Metadata for Cordova's config.xml
    */
-  readonly indexAttribute: ResourceNodeAttribute;
+  readonly configXml: {
+
+    /**
+     * XML node name of this resource (e.g. 'icon', 'splash')
+     */
+    readonly nodeName: string;
+
+    /**
+     * An array of resource keys to copy into the XML node as attributes
+     */
+    readonly nodeAttributes: readonly ResourceNodeAttribute[];
+
+    /**
+     * Uniquely identifies a node.
+     *
+     * Use `nodeName` and this attribute to look up existing nodes in the XML.
+     * This is important because nodes need to be replaced if found.
+     */
+    readonly indexAttribute: ResourceNodeAttribute;
+  };
 }
 
 export type ResourcesPlatform = { readonly [T in ResourceType.ICON | ResourceType.SPLASH]: ResourcesTypeConfig; };
@@ -274,9 +289,11 @@ export function getResourcesConfig(platform: Platform, type: ResourceType): Reso
         { foreground: 'android/icon/xxhdpi-foreground.png', background: 'android/icon/xxhdpi-background.png', format: Format.PNG, width: 324, height: 324, density: Density.XXHDPI },
         { foreground: 'android/icon/xxxhdpi-foreground.png', background: 'android/icon/xxxhdpi-background.png', format: Format.PNG, width: 432, height: 432, density: Density.XXXHDPI },
       ],
-      nodeName: 'icon',
-      nodeAttributes: [NodeAttributes.FOREGROUND, NodeAttributes.DENSITY, NodeAttributes.BACKGROUND],
-      indexAttribute: NodeAttributes.DENSITY,
+      configXml: {
+        nodeName: 'icon',
+        nodeAttributes: [NodeAttributes.FOREGROUND, NodeAttributes.DENSITY, NodeAttributes.BACKGROUND],
+        indexAttribute: NodeAttributes.DENSITY,
+      },
     };
   }
 
@@ -355,9 +372,11 @@ const RESOURCES: ResourcesConfig = {
         { src : 'windows/icon/StoreLogo.scale-400.png', format: Format.PNG, width: 200, height: 200 },
 
       ],
-      nodeName: 'icon',
-      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET], /* NodeAttributes.WIDTH, NodeAttributes.HEIGHT, */
-      indexAttribute: NodeAttributes.SRC,
+      configXml: {
+        nodeName: 'icon',
+        nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET], /* NodeAttributes.WIDTH, NodeAttributes.HEIGHT, */
+        indexAttribute: NodeAttributes.SRC,
+      },
     },
     [ResourceType.SPLASH]: {
       resources: [
@@ -370,9 +389,11 @@ const RESOURCES: ResourcesConfig = {
         { src: 'windows/splash/Splash.scale-200.png', format: Format.PNG, width: 1240, height: 600, orientation: Orientation.LANDSCAPE },
         { src: 'windows/splash/Splash.scale-400.png', format: Format.PNG, width: 2480, height: 1200, orientation: Orientation.LANDSCAPE },
       ],
-      nodeName: 'splash',
-      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET], /* NodeAttributes.WIDTH, NodeAttributes.HEIGHT, */
-      indexAttribute: NodeAttributes.SRC,
+      configXml: {
+        nodeName: 'splash',
+        nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET], /* NodeAttributes.WIDTH, NodeAttributes.HEIGHT, */
+        indexAttribute: NodeAttributes.SRC,
+      },
     },
   },
   [Platform.ANDROID]: {
@@ -385,9 +406,11 @@ const RESOURCES: ResourcesConfig = {
         { src: 'android/icon/drawable-xxhdpi-icon.png', format: Format.PNG, width: 144, height: 144, density: Density.XXHDPI },
         { src: 'android/icon/drawable-xxxhdpi-icon.png', format: Format.PNG, width: 192, height: 192, density: Density.XXXHDPI },
       ],
-      nodeName: 'icon',
-      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.DENSITY],
-      indexAttribute: NodeAttributes.DENSITY,
+      configXml: {
+        nodeName: 'icon',
+        nodeAttributes: [NodeAttributes.SRC, NodeAttributes.DENSITY],
+        indexAttribute: NodeAttributes.DENSITY,
+      },
     },
     [ResourceType.SPLASH]: {
       resources: [
@@ -404,9 +427,11 @@ const RESOURCES: ResourcesConfig = {
         { src: 'android/splash/drawable-port-xxhdpi-screen.png', format: Format.PNG, width: 960, height: 1600, density: Density.PORT_XXHDPI, orientation: Orientation.PORTRAIT },
         { src: 'android/splash/drawable-port-xxxhdpi-screen.png', format: Format.PNG, width: 1280, height: 1920, density: Density.PORT_XXXHDPI, orientation: Orientation.PORTRAIT },
       ],
-      nodeName: 'splash',
-      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.DENSITY],
-      indexAttribute: NodeAttributes.DENSITY,
+      configXml: {
+        nodeName: 'splash',
+        nodeAttributes: [NodeAttributes.SRC, NodeAttributes.DENSITY],
+        indexAttribute: NodeAttributes.DENSITY,
+      },
     },
   },
   [Platform.IOS]: {
@@ -444,9 +469,11 @@ const RESOURCES: ResourcesConfig = {
         { src: 'ios/icon/icon-small@3x.png', format: Format.PNG, width: 87, height: 87 },
         { src: 'ios/icon/icon-1024.png', format: Format.PNG, width: 1024, height: 1024 },
       ],
-      nodeName: 'icon',
-      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
-      indexAttribute: NodeAttributes.SRC,
+      configXml: {
+        nodeName: 'icon',
+        nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
+        indexAttribute: NodeAttributes.SRC,
+      },
     },
     [ResourceType.SPLASH]: {
       resources: [
@@ -470,9 +497,11 @@ const RESOURCES: ResourcesConfig = {
         { src: 'ios/splash/Default~iphone.png', format: Format.PNG, width: 320, height: 480, orientation: Orientation.PORTRAIT },
         { src: 'ios/splash/Default@2x~universal~anyany.png', format: Format.PNG, width: 2732, height: 2732 },
       ],
-      nodeName: 'splash',
-      nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
-      indexAttribute: NodeAttributes.SRC,
+      configXml: {
+        nodeName: 'splash',
+        nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
+        indexAttribute: NodeAttributes.SRC,
+      },
     },
   },
 };

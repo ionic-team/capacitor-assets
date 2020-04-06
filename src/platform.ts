@@ -17,11 +17,13 @@ export const enum Platform {
 export const PLATFORMS: readonly Platform[] = [Platform.ANDROID, Platform.IOS, Platform.WINDOWS];
 
 export interface GeneratedResource extends ResourceKeyValues {
-  type: ResourceType;
-  platform: Platform;
-  nodeName: string;
-  nodeAttributes: readonly ResourceNodeAttribute[];
-  indexAttribute: ResourceNodeAttribute;
+  readonly type: ResourceType;
+  readonly platform: Platform;
+  readonly configXml: {
+    readonly nodeName: string;
+    readonly nodeAttributes: readonly ResourceNodeAttribute[];
+    readonly indexAttribute: ResourceNodeAttribute;
+  };
 }
 
 export interface SimpleResourceOptions {
@@ -213,7 +215,7 @@ export async function generateAdaptiveIconResources(resourcesDirectory: string, 
 
 export async function consolidateAdaptiveIconResources(foregrounds: readonly GeneratedResource[], backgrounds: readonly GeneratedResource[]): Promise<GeneratedResource[]> {
   return foregrounds.map(foreground => {
-    const background = backgrounds.find(r => r[r.indexAttribute.key] === foreground[foreground.indexAttribute.key]);
+    const background = backgrounds.find(r => r[r.configXml.indexAttribute.key] === foreground[foreground.configXml.indexAttribute.key]);
 
     if (!background) {
       throw new BadInputError(`Cannot consolidate adaptive icon resources: No background for foreground: ${foreground.src}`);
@@ -227,9 +229,11 @@ export async function consolidateAdaptiveIconResources(foregrounds: readonly Gen
       density: foreground.density,
       width: foreground.width,
       height: foreground.height,
-      nodeName: foreground.nodeName,
-      nodeAttributes: foreground.nodeAttributes,
-      indexAttribute: foreground.indexAttribute,
+      configXml: {
+        nodeName: foreground.configXml.nodeName,
+        nodeAttributes: foreground.configXml.nodeAttributes,
+        indexAttribute: foreground.configXml.indexAttribute,
+      },
     };
   });
 }
@@ -282,9 +286,11 @@ export async function generateImageResource(type: ResourceType, platform: Platfo
     height,
     src: dest,
     platform,
-    nodeName: config.nodeName,
-    nodeAttributes: config.nodeAttributes,
-    indexAttribute: config.indexAttribute,
+    configXml: {
+      nodeName: config.configXml.nodeName,
+      nodeAttributes: config.configXml.nodeAttributes,
+      indexAttribute: config.configXml.indexAttribute,
+    },
   };
 }
 

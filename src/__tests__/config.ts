@@ -16,9 +16,12 @@ describe('cordova-res', () => {
         [ResourceKey.SRC]: '/path/to/resources/icon.png',
         type: ResourceType.ICON,
         platform: Platform.ANDROID,
-        nodeName: 'icon',
-        nodeAttributes: [SRC_ATTRIBUTE],
-        indexAttribute: SRC_ATTRIBUTE,
+        configXml: {
+          nodeName: 'icon',
+          nodeAttributes: [SRC_ATTRIBUTE],
+          indexAttribute: SRC_ATTRIBUTE,
+          included: true,
+        },
       };
 
       it('should insert node for empty container', async () => {
@@ -29,7 +32,7 @@ describe('cordova-res', () => {
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);
-        expect(children[0].tag).toEqual(resource.nodeName);
+        expect(children[0].tag).toEqual(resource.configXml.nodeName);
         expect(children[0].get('src')).toEqual(src);
       });
 
@@ -42,7 +45,7 @@ describe('cordova-res', () => {
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);
-        expect(children[0].tag).toEqual(resource.nodeName);
+        expect(children[0].tag).toEqual(resource.configXml.nodeName);
         expect(children[0].get('src')).toEqual(src);
       });
 
@@ -55,7 +58,7 @@ describe('cordova-res', () => {
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);
-        expect(children[0].tag).toEqual(resource.nodeName);
+        expect(children[0].tag).toEqual(resource.configXml.nodeName);
         expect(children[0].get('src')).toEqual(src);
       });
 

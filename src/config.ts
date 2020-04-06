@@ -100,17 +100,18 @@ export function conformPath(configPath: string, value: string | number): string 
 }
 
 export function runResource(configPath: string, container: et.Element, resource: GeneratedResource): void {
-  const src = resource[resource.indexAttribute.key];
+  const { nodeName, nodeAttributes, indexAttribute } = resource.configXml;
+  const src = resource[indexAttribute.key];
 
   if (typeof src !== 'string') {
-    throw new BadInputError(`Bad value for index "${resource.indexAttribute.key}": ${src}`);
+    throw new BadInputError(`Bad value for index "${indexAttribute.key}": ${src}`);
   }
 
   // We force the use of forward slashes here to provide cross-platform
   // compatibility for paths.
-  const imgElement = resolveResourceElement(container, resource.nodeName, resource.indexAttribute, conformPath(configPath, src));
+  const imgElement = resolveResourceElement(container, nodeName, indexAttribute, conformPath(configPath, src));
 
-  for (const attr of resource.nodeAttributes) {
+  for (const attr of nodeAttributes) {
     const v = resource[attr.key];
 
     if (v) {
