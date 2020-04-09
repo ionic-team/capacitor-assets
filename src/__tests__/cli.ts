@@ -1,5 +1,7 @@
+import * as et from 'elementtree';
+
 import { Options } from '..';
-import { generateRunOptions, parseOptions } from '../cli';
+import { generateRunOptions, parseOptions, resolveOptions } from '../cli';
 import { Platform } from '../platform';
 
 function generatePlatformsConfig(resourcesDirectory: string) {
@@ -169,6 +171,54 @@ describe('cordova-res', () => {
         expect(generateRunOptions(Platform.IOS, 'resources', ['--icon-source', 'foo.png', '--splash-source', 'bar.png'])).toEqual({
           icon: { sources: ['foo.png'] },
           splash: { sources: ['bar.png'] },
+        });
+      });
+
+    });
+
+    describe('resolveOptions', () => {
+
+      it('should pull platforms from config.xml if none provided', async () => {
+
+        const configXml: et.Element = et.Element('widget');
+        configXml.append(et.Element('platform', { name: 'android' }));
+        configXml.append(et.Element('platform', { name: 'ios' }));
+
+        const options: Options = await resolveOptions([], 'resources', new et.ElementTree(configXml));
+
+        expect(options.platforms).toEqual({
+          ...generatePlatformsConfig('resources'),
+          windows: undefined,
+        });
+      });
+
+      it('should use runtime platform if provided', async () => {
+
+        const configXml: et.Element = et.Element('widget');
+        configXml.append(et.Element('platform', { name: 'android' }));
+        configXml.append(et.Element('platform', { name: 'ios' }));
+
+        const options: Options = await resolveOptions(['android'], 'resources', new et.ElementTree(configXml));
+
+        expect(options.platforms).toEqual({
+          ...generatePlatformsConfig('resources'),
+          windows: undefined,
+          ios: undefined,
+        });
+      });
+
+      it('should generate for all platforms if no config.xml and no runtime platform', async () => {
+
+        const configXml: et.Element = et.Element('widget');
+        configXml.append(et.Element('platform', { name: 'android' }));
+        configXml.append(et.Element('platform', { name: 'ios' }));
+
+        const options: Options = await resolveOptions(['android'], 'resources', new et.ElementTree(configXml));
+
+        expect(options.platforms).toEqual({
+          ...generatePlatformsConfig('resources'),
+          windows: undefined,
+          ios: undefined,
         });
       });
 

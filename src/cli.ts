@@ -17,17 +17,21 @@ export async function resolveOptions(args: readonly string[], directory: string,
   const platformList = filterSupportedPlatforms(doc ? getPlatforms(doc) : []);
   const parsedOptions = parseOptions(args);
   const { resourcesDirectory = DEFAULT_RESOURCES_DIRECTORY } = parsedOptions;
+  const platformOption = parsePlatformOption(args);
 
   return {
-    ...{ directory, ...platformList.length > 0 ? { platforms: generatePlatformOptions(platformList, resourcesDirectory, args) } : {} },
-    ...parsedOptions,
+  ...{
+      directory,
+      ...parsedOptions,
+      platforms: platformOption ? parsedOptions.platforms : generatePlatformOptions(platformList, resourcesDirectory, args),
+    },
   };
 }
 
 export function parseOptions(args: readonly string[]): Required<Options> {
   const json = args.includes('--json');
   const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
-  const platformArg = args[0] ? args[0] : undefined;
+  const platformArg = parsePlatformOption(args);
   const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : PLATFORMS);
 
   return {
@@ -40,6 +44,10 @@ export function parseOptions(args: readonly string[]): Required<Options> {
     skipConfig: parseSkipConfigOption(args),
     copy: parseCopyOption(args),
   };
+}
+
+export function parsePlatformOption(args: readonly string[]): string | undefined {
+  return args[0] ? args[0] : undefined;
 }
 
 export function generatePlatformOptions(platforms: readonly Platform[], resourcesDirectory: string, args: readonly string[]): PlatformOptions {
