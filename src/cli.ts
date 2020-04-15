@@ -1,7 +1,7 @@
 import et from 'elementtree';
 
 import type { NativeProjectConfigByPlatform, Options, PlatformOptions } from '.';
-import { getPlatforms } from './config';
+import { getPlatforms } from './cordova/config';
 import { BadInputError } from './error';
 import { NativeProjectConfig } from './native';
 import { AdaptiveIconResourceOptions, PLATFORMS, Platform, RunPlatformOptions, SimpleResourceOptions, filterSupportedPlatforms, validatePlatforms } from './platform';

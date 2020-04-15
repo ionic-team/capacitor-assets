@@ -23,6 +23,7 @@ export interface GeneratedResource extends ResourceKeyValues {
     readonly nodeName: string;
     readonly nodeAttributes: readonly ResourceNodeAttribute[];
     readonly indexAttribute: ResourceNodeAttribute;
+    readonly included: boolean;
   };
 }
 
@@ -221,6 +222,8 @@ export async function consolidateAdaptiveIconResources(foregrounds: readonly Gen
       throw new BadInputError(`Cannot consolidate adaptive icon resources: No background for foreground: ${foreground.src}`);
     }
 
+    const { nodeName, nodeAttributes, indexAttribute, included } = foreground.configXml;
+
     return {
       platform: foreground.platform,
       type: foreground.type,
@@ -230,9 +233,10 @@ export async function consolidateAdaptiveIconResources(foregrounds: readonly Gen
       width: foreground.width,
       height: foreground.height,
       configXml: {
-        nodeName: foreground.configXml.nodeName,
-        nodeAttributes: foreground.configXml.nodeAttributes,
-        indexAttribute: foreground.configXml.indexAttribute,
+        nodeName,
+        nodeAttributes,
+        indexAttribute,
+        included,
       },
     };
   });
@@ -271,11 +275,15 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(resour
   return resources;
 }
 
-export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<unknown>, image: ImageSourceData, schema: ImageSchema, errstream?: NodeJS.WritableStream): Promise<GeneratedResource> {
+export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<ResourceKeyValues, ResourceKey>, image: ImageSourceData, schema: ResourceKeyValues & ImageSchema, errstream?: NodeJS.WritableStream): Promise<GeneratedResource> {
   const { pipeline, metadata } = image;
   const { src, format, width, height } = schema;
+  const { nodeName, nodeAttributes, indexAttribute, includedResources } = config.configXml;
 
+  const index = schema[indexAttribute.key];
+  const included = index ? includedResources.includes(index) : false;
   const dest = pathlib.join(resourcesDirectory, src);
+
   await ensureDir(pathlib.dirname(dest));
   await generateImage({ src: dest, format, width, height }, pipeline.clone(), metadata, errstream);
 
@@ -287,9 +295,10 @@ export async function generateImageResource(type: ResourceType, platform: Platfo
     src: dest,
     platform,
     configXml: {
-      nodeName: config.configXml.nodeName,
-      nodeAttributes: config.configXml.nodeAttributes,
-      indexAttribute: config.configXml.indexAttribute,
+      nodeName,
+      nodeAttributes,
+      indexAttribute,
+      included,
     },
   };
 }

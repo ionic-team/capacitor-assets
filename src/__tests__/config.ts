@@ -1,6 +1,6 @@
 import * as et from 'elementtree';
 
-import { runResource } from '../config';
+import { runResource } from '../cordova/config';
 import { GeneratedResource, Platform } from '../platform';
 import { ResourceKey, ResourceNodeAttributeType, ResourceType } from '../resources';
 

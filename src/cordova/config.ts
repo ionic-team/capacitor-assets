@@ -3,11 +3,11 @@ import Debug from 'debug';
 import et from 'elementtree';
 import pathlib from 'path';
 
-import { BadInputError } from './error';
-import { GeneratedResource, Platform } from './platform';
-import { ResolvedColorSource, ResolvedSource, ResourceNodeAttribute, ResourceNodeAttributeType, SourceType } from './resources';
+import { BadInputError } from '../error';
+import { GeneratedResource, Platform } from '../platform';
+import { ResolvedColorSource, ResolvedSource, ResourceNodeAttribute, ResourceNodeAttributeType, SourceType } from '../resources';
 
-const debug = Debug('cordova-res:config');
+const debug = Debug('cordova-res:cordova:config');
 
 export function getConfigPath(directory: string): string {
   return pathlib.resolve(directory, 'config.xml');
@@ -85,10 +85,10 @@ export function runConfig(configPath: string, doc: et.ElementTree, resources: re
 
   for (const [ platform, platformResources ] of platforms) {
     const platformElement = resolvePlatformElement(root, platform);
-    let filteredResources = platformResources.filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation);
-    if (platform === Platform.WINDOWS) {
-      filteredResources = filteredResources.filter(img => typeof img.target === 'string');
-    }
+    const filteredResources = platformResources
+      .filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation)
+      .filter(img => img.configXml.included);
+
     for (const resource of filteredResources) {
       runResource(configPath, platformElement, resource);
     }
@@ -99,23 +99,27 @@ export function conformPath(configPath: string, value: string | number): string 
   return pathlib.relative(pathlib.dirname(configPath), value.toString()).replace(/\\/g, '/');
 }
 
+export function resolveAttributeValue(configPath: string, attr: ResourceNodeAttribute, value: string | number): string {
+  return attr.type === ResourceNodeAttributeType.PATH ? conformPath(configPath, value) : value.toString();
+}
+
 export function runResource(configPath: string, container: et.Element, resource: GeneratedResource): void {
   const { nodeName, nodeAttributes, indexAttribute } = resource.configXml;
-  const src = resource[indexAttribute.key];
+  const index = resource[indexAttribute.key];
 
-  if (typeof src !== 'string') {
-    throw new BadInputError(`Bad value for index "${indexAttribute.key}": ${src}`);
+  if (typeof index !== 'string' && typeof index !== 'number') {
+    throw new BadInputError(`Bad value for index "${indexAttribute.key}": ${index}`);
   }
 
   // We force the use of forward slashes here to provide cross-platform
   // compatibility for paths.
-  const imgElement = resolveResourceElement(container, nodeName, indexAttribute, conformPath(configPath, src));
+  const imgElement = resolveResourceElement(container, nodeName, indexAttribute, conformPath(configPath, index));
 
   for (const attr of nodeAttributes) {
     const v = resource[attr.key];
 
     if (v) {
-      imgElement.set(attr.key, attr.type === ResourceNodeAttributeType.PATH ? conformPath(configPath, v) : v.toString());
+      imgElement.set(attr.key, resolveAttributeValue(configPath, attr, v));
     }
   }
 }

@@ -4,7 +4,7 @@ import et from 'elementtree';
 import path from 'path';
 
 import { getDirectory, parseOptions, resolveOptions } from './cli';
-import { getConfigPath, read as readConfig, run as runConfig, write as writeConfig } from './config';
+import { getConfigPath, read as readConfig, run as runConfig, write as writeConfig } from './cordova/config';
 import { BaseError } from './error';
 import { NativeProjectConfig, copyToNativeProject } from './native';
 import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
