@@ -352,3 +352,14 @@ export function filterSupportedPlatforms(platforms: readonly string[]): Platform
 export function isSupportedPlatform(platform: any): platform is Platform {
   return PLATFORMS.includes(platform);
 }
+
+export function prettyPlatform(platform: Platform): string {
+  switch (platform) {
+    case Platform.IOS:
+      return 'iOS';
+    case Platform.ANDROID:
+      return 'Android';
+    case Platform.WINDOWS:
+      return 'Windows';
+  }
+}

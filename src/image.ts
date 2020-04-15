@@ -53,8 +53,7 @@ export function debugSourceImage(src: string, error: NodeJS.ErrnoException, errs
     debug('Source file missing: %s', src);
   } else {
     if (errstream) {
-      const message = util.format('WARN: Error with source file %s: %s', src, error);
-      errstream.write(`${message}\n`);
+      errstream.write(util.format('WARN: Error with source file %s: %s', src, error) + '\n');
     } else {
       debug('Error with source file %s: %O', src, error);
     }
@@ -78,7 +77,7 @@ export async function generateImage(image: ImageSchema, src: Sharp, metadata: Me
 
   if (errstream) {
     if (metadata.format !== image.format) {
-      errstream.write(`WARN: Must perform conversion from ${metadata.format} to png.\n`);
+      errstream.write(util.format(`WARN: Must perform conversion from %s to png.`, metadata.format) + '\n');
     }
   }
 

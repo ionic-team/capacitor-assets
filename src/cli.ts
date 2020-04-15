@@ -119,6 +119,7 @@ export function parseAdaptiveIconBackgroundOptions(resourcesDirectory: string, a
 
 export function parseSimpleResourceOptions(platform: Platform, type: ResourceType.ICON | ResourceType.SPLASH, resourcesDirectory: string, args: readonly string[]): SimpleResourceOptions {
   const source = parseSourceFromArgs(type, args);
+
   return { sources: source ? [source] : getDefaultSources(platform, type, resourcesDirectory) };
 }
 

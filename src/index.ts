@@ -2,12 +2,13 @@ import { pathWritable } from '@ionic/utils-fs';
 import Debug from 'debug';
 import et from 'elementtree';
 import path from 'path';
+import util from 'util';
 
 import { getDirectory, parseOptions, resolveOptions } from './cli';
 import { getConfigPath, read as readConfig, run as runConfig, write as writeConfig } from './cordova/config';
 import { BaseError } from './error';
 import { NativeProjectConfig, copyToNativeProject } from './native';
-import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, run as runPlatform } from './platform';
+import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, prettyPlatform, run as runPlatform } from './platform';
 import { Density, Orientation, ResolvedSource, SourceType } from './resources';
 import { tryFn } from './utils/fn';
 
@@ -74,7 +75,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     if (platformOptions) {
       const platformResult = await runPlatform(platform, resourcesDirectory, platformOptions, errstream);
 
-      logstream.write(`Generated ${platformResult.resources.length} resources for ${platform}\n`);
+      logstream.write(util.format(`Generated %s resources for %s`, platformResult.resources.length, prettyPlatform(platform)) + '\n');
 
       resources.push(...platformResult.resources);
       sources.push(...platformResult.sources);

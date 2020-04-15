@@ -2,6 +2,7 @@ import { ensureDir, readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
 import et from 'elementtree';
 import pathlib from 'path';
+import util from 'util';
 
 import { BadInputError } from '../error';
 import { GeneratedResource, Platform } from '../platform';
@@ -78,7 +79,7 @@ export function runConfig(configPath: string, doc: et.ElementTree, resources: re
   const orientation = orientationPreference || 'default';
 
   if (orientation !== 'default' && errstream) {
-    errstream.write(`WARN: Orientation preference set to '${orientation}'. Only configuring ${orientation} resources.\n`);
+    errstream.write(util.format(`WARN: Orientation preference set to '%s'. Only configuring %s resources.`, orientation, orientation) + '\n');
   }
 
   const platforms = groupImages(resources);
