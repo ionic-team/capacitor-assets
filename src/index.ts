@@ -60,11 +60,8 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     if (await pathWritable(configPath)) {
       config = await readConfig(configPath);
     } else {
+      errstream?.write(`WARN:\tNo config.xml file in directory. Skipping config.\n`);
       debug('File missing/not writable: %O', configPath);
-
-      if (errstream) {
-        errstream.write(`WARN:\tNo config.xml file in directory. Skipping config.\n`);
-      }
     }
   }
 
@@ -75,7 +72,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     if (platformOptions) {
       const platformResult = await runPlatform(platform, resourcesDirectory, platformOptions, errstream);
 
-      logstream.write(util.format(`Generated %s resources for %s`, platformResult.resources.length, prettyPlatform(platform)) + '\n');
+      logstream?.write(util.format(`Generated %s resources for %s`, platformResult.resources.length, prettyPlatform(platform)) + '\n');
 
       resources.push(...platformResult.resources);
       sources.push(...platformResult.sources);
@@ -90,7 +87,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     await runConfig(configPath, resourcesDirectory, config, sources, resources, errstream);
     await writeConfig(configPath, config);
 
-    logstream.write(`Wrote to config.xml\n`);
+    logstream?.write(`Wrote to config.xml\n`);
   }
 
   return {
@@ -152,16 +149,16 @@ namespace CordovaRes {
     /**
      * Specify an alternative output mechanism.
      *
-     * A NullStream may be used to silence output entirely.
+     * `null` may be specified to silence output.
      */
-    readonly logstream?: NodeJS.WritableStream;
+    readonly logstream?: NodeJS.WritableStream | null;
 
     /**
      * Specify an alternative error output mechanism.
      *
-     * A NullStream may be used to silence error output entirely.
+     * `null` may be specified to silence error output.
      */
-    readonly errstream?: NodeJS.WritableStream;
+    readonly errstream?: NodeJS.WritableStream | null;
 
     /**
      * Resource generation configuration by platform.

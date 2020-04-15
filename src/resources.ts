@@ -136,26 +136,24 @@ export function getRasterResourceSchema(platform: Platform, type: ResourceType):
   }
 }
 
-export async function validateResource(platform: Platform, type: ResourceType, source: string, pipeline: Sharp, errstream?: NodeJS.WritableStream): Promise<Metadata> {
+export async function validateResource(platform: Platform, type: ResourceType, source: string, pipeline: Sharp, errstream: NodeJS.WritableStream | null): Promise<Metadata> {
   const metadata = await pipeline.metadata();
 
   const schema = getRasterResourceSchema(platform, type);
   await validateRasterResource(platform, type, source, metadata, schema);
 
-  if (errstream) {
-    if (platform === Platform.IOS && type === ResourceType.ICON) {
-      if (metadata.hasAlpha) {
-        // @see https://github.com/ionic-team/cordova-res/issues/94
-        errstream.write(util.format(
-          (
-            'WARN:\tSource icon %s contains alpha channel, generated icons for %s will not.\n\n' +
-            '\tApple recommends avoiding transparency. See the App Icon Human Interface Guidelines[1] for details. Any transparency in your icon will be filled in with white.\n\n' +
-            '\t[1]: https://developer.apple.com/design/human-interface-guidelines/ios/icons-and-images/app-icon/\n'
-          ),
-          source,
-          prettyPlatform(platform)
-        ) + '\n');
-      }
+  if (platform === Platform.IOS && type === ResourceType.ICON) {
+    if (metadata.hasAlpha) {
+      // @see https://github.com/ionic-team/cordova-res/issues/94
+      errstream?.write(util.format(
+        (
+          'WARN:\tSource icon %s contains alpha channel, generated icons for %s will not.\n\n' +
+          '\tApple recommends avoiding transparency. See the App Icon Human Interface Guidelines[1] for details. Any transparency in your icon will be filled in with white.\n\n' +
+          '\t[1]: https://developer.apple.com/design/human-interface-guidelines/ios/icons-and-images/app-icon/\n'
+        ),
+        source,
+        prettyPlatform(platform)
+      ) + '\n');
     }
   }
 

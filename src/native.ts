@@ -180,20 +180,18 @@ async function copyImages(sourcePath: string, targetPath: string, images: readon
   }));
 }
 
-export async function copyToNativeProject(platform: Platform, nativeProject: NativeProjectConfig, logstream: NodeJS.WritableStream, errstream?: NodeJS.WritableStream) {
+export async function copyToNativeProject(platform: Platform, nativeProject: NativeProjectConfig, logstream: NodeJS.WritableStream | null, errstream: NodeJS.WritableStream | null) {
   if (platform === Platform.IOS) {
     const iosProjectDirectory = nativeProject.directory || 'ios';
     await copyImages(SOURCE_IOS_ICON, path.join(iosProjectDirectory, TARGET_IOS_ICON), IOS_ICONS);
     await copyImages(SOURCE_IOS_SPLASH, path.join(iosProjectDirectory, TARGET_IOS_SPLASH), IOS_SPLASHES);
-    logstream.write(util.format(`Copied %s resource items to %s`, IOS_ICONS.length + IOS_SPLASHES.length, prettyPlatform(platform)) + '\n');
+    logstream?.write(util.format(`Copied %s resource items to %s`, IOS_ICONS.length + IOS_SPLASHES.length, prettyPlatform(platform)) + '\n');
   } else if (platform === Platform.ANDROID) {
     const androidProjectDirectory = nativeProject.directory || 'android';
     await copyImages(SOURCE_ANDROID_ICON, path.join(androidProjectDirectory, TARGET_ANDROID_ICON), ANDROID_ICONS);
     await copyImages(SOURCE_ANDROID_SPLASH, path.join(androidProjectDirectory, TARGET_ANDROID_SPLASH), ANDROID_SPLASHES);
-    logstream.write(util.format(`Copied %s resource items to %s`, ANDROID_ICONS.length + ANDROID_SPLASHES.length, prettyPlatform(platform)) + '\n');
+    logstream?.write(util.format(`Copied %s resource items to %s`, ANDROID_ICONS.length + ANDROID_SPLASHES.length, prettyPlatform(platform)) + '\n');
   } else {
-    if (errstream) {
-      errstream.write(util.format('WARN:\tCopying to native projects is not supported for %s', prettyPlatform(platform)) + '\n');
-    }
+    errstream?.write(util.format('WARN:\tCopying to native projects is not supported for %s', prettyPlatform(platform)) + '\n');
   }
 }

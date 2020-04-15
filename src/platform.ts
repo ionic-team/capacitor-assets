@@ -86,7 +86,7 @@ export interface RunPlatformResult {
 /**
  * Run resource generation for the given platform.
  */
-export async function run(platform: Platform, resourcesDirectory: string, options: Readonly<RunPlatformOptions>, errstream?: NodeJS.WritableStream): Promise<RunPlatformResult> {
+export async function run(platform: Platform, resourcesDirectory: string, options: Readonly<RunPlatformOptions>, errstream: NodeJS.WritableStream | null): Promise<RunPlatformResult> {
   debug('Running %s platform with options: %O', platform, options);
 
   const resources: GeneratedResource[] = [];
@@ -124,7 +124,7 @@ export async function run(platform: Platform, resourcesDirectory: string, option
  * If there are no options given for this resource or if the source images are
  * not suitable, this function resolves with `undefined`.
  */
-export async function safelyGenerateSimpleResources(type: ResourceType.ICON | ResourceType.SPLASH, platform: Platform, resourcesDirectory: string, options?: Readonly<SimpleResourceOptions>, errstream?: NodeJS.WritableStream): Promise<SimpleResourceResult | undefined> {
+export async function safelyGenerateSimpleResources(type: ResourceType.ICON | ResourceType.SPLASH, platform: Platform, resourcesDirectory: string, options: Readonly<SimpleResourceOptions> | undefined, errstream: NodeJS.WritableStream | null): Promise<SimpleResourceResult | undefined> {
   if (!options) {
     return;
   }
@@ -149,7 +149,7 @@ export async function safelyGenerateSimpleResources(type: ResourceType.ICON | Re
  * If there are no options given for this resource, this function resolves
  * with `undefined`.
  */
-export async function generateSimpleResources(type: ResourceType.ICON | ResourceType.SPLASH, platform: Platform, resourcesDirectory: string, options?: Readonly<SimpleResourceOptions>, errstream?: NodeJS.WritableStream): Promise<SimpleResourceResult | undefined> {
+export async function generateSimpleResources(type: ResourceType.ICON | ResourceType.SPLASH, platform: Platform, resourcesDirectory: string, options: Readonly<SimpleResourceOptions> | undefined, errstream: NodeJS.WritableStream | null): Promise<SimpleResourceResult | undefined> {
   if (!options) {
     return;
   }
@@ -199,7 +199,7 @@ export function combineTransformFunctions(transformations: readonly TransformFun
  * If there are no options given for this resource or if the platform or
  * source images are not suitable, this function resolves with `undefined`.
  */
-export async function safelyGenerateAdaptiveIconResources(platform: Platform, resourcesDirectory: string, options?: Readonly<AdaptiveIconResourceOptions>, errstream?: NodeJS.WritableStream): Promise<RunPlatformResult | undefined> {
+export async function safelyGenerateAdaptiveIconResources(platform: Platform, resourcesDirectory: string, options: Readonly<AdaptiveIconResourceOptions> | undefined, errstream: NodeJS.WritableStream | null): Promise<RunPlatformResult | undefined> {
   if (!options || platform !== Platform.ANDROID) {
     return;
   }
@@ -218,7 +218,7 @@ export async function safelyGenerateAdaptiveIconResources(platform: Platform, re
 /**
  * Generate Android Adaptive Icons.
  */
-export async function generateAdaptiveIconResources(resourcesDirectory: string, options: Readonly<AdaptiveIconResourceOptions>, errstream?: NodeJS.WritableStream): Promise<RunPlatformResult> {
+export async function generateAdaptiveIconResources(resourcesDirectory: string, options: Readonly<AdaptiveIconResourceOptions>, errstream: NodeJS.WritableStream | null): Promise<RunPlatformResult> {
   if (options.foreground.sources.length === 0 || options.background.sources.length === 0) {
     throw new BadInputError('Adaptive icons require sources for both foreground and background.');
   }
@@ -271,7 +271,7 @@ export async function consolidateAdaptiveIconResources(foregrounds: readonly Gen
 /**
  * Generate the foreground of Adaptive Icons.
  */
-export async function generateAdaptiveIconResourcesPortion(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, sources: readonly (string | ImageSource)[], transform: TransformFunction = (image, pipeline) => pipeline, errstream?: NodeJS.WritableStream): Promise<SimpleResourceResult> {
+export async function generateAdaptiveIconResourcesPortion(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, sources: readonly (string | ImageSource)[], transform: TransformFunction = (image, pipeline) => pipeline, errstream: NodeJS.WritableStream | null): Promise<SimpleResourceResult> {
   const source = await resolveSourceImage(Platform.ANDROID, ResourceType.ADAPTIVE_ICON, sources.map(s => imageSourceToPath(s)), errstream);
 
   return {
@@ -280,7 +280,7 @@ export async function generateAdaptiveIconResourcesPortion(resourcesDirectory: s
   };
 }
 
-export async function generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, source: ResolvedImageSource, transform: TransformFunction = (image, pipeline) => pipeline, errstream?: NodeJS.WritableStream): Promise<GeneratedResource[]> {
+export async function generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, source: ResolvedImageSource, transform: TransformFunction = (image, pipeline) => pipeline, errstream: NodeJS.WritableStream | null): Promise<GeneratedResource[]> {
   debug('Using %O for %s source image for %s', source.image.src, ResourceType.ADAPTIVE_ICON, Platform.ANDROID);
 
   const config = getResourcesConfig(Platform.ANDROID, ResourceType.ADAPTIVE_ICON);
@@ -302,7 +302,7 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(resour
   return resources;
 }
 
-export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<ResourceKeyValues, ResourceKey>, image: ImageSourceData, schema: ResourceKeyValues & ImageSchema, transform: TransformFunction = (image, pipeline) => pipeline, errstream?: NodeJS.WritableStream): Promise<GeneratedResource> {
+export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<ResourceKeyValues, ResourceKey>, image: ImageSourceData, schema: ResourceKeyValues & ImageSchema, transform: TransformFunction = (image, pipeline) => pipeline, errstream: NodeJS.WritableStream | null): Promise<GeneratedResource> {
   const { pipeline, metadata } = image;
   const { src, format, width, height } = schema;
   const { nodeName, nodeAttributes, indexAttribute, includedResources } = config.configXml;
@@ -336,13 +336,13 @@ export function imageSourceToPath(source: string | ImageSource): string {
   return typeof source === 'string' ? source : source.src;
 }
 
-export async function resolveSource(platform: Platform, type: ResourceType, name: string, sources: readonly (string | ImageSource | ColorSource)[], errstream?: NodeJS.WritableStream): Promise<ResolvedSource> {
+export async function resolveSource(platform: Platform, type: ResourceType, name: string, sources: readonly (string | ImageSource | ColorSource)[], errstream: NodeJS.WritableStream | null): Promise<ResolvedSource> {
   for (const source of sources) {
     if (typeof source === 'string' || source.type === SourceType.RASTER) {
       const src = imageSourceToPath(source);
 
       try {
-        return await readSourceImage(platform, type, src);
+        return await readSourceImage(platform, type, src, errstream);
       } catch (e) {
         debugSourceImage(src, e, errstream);
       }

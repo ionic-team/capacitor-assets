@@ -37,12 +37,12 @@ describe('cordova-res', () => {
 
         const result = await platform.run(Platform.ANDROID, 'resources', {
           [ResourceType.ICON]: { sources: ['icon.png'] },
-        });
+        }, null);
 
         const generatedImages = getResourcesConfig(Platform.ANDROID, ResourceType.ICON).resources;
 
         expect(imageMock.resolveSourceImage).toHaveBeenCalledTimes(1);
-        expect(imageMock.resolveSourceImage).toHaveBeenCalledWith('android', 'icon', ['icon.png'], undefined);
+        expect(imageMock.resolveSourceImage).toHaveBeenCalledWith('android', 'icon', ['icon.png'], null);
         expect(imageMock.generateImage).toHaveBeenCalledTimes(generatedImages.length);
 
         for (const generatedImage of generatedImages) {
@@ -55,7 +55,7 @@ describe('cordova-res', () => {
             },
             expect.anything(),
             expect.anything(),
-            undefined
+            null
           );
         }
 
@@ -68,12 +68,12 @@ describe('cordova-res', () => {
 
         const result = await platform.run(Platform.WINDOWS, 'resources', {
           [ResourceType.ICON]: { sources: ['icon.png'] },
-        });
+        }, null);
 
         const generatedImages = getResourcesConfig(Platform.WINDOWS, ResourceType.ICON).resources;
 
         expect(imageMock.resolveSourceImage).toHaveBeenCalledTimes(1);
-        expect(imageMock.resolveSourceImage).toHaveBeenCalledWith('windows', 'icon', ['icon.png'], undefined);
+        expect(imageMock.resolveSourceImage).toHaveBeenCalledWith('windows', 'icon', ['icon.png'], null);
         expect(imageMock.generateImage).toHaveBeenCalledTimes(generatedImages.length);
 
         for (const generatedImage of generatedImages) {
@@ -86,7 +86,7 @@ describe('cordova-res', () => {
               },
               expect.anything(),
               expect.anything(),
-              undefined
+              null
           );
         }
 

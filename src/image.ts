@@ -14,7 +14,7 @@ export type SharpTransformation = (pipeline: Sharp) => Sharp;
 /**
  * Check an array of source files, returning the first viable image.
  */
-export async function resolveSourceImage(platform: Platform, type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
+export async function resolveSourceImage(platform: Platform, type: ResourceType, sources: string[], errstream: NodeJS.WritableStream | null): Promise<ResolvedImageSource> {
   const errors: [string, NodeJS.ErrnoException][] = [];
 
   for (const source of sources) {
@@ -35,7 +35,7 @@ export async function resolveSourceImage(platform: Platform, type: ResourceType,
   );
 }
 
-export async function readSourceImage(platform: Platform, type: ResourceType, src: string, errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
+export async function readSourceImage(platform: Platform, type: ResourceType, src: string, errstream: NodeJS.WritableStream | null): Promise<ResolvedImageSource> {
   const image = sharp(await readFile(src));
   const metadata = await validateResource(platform, type, src, image, errstream);
 
@@ -50,15 +50,12 @@ export async function readSourceImage(platform: Platform, type: ResourceType, sr
   };
 }
 
-export function debugSourceImage(src: string, error: NodeJS.ErrnoException, errstream?: NodeJS.WritableStream): void {
+export function debugSourceImage(src: string, error: NodeJS.ErrnoException, errstream: NodeJS.WritableStream | null): void {
   if (error.code === 'ENOENT') {
     debug('Source file missing: %s', src);
   } else {
-    if (errstream) {
-      errstream.write(util.format('WARN:\tError with source file %s: %s', src, error) + '\n');
-    } else {
-      debug('Error with source file %s: %O', src, error);
-    }
+    errstream?.write(util.format('WARN:\tError with source file %s: %s', src, error) + '\n');
+    debug('Error with source file %s: %O', src, error);
   }
 }
 
@@ -69,7 +66,7 @@ export interface ImageSchema {
   height: number;
 }
 
-export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, errstream?: NodeJS.WritableStream): Promise<void> {
+export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, errstream: NodeJS.WritableStream | null): Promise<void> {
   if (image.format === Format.NONE) {
     debug('Skipping generation of %o (format=none)', image.src);
     return;
@@ -77,10 +74,8 @@ export async function generateImage(image: ImageSchema, src: Sharp, metadata: Me
 
   debug('Generating %o (%ox%o)', image.src, image.width, image.height);
 
-  if (errstream) {
-    if (metadata.format !== image.format) {
-      errstream.write(util.format(`WARN:\tMust perform conversion from %s to png.`, metadata.format) + '\n');
-    }
+  if (metadata.format !== image.format) {
+    errstream?.write(util.format(`WARN:\tMust perform conversion from %s to png.`, metadata.format) + '\n');
   }
 
   const transformations = [createImageResizer(image), createImageConverter(image.format)];

@@ -14,7 +14,7 @@ export function getConfigPath(directory: string): string {
   return pathlib.resolve(directory, 'config.xml');
 }
 
-export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: readonly ResolvedSource[], resources: readonly GeneratedResource[], errstream?: NodeJS.WritableStream): Promise<void> {
+export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: readonly ResolvedSource[], resources: readonly GeneratedResource[], errstream: NodeJS.WritableStream | null): Promise<void> {
   const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
 
   if (colors.length > 0) {
@@ -71,15 +71,15 @@ export async function runColorsConfig(colorsPath: string, colors: readonly Resol
   await write(colorsPath, colorsDocument);
 }
 
-export function runConfig(configPath: string, doc: et.ElementTree, resources: readonly GeneratedResource[], errstream?: NodeJS.WritableStream): void {
+export function runConfig(configPath: string, doc: et.ElementTree, resources: readonly GeneratedResource[], errstream: NodeJS.WritableStream | null): void {
   const root = doc.getroot();
   const orientationPreference = getPreference(root, 'Orientation');
   debug('Orientation preference: %O', orientationPreference);
 
   const orientation = orientationPreference || 'default';
 
-  if (orientation !== 'default' && errstream) {
-    errstream.write(util.format(`WARN:\tOrientation preference set to '%s'. Only configuring %s resources.`, orientation, orientation) + '\n');
+  if (orientation !== 'default') {
+    errstream?.write(util.format(`WARN:\tOrientation preference set to '%s'. Only configuring %s resources.`, orientation, orientation) + '\n');
   }
 
   const platforms = groupImages(resources);
