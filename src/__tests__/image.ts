@@ -9,7 +9,7 @@ describe('cordova-res', () => {
 
       let image: typeof import('../image');
       let fsMock: { [key: string]: jest.Mock };
-      let resourcesMock: { RASTER_RESOURCE_VALIDATORS: { [key: string]: jest.Mock } };
+      let resourcesMock: { validateResource: jest.Mock };
 
       beforeEach(async () => {
         jest.resetModules();
@@ -19,11 +19,7 @@ describe('cordova-res', () => {
           writeFile: jest.fn(),
         };
 
-        resourcesMock = {
-          RASTER_RESOURCE_VALIDATORS: {
-            [ResourceType.ICON]: jest.fn(),
-          },
-        };
+        resourcesMock = { validateResource: jest.fn() };
 
         jest.mock('@ionic/utils-fs', () => fsMock);
         jest.mock('../resources', () => resourcesMock);
@@ -48,7 +44,7 @@ describe('cordova-res', () => {
         const { src } = await image.resolveSourceImage(Platform.ANDROID, ResourceType.ICON, ['foo.png', 'bar.png']);
         expect(src).toEqual('bar.png');
         expect(fsMock.readFile).toHaveBeenCalledTimes(2);
-        expect(resourcesMock.RASTER_RESOURCE_VALIDATORS[ResourceType.ICON]).toHaveBeenCalledTimes(1);
+        expect(resourcesMock.validateResource).toHaveBeenCalledTimes(1);
       });
 
     });

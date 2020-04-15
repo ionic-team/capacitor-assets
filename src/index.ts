@@ -63,7 +63,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
       debug('File missing/not writable: %O', configPath);
 
       if (errstream) {
-        errstream.write(`WARN: No config.xml file in directory. Skipping config.\n`);
+        errstream.write(`WARN:\tNo config.xml file in directory. Skipping config.\n`);
       }
     }
   }

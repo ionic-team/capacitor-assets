@@ -1,7 +1,8 @@
 import { Metadata, Sharp } from 'sharp';
+import util from 'util';
 
 import { BadInputError, ValidationError, ValidationErrorCode } from './error';
-import { Platform } from './platform';
+import { Platform, prettyPlatform } from './platform';
 
 export const DEFAULT_RESOURCES_DIRECTORY = 'resources';
 
@@ -82,8 +83,6 @@ export type ResolvedSource = ResolvedImageSource | ResolvedColorSource;
 export const RESOURCE_FORMATS: readonly Format[] = [Format.JPEG, Format.PNG];
 export const RESOURCE_RASTER_FORMATS: readonly Format[] = [Format.JPEG, Format.PNG];
 
-export type ResourceValidator = (source: string, pipeline: Sharp) => Promise<Metadata>;
-
 export function isResourceFormat(format: any): format is Format {
   return RESOURCE_FORMATS.includes(format);
 }
@@ -92,11 +91,14 @@ export function isRasterResourceFormat(format: any): format is Format {
   return RESOURCE_RASTER_FORMATS.includes(format);
 }
 
-async function rasterResourceValidator(type: ResourceType, source: string, pipeline: Sharp, dimensions: [number, number]): Promise<Metadata> {
-  const metadata = await pipeline.metadata();
+export interface RasterResourceSchema {
+  width: number;
+  height: number;
+}
 
+export async function validateRasterResource(platform: Platform, type: ResourceType, source: string, metadata: Metadata, schema: RasterResourceSchema): Promise<void> {
   const { format, width, height } = metadata;
-  const [ requiredWidth, requiredHeight ] = dimensions;
+  const { width: requiredWidth, height: requiredHeight } = schema;
 
   if (!format || !isRasterResourceFormat(format)) {
     throw new ValidationError(`The format for source image of type "${type}" must be one of: (${RESOURCE_RASTER_FORMATS.join(', ')}) (image format is "${format}").`, {
@@ -119,17 +121,46 @@ async function rasterResourceValidator(type: ResourceType, source: string, pipel
       requiredHeight,
     });
   }
-
-  return metadata;
 }
 
 export const COLOR_REGEX = /^\#[A-F0-9]{6}$/;
 
-export const RASTER_RESOURCE_VALIDATORS: { readonly [T in ResourceType]: ResourceValidator; } = {
-  [ResourceType.ADAPTIVE_ICON]: async (source, pipeline) => rasterResourceValidator(ResourceType.ADAPTIVE_ICON, source, pipeline, [432, 432]),
-  [ResourceType.ICON]: async (source, pipeline) => rasterResourceValidator(ResourceType.ICON, source, pipeline, [1024, 1024]),
-  [ResourceType.SPLASH]: async (source, pipeline) => rasterResourceValidator(ResourceType.SPLASH, source, pipeline, [2732, 2732]),
-};
+export function getRasterResourceSchema(platform: Platform, type: ResourceType): RasterResourceSchema {
+  switch (type) {
+    case ResourceType.ADAPTIVE_ICON:
+      return { width: 432, height: 432 };
+    case ResourceType.ICON:
+      return { width: 1024, height: 1024 };
+    case ResourceType.SPLASH:
+      return { width: 2732, height: 2732 };
+  }
+}
+
+export async function validateResource(platform: Platform, type: ResourceType, source: string, pipeline: Sharp, errstream?: NodeJS.WritableStream): Promise<Metadata> {
+  const metadata = await pipeline.metadata();
+
+  const schema = getRasterResourceSchema(platform, type);
+  await validateRasterResource(platform, type, source, metadata, schema);
+
+  if (errstream) {
+    if (platform === Platform.IOS && type === ResourceType.ICON) {
+      if (metadata.hasAlpha) {
+        // @see https://github.com/ionic-team/cordova-res/issues/94
+        errstream.write(util.format(
+          (
+            'WARN:\tSource icon %s contains alpha channel, generated icons for %s will not.\n\n' +
+            '\tApple recommends avoiding transparency. See the App Icon Human Interface Guidelines[1] for details. Any transparency in your icon will be filled in with white.\n\n' +
+            '\t[1]: https://developer.apple.com/design/human-interface-guidelines/ios/icons-and-images/app-icon/\n'
+          ),
+          source,
+          prettyPlatform(platform)
+        ) + '\n');
+      }
+    }
+  }
+
+  return metadata;
+}
 
 export const enum Format {
   NONE = 'none',

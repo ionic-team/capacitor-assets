@@ -1,6 +1,7 @@
 import { ensureDir } from '@ionic/utils-fs';
 import Debug from 'debug';
 import pathlib from 'path';
+import { Sharp } from 'sharp';
 
 import { BadInputError, ResolveSourceImageError } from './error';
 import { ImageSchema, debugSourceImage, generateImage, readSourceImage, resolveSourceImage } from './image';
@@ -27,12 +28,24 @@ export interface GeneratedResource extends ResourceKeyValues {
   };
 }
 
-export interface SimpleResourceOptions {
+export type TransformFunction = (image: ImageSchema, pipeline: Sharp) => Sharp;
+
+export interface ResourceOptions<S> {
   /**
-   * Paths to source images to use for this resource.
+   * Represents the sources to use for this resource.
+   *
+   * Usually, this is a file path or {@link ImageSource}. In the case of
+   * Android Adaptive Icons, this may be a {@link ColorSource}.
    */
-  sources: (string | ImageSource)[];
+  readonly sources: readonly S[];
+
+  /**
+   * Additional image transformations to apply.
+   */
+  readonly transform?: TransformFunction;
 }
+
+export type SimpleResourceOptions = ResourceOptions<string | ImageSource>;
 
 export interface SimpleResourceResult {
   resources: GeneratedResource[];
@@ -56,13 +69,7 @@ export interface AdaptiveIconResourceOptions {
   /**
    * Options for the background portion of adaptive icons.
    */
-  background: {
-
-    /**
-     * Paths to source images or colors to use for this resource.
-     */
-    sources: (string | ImageSource | ColorSource)[];
-  };
+  background: ResourceOptions<string | ImageSource | ColorSource>;
 }
 
 export interface RunPlatformOptions {
@@ -157,7 +164,7 @@ export async function generateSimpleResources(type: ResourceType.ICON | Resource
   const resources = await Promise.all(config.resources.map(
     async (resource): Promise<GeneratedResource> => ({
       ...resource,
-      ...await generateImageResource(type, platform, resourcesDirectory, config, source.image, resource, errstream),
+      ...await generateImageResource(type, platform, resourcesDirectory, config, source.image, resource, getResourceTransformFunction(platform, type, options), errstream),
     })
   ));
 
@@ -165,6 +172,25 @@ export async function generateSimpleResources(type: ResourceType.ICON | Resource
     resources,
     source,
   };
+}
+
+export function getResourceTransformFunction(platform: Platform, type: ResourceType, { transform = (image, pipeline) => pipeline }: Readonly<SimpleResourceOptions>): TransformFunction {
+  const transforms = [transform];
+
+  if (platform === Platform.IOS && type === ResourceType.ICON) {
+    // Automatically remove the alpha channel for iOS icons. If alpha channels
+    // exist in iOS icons when uploaded to the App Store, the app may be
+    // rejected referencing ITMS-90717.
+    //
+    // @see https://github.com/ionic-team/cordova-res/issues/94
+    transforms.push((image, pipeline) => pipeline.flatten({ background: { r: 255, g: 255, b: 255 } }));
+  }
+
+  return combineTransformFunctions(transforms);
+}
+
+export function combineTransformFunctions(transformations: readonly TransformFunction[]): TransformFunction {
+  return transformations.reduce((acc, transformation) => (image, pipeline) => transformation(image, acc(image, pipeline)));
 }
 
 /**
@@ -200,10 +226,10 @@ export async function generateAdaptiveIconResources(resourcesDirectory: string, 
   debug('Building %s resources', ResourceType.ADAPTIVE_ICON);
 
   const { resources: iconResources = [], source: iconSource } = (await safelyGenerateSimpleResources(ResourceType.ICON, Platform.ANDROID, resourcesDirectory, options.icon, errstream)) || { source: undefined };
-  const { resources: foregroundResources, source: foregroundSource } = await generateAdaptiveIconResourcesPortion(resourcesDirectory, ResourceKey.FOREGROUND, options.foreground.sources, errstream);
+  const { resources: foregroundResources, source: foregroundSource } = await generateAdaptiveIconResourcesPortion(resourcesDirectory, ResourceKey.FOREGROUND, options.foreground.sources, options.foreground.transform, errstream);
   const resolvedBackgroundSource = await resolveSource(Platform.ANDROID, ResourceType.ADAPTIVE_ICON, ResourceKey.BACKGROUND, options.background.sources, errstream);
   const backgroundResources = resolvedBackgroundSource.type === SourceType.RASTER
-    ? await generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory, ResourceKey.BACKGROUND, resolvedBackgroundSource, errstream)
+    ? await generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory, ResourceKey.BACKGROUND, resolvedBackgroundSource, options.background.transform, errstream)
     : foregroundResources.map(resource => ({ ...resource, src: '@color/background' }));
 
   const resources = await consolidateAdaptiveIconResources(foregroundResources, backgroundResources);
@@ -245,16 +271,16 @@ export async function consolidateAdaptiveIconResources(foregrounds: readonly Gen
 /**
  * Generate the foreground of Adaptive Icons.
  */
-export async function generateAdaptiveIconResourcesPortion(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, sources: (string | ImageSource)[], errstream?: NodeJS.WritableStream): Promise<SimpleResourceResult> {
+export async function generateAdaptiveIconResourcesPortion(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, sources: readonly (string | ImageSource)[], transform: TransformFunction = (image, pipeline) => pipeline, errstream?: NodeJS.WritableStream): Promise<SimpleResourceResult> {
   const source = await resolveSourceImage(Platform.ANDROID, ResourceType.ADAPTIVE_ICON, sources.map(s => imageSourceToPath(s)), errstream);
 
   return {
-    resources: await generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory, type, source, errstream),
+    resources: await generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory, type, source, transform, errstream),
     source,
   };
 }
 
-export async function generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, source: ResolvedImageSource, errstream?: NodeJS.WritableStream): Promise<GeneratedResource[]> {
+export async function generateAdaptiveIconResourcesPortionFromImageSource(resourcesDirectory: string, type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND, source: ResolvedImageSource, transform: TransformFunction = (image, pipeline) => pipeline, errstream?: NodeJS.WritableStream): Promise<GeneratedResource[]> {
   debug('Using %O for %s source image for %s', source.image.src, ResourceType.ADAPTIVE_ICON, Platform.ANDROID);
 
   const config = getResourcesConfig(Platform.ANDROID, ResourceType.ADAPTIVE_ICON);
@@ -268,6 +294,7 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(resour
       config,
       source.image,
       { ...resource, src: resource[type] },
+      transform,
       errstream
     ),
   })));
@@ -275,7 +302,7 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(resour
   return resources;
 }
 
-export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<ResourceKeyValues, ResourceKey>, image: ImageSourceData, schema: ResourceKeyValues & ImageSchema, errstream?: NodeJS.WritableStream): Promise<GeneratedResource> {
+export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<ResourceKeyValues, ResourceKey>, image: ImageSourceData, schema: ResourceKeyValues & ImageSchema, transform: TransformFunction = (image, pipeline) => pipeline, errstream?: NodeJS.WritableStream): Promise<GeneratedResource> {
   const { pipeline, metadata } = image;
   const { src, format, width, height } = schema;
   const { nodeName, nodeAttributes, indexAttribute, includedResources } = config.configXml;
@@ -285,7 +312,9 @@ export async function generateImageResource(type: ResourceType, platform: Platfo
   const dest = pathlib.join(resourcesDirectory, src);
 
   await ensureDir(pathlib.dirname(dest));
-  await generateImage({ src: dest, format, width, height }, pipeline.clone(), metadata, errstream);
+
+  const generatedImage: ImageSchema = { src: dest, format, width, height };
+  await generateImage(generatedImage, transform(generatedImage, pipeline.clone()), metadata, errstream);
 
   return {
     type,

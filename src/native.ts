@@ -193,7 +193,7 @@ export async function copyToNativeProject(platform: Platform, nativeProject: Nat
     logstream.write(util.format(`Copied %s resource items to %s`, ANDROID_ICONS.length + ANDROID_SPLASHES.length, prettyPlatform(platform)) + '\n');
   } else {
     if (errstream) {
-      errstream.write(util.format('WARN: Copying to native projects is not supported for %s', prettyPlatform(platform)) + '\n');
+      errstream.write(util.format('WARN:\tCopying to native projects is not supported for %s', prettyPlatform(platform)) + '\n');
     }
   }
 }

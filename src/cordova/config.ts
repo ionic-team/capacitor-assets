@@ -79,7 +79,7 @@ export function runConfig(configPath: string, doc: et.ElementTree, resources: re
   const orientation = orientationPreference || 'default';
 
   if (orientation !== 'default' && errstream) {
-    errstream.write(util.format(`WARN: Orientation preference set to '%s'. Only configuring %s resources.`, orientation, orientation) + '\n');
+    errstream.write(util.format(`WARN:\tOrientation preference set to '%s'. Only configuring %s resources.`, orientation, orientation) + '\n');
   }
 
   const platforms = groupImages(resources);
