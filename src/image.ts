@@ -69,11 +69,12 @@ export interface ImageSchema {
 }
 
 export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, errstream?: NodeJS.WritableStream): Promise<void> {
-  debug('Generating %o (%ox%o)', image.src, image.width, image.height);
-
   if (image.format === Format.NONE) {
+    debug('Skipping generation of %o (format=none)', image.src);
     return;
   }
+
+  debug('Generating %o (%ox%o)', image.src, image.width, image.height);
 
   if (errstream) {
     if (metadata.format !== image.format) {
