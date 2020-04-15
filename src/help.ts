@@ -40,7 +40,7 @@ const help = `
     --android-project <path> ............. Use specified directory for Android native project (default: 'android')
 
     -h, --help ........................... Print help for the platform, then quit
-    --version ............................ Print version, then quit
+    -v, --version ........................ Print version, then quit
     --verbose ............................ Print verbose output to stderr
 `;
 

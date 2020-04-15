@@ -5,14 +5,16 @@ import util from 'util';
 
 import { ResolveSourceImageError, ValidationError } from './error';
 import { Platform } from './platform';
-import { Format, RASTER_RESOURCE_VALIDATORS, ResolvedImageSource, ResourceType, SourceType } from './resources';
+import { Format, ResolvedImageSource, ResourceType, SourceType, validateResource } from './resources';
 
 const debug = Debug('cordova-res:image');
+
+export type SharpTransformation = (pipeline: Sharp) => Sharp;
 
 /**
  * Check an array of source files, returning the first viable image.
  */
-export async function resolveSourceImage(platform: Platform, type: ResourceType, sources: string[], errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
+export async function resolveSourceImage(platform: Platform, type: ResourceType, sources: string[], errstream: NodeJS.WritableStream | null): Promise<ResolvedImageSource> {
   const errors: [string, NodeJS.ErrnoException][] = [];
 
   for (const source of sources) {
@@ -33,9 +35,9 @@ export async function resolveSourceImage(platform: Platform, type: ResourceType,
   );
 }
 
-export async function readSourceImage(platform: Platform, type: ResourceType, src: string, errstream?: NodeJS.WritableStream): Promise<ResolvedImageSource> {
+export async function readSourceImage(platform: Platform, type: ResourceType, src: string, errstream: NodeJS.WritableStream | null): Promise<ResolvedImageSource> {
   const image = sharp(await readFile(src));
-  const metadata = await RASTER_RESOURCE_VALIDATORS[type](src, image);
+  const metadata = await validateResource(platform, type, src, image, errstream);
 
   debug('Source image for %s: %O', type, metadata);
 
@@ -48,16 +50,12 @@ export async function readSourceImage(platform: Platform, type: ResourceType, sr
   };
 }
 
-export function debugSourceImage(src: string, error: NodeJS.ErrnoException, errstream?: NodeJS.WritableStream): void {
+export function debugSourceImage(src: string, error: NodeJS.ErrnoException, errstream: NodeJS.WritableStream | null): void {
   if (error.code === 'ENOENT') {
     debug('Source file missing: %s', src);
   } else {
-    if (errstream) {
-      const message = util.format('WARN: Error with source file %s: %s', src, error);
-      errstream.write(`${message}\n`);
-    } else {
-      debug('Error with source file %s: %O', src, error);
-    }
+    errstream?.write(util.format('WARN:\tError with source file %s: %s', src, error) + '\n');
+    debug('Error with source file %s: %O', src, error);
   }
 }
 
@@ -68,35 +66,41 @@ export interface ImageSchema {
   height: number;
 }
 
-export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, errstream?: NodeJS.WritableStream): Promise<void> {
-  debug('Generating %o (%ox%o)', image.src, image.width, image.height);
-
+export async function generateImage(image: ImageSchema, src: Sharp, metadata: Metadata, errstream: NodeJS.WritableStream | null): Promise<void> {
   if (image.format === Format.NONE) {
+    debug('Skipping generation of %o (format=none)', image.src);
     return;
   }
 
-  if (errstream) {
-    if (metadata.format !== image.format) {
-      errstream.write(`WARN: Must perform conversion from ${metadata.format} to png.\n`);
-    }
+  debug('Generating %o (%ox%o)', image.src, image.width, image.height);
+
+  if (metadata.format !== image.format) {
+    errstream?.write(util.format(`WARN:\tMust perform conversion from %s to png.`, metadata.format) + '\n');
   }
 
-  const pipeline = applyFormatConversion(image.format, transformImage(image, src));
+  const transformations = [createImageResizer(image), createImageConverter(image.format)];
+  const pipeline = applyTransformations(src, transformations);
 
   await writeFile(image.src, await pipeline.toBuffer());
 }
 
-export function transformImage(image: ImageSchema, src: Sharp): Sharp {
-  return src.resize(image.width, image.height);
+export function applyTransformations(src: Sharp, transformations: readonly SharpTransformation[]): Sharp {
+  return transformations.reduce((pipeline, transformation) => transformation(pipeline), src);
 }
 
-export function applyFormatConversion(format: Format, src: Sharp): Sharp {
-  switch (format) {
-    case Format.PNG:
-      return src.png();
-    case Format.JPEG:
-      return src.jpeg();
-  }
+export function createImageResizer(image: ImageSchema): SharpTransformation {
+  return src => src.resize(image.width, image.height);
+}
 
-  return src;
+export function createImageConverter(format: Format): SharpTransformation {
+  return src => {
+    switch (format) {
+      case Format.PNG:
+        return src.png();
+      case Format.JPEG:
+        return src.jpeg();
+    }
+
+    return src;
+  };
 }

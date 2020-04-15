@@ -1,7 +1,7 @@
 import et from 'elementtree';
 
 import type { NativeProjectConfigByPlatform, Options, PlatformOptions } from '.';
-import { getPlatforms } from './config';
+import { getPlatforms } from './cordova/config';
 import { BadInputError } from './error';
 import { NativeProjectConfig } from './native';
 import { AdaptiveIconResourceOptions, PLATFORMS, Platform, RunPlatformOptions, SimpleResourceOptions, filterSupportedPlatforms, validatePlatforms } from './platform';
@@ -127,6 +127,7 @@ export function parseAdaptiveIconBackgroundOptions(resourcesDirectory: string, a
 
 export function parseSimpleResourceOptions(platform: Platform, type: ResourceType.ICON | ResourceType.SPLASH, resourcesDirectory: string, args: readonly string[]): SimpleResourceOptions {
   const source = parseSourceFromArgs(type, args);
+
   return { sources: source ? [source] : getDefaultSources(platform, type, resourcesDirectory) };
 }
 

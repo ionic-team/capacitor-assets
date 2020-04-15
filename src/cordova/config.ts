@@ -2,18 +2,19 @@ import { ensureDir, readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
 import et from 'elementtree';
 import pathlib from 'path';
+import util from 'util';
 
-import { BadInputError } from './error';
-import { GeneratedResource, Platform } from './platform';
-import { ResolvedColorSource, ResolvedSource, ResourceNodeAttribute, ResourceNodeAttributeType, SourceType } from './resources';
+import { BadInputError } from '../error';
+import { GeneratedResource, Platform } from '../platform';
+import { ResolvedColorSource, ResolvedSource, ResourceNodeAttribute, ResourceNodeAttributeType, SourceType } from '../resources';
 
-const debug = Debug('cordova-res:config');
+const debug = Debug('cordova-res:cordova:config');
 
 export function getConfigPath(directory: string): string {
   return pathlib.resolve(directory, 'config.xml');
 }
 
-export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: readonly ResolvedSource[], resources: readonly GeneratedResource[], errstream?: NodeJS.WritableStream): Promise<void> {
+export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: readonly ResolvedSource[], resources: readonly GeneratedResource[], errstream: NodeJS.WritableStream | null): Promise<void> {
   const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
 
   if (colors.length > 0) {
@@ -70,25 +71,25 @@ export async function runColorsConfig(colorsPath: string, colors: readonly Resol
   await write(colorsPath, colorsDocument);
 }
 
-export function runConfig(configPath: string, doc: et.ElementTree, resources: readonly GeneratedResource[], errstream?: NodeJS.WritableStream): void {
+export function runConfig(configPath: string, doc: et.ElementTree, resources: readonly GeneratedResource[], errstream: NodeJS.WritableStream | null): void {
   const root = doc.getroot();
   const orientationPreference = getPreference(root, 'Orientation');
   debug('Orientation preference: %O', orientationPreference);
 
   const orientation = orientationPreference || 'default';
 
-  if (orientation !== 'default' && errstream) {
-    errstream.write(`WARN: Orientation preference set to '${orientation}'. Only configuring ${orientation} resources.\n`);
+  if (orientation !== 'default') {
+    errstream?.write(util.format(`WARN:\tOrientation preference set to '%s'. Only configuring %s resources.`, orientation, orientation) + '\n');
   }
 
   const platforms = groupImages(resources);
 
   for (const [ platform, platformResources ] of platforms) {
     const platformElement = resolvePlatformElement(root, platform);
-    let filteredResources = platformResources.filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation);
-    if (platform === Platform.WINDOWS) {
-      filteredResources = filteredResources.filter(img => typeof img.target === 'string');
-    }
+    const filteredResources = platformResources
+      .filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation)
+      .filter(img => img.configXml.included);
+
     for (const resource of filteredResources) {
       runResource(configPath, platformElement, resource);
     }
@@ -99,22 +100,27 @@ export function conformPath(configPath: string, value: string | number): string 
   return pathlib.relative(pathlib.dirname(configPath), value.toString()).replace(/\\/g, '/');
 }
 
-export function runResource(configPath: string, container: et.Element, resource: GeneratedResource): void {
-  const src = resource[resource.indexAttribute.key];
+export function resolveAttributeValue(configPath: string, attr: ResourceNodeAttribute, value: string | number): string {
+  return attr.type === ResourceNodeAttributeType.PATH ? conformPath(configPath, value) : value.toString();
+}
 
-  if (typeof src !== 'string') {
-    throw new BadInputError(`Bad value for index "${resource.indexAttribute.key}": ${src}`);
+export function runResource(configPath: string, container: et.Element, resource: GeneratedResource): void {
+  const { nodeName, nodeAttributes, indexAttribute } = resource.configXml;
+  const index = resource[indexAttribute.key];
+
+  if (typeof index !== 'string' && typeof index !== 'number') {
+    throw new BadInputError(`Bad value for index "${indexAttribute.key}": ${index}`);
   }
 
   // We force the use of forward slashes here to provide cross-platform
   // compatibility for paths.
-  const imgElement = resolveResourceElement(container, resource.nodeName, resource.indexAttribute, conformPath(configPath, src));
+  const imgElement = resolveResourceElement(container, nodeName, indexAttribute, conformPath(configPath, index));
 
-  for (const attr of resource.nodeAttributes) {
+  for (const attr of nodeAttributes) {
     const v = resource[attr.key];
 
     if (v) {
-      imgElement.set(attr.key, attr.type === ResourceNodeAttributeType.PATH ? conformPath(configPath, v) : v.toString());
+      imgElement.set(attr.key, resolveAttributeValue(configPath, attr, v));
     }
   }
 }
