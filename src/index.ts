@@ -9,7 +9,7 @@ import { getConfigPath, read as readConfig, run as runConfig, write as writeConf
 import { BaseError } from './error';
 import { NativeProjectConfig, copyToNativeProject } from './native';
 import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, prettyPlatform, run as runPlatform } from './platform';
-import { Density, Orientation, ResolvedSource, SourceType } from './resources';
+import { Density, Orientation, ResolvedSource, ResourceType, SourceType } from './resources';
 import { tryFn } from './utils/fn';
 
 const debug = Debug('cordova-res');
@@ -78,7 +78,9 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
       sources.push(...platformResult.sources);
 
       if (copy && nativeProject) {
-        await copyToNativeProject(platform, nativeProject, logstream, errstream);
+        const shouldCopyIcons = resources.findIndex(res => res.type === ResourceType.ICON || res.type === ResourceType.ADAPTIVE_ICON) !== -1;
+        const shouldCopySplash = resources.findIndex(res => res.type === ResourceType.SPLASH) !== -1;
+        await copyToNativeProject(platform, nativeProject, shouldCopyIcons, shouldCopySplash, logstream, errstream);
       }
     }
   }
