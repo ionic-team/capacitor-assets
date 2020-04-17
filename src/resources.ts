@@ -1,3 +1,4 @@
+import pathlib from 'path';
 import { Metadata, Sharp } from 'sharp';
 import util from 'util';
 
@@ -309,107 +310,109 @@ export function getResourcesConfig(platform: Platform, type: ResourceType): Reso
   return RESOURCES[platform][type];
 }
 
+export function generateScaledWindowsResourceSrc(src: string, factor: number): string {
+  const { dir, name, ext } = pathlib.parse(src);
+
+  return pathlib.join(dir, `${name}.scale-${factor * 100}${ext}`);
+}
+
+export function generateScaledWindowsResource(resource: ResourcesImageConfig, factor: number): ResourcesImageConfig {
+  return {
+    ...resource,
+    src: generateScaledWindowsResourceSrc(resource.src, factor),
+    format: Format.PNG,
+    target: undefined,
+    width: Math.round(resource.width * factor),
+    height: Math.round(resource.height * factor),
+  };
+}
+
+export function generateScaledWindowsResources(resource: ResourcesImageConfig, factors: readonly number[]): ResourcesImageConfig[] {
+  return factors.map(factor => generateScaledWindowsResource(resource, factor));
+}
+
+/**
+ * App Icon: App list in start menu, task bar, task manager
+ */
+const WINDOWS_SQUARE_44_X_44_ICON = { src: 'windows/icon/Square44x44Logo.png', format: Format.NONE, width: 44, height: 44, target: Target.SQUARE_44_X_44_LOGO } as const;
+
+/**
+ * Small tile: Start menu
+ */
+const WINDOWS_SQUARE_71_X_71_ICON = { src: 'windows/icon/SmallTile.png', format: Format.NONE, width: 71, height: 71, target: Target.SQUARE_71_X_71_LOGO } as const;
+
+/**
+ * Medium Tile: For Start menu, Microsoft Store listing
+ */
+const WINDOWS_SQUARE_150_X_150_ICON = { src: 'windows/icon/Square150x150Logo.png', format: Format.NONE, width: 150, height: 150, target: Target.SQUARE_150_X_150_LOGO } as const;
+
+/**
+ * Large Tile: Start Menu
+ */
+const WINDOWS_SQUARE_310_X_310_ICON = { src: 'windows/icon/Square310x310Logo.png', format: Format.NONE, width: 310, height: 310, target: Target.SQUARE_310_X_310_LOGO } as const;
+
+/**
+ * Wide Tile: Start Menu
+ */
+const WINDOWS_WIDE_310_X_150_LOGO = { src: 'windows/icon/Wide310x150Logo.png', format: Format.NONE, width: 310, height : 150, target: Target.WIDE_310_X_150_LOGO } as const;
+
+/**
+ * Store Logo: App installer, Partner Center, the "Report an app" option in the Store, the "Write a review" option in the Store
+ */
+const WINDOWS_STORE_LOGO = { src: 'windows/icon/StoreLogo.png', format: Format.NONE, width: 50, height: 50, target: Target.STORE_LOGO } as const;
+
+const WINDOWS_SPLASH_SCREEN = { src: 'windows/splash/Splash.png', format: Format.NONE, width: 620, height: 300, orientation: Orientation.LANDSCAPE, target: Target.SPLASH_SCREEN } as const;
+
+/**
+ * @see https://cordova.apache.org/docs/en/latest/config_ref/images.html#windows
+ * @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos
+ * @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos#icon-types-locations-and-scale-factors
+ */
 const WINDOWS_ICON_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey.SRC> = {
   resources: [
-    // @see https://cordova.apache.org/docs/en/latest/config_ref/images.html#windows
-    // @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos
-    // @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos#icon-types-locations-and-scale-factors
-
-    // App Icon: App list in start menu, task bar, task manager
-    { src: 'windows/icon/Square44x44Logo.png', format: Format.NONE, width: 44, height: 44, target: Target.SQUARE_44_X_44_LOGO },
-    { src: 'windows/icon/Square44x44Logo.scale-100.png', format: Format.PNG, width: 44, height: 44 },
-    { src: 'windows/icon/Square44x44Logo.scale-125.png', format: Format.PNG, width: 55, height: 55 },
-    { src: 'windows/icon/Square44x44Logo.scale-140.png', format: Format.PNG, width: 62, height: 62 },
-    { src: 'windows/icon/Square44x44Logo.scale-150.png', format: Format.PNG, width: 66, height: 66 },
-    { src: 'windows/icon/Square44x44Logo.scale-200.png', format: Format.PNG, width: 88, height: 88 },
-    { src: 'windows/icon/Square44x44Logo.scale-240.png', format: Format.PNG, width: 106, height: 106 },
-    { src: 'windows/icon/Square44x44Logo.scale-400.png', format: Format.PNG, width: 176, height: 176 },
-
-    // Small tile: Start menu
-    { src: 'windows/icon/SmallTile.png', format: Format.NONE, width: 71, height: 71, target: Target.SQUARE_71_X_71_LOGO },
-    { src: 'windows/icon/SmallTile.scale-100.png', format: Format.PNG, width: 71, height: 71 },
-    { src: 'windows/icon/SmallTile.scale-125.png', format: Format.PNG, width: 89, height: 89 },
-    { src: 'windows/icon/SmallTile.scale-140.png', format: Format.PNG, width: 99, height: 99 },
-    { src: 'windows/icon/SmallTile.scale-150.png', format: Format.PNG, width: 107, height: 107 },
-    { src: 'windows/icon/SmallTile.scale-200.png', format: Format.PNG, width: 142, height: 142 },
-    { src: 'windows/icon/SmallTile.scale-240.png', format: Format.PNG, width: 170, height: 170 },
-    { src: 'windows/icon/SmallTile.scale-400.png', format: Format.PNG, width: 284, height: 284 },
-
-    // Medium Tile: For Start menu, Microsoft Store listing
-    { src: 'windows/icon/Square150x150Logo.png', format: Format.NONE, width: 150, height: 150, target: Target.SQUARE_150_X_150_LOGO },
-    { src: 'windows/icon/Square150x150Logo.scale-100.png', format: Format.PNG, width: 150, height: 150 },
-    { src: 'windows/icon/Square150x150Logo.scale-125.png', format: Format.PNG, width: 188, height: 188 },
-    { src: 'windows/icon/Square150x150Logo.scale-140.png', format: Format.PNG, width: 210, height: 210 },
-    { src: 'windows/icon/Square150x150Logo.scale-150.png', format: Format.PNG, width: 225, height: 225 },
-    { src: 'windows/icon/Square150x150Logo.scale-200.png', format: Format.PNG, width: 300, height: 300 },
-    { src: 'windows/icon/Square150x150Logo.scale-240.png', format: Format.PNG, width: 360, height: 360 },
-    { src: 'windows/icon/Square150x150Logo.scale-400.png', format: Format.PNG, width: 600, height: 600 },
-
-    // Large Tile: Start Menu
-    { src: 'windows/icon/Square310x310Logo.png', format: Format.NONE, width: 310, height: 310, target: Target.SQUARE_310_X_310_LOGO },
-    { src: 'windows/icon/Square310x310Logo.scale-100.png', format: Format.PNG, width: 310, height: 310 },
-    { src: 'windows/icon/Square310x310Logo.scale-125.png', format: Format.PNG, width: 388, height: 388 },
-    { src: 'windows/icon/Square310x310Logo.scale-140.png', format: Format.PNG, width: 434, height: 434 },
-    { src: 'windows/icon/Square310x310Logo.scale-150.png', format: Format.PNG, width: 465, height: 465 },
-    { src: 'windows/icon/Square310x310Logo.scale-180.png', format: Format.PNG, width: 558, height: 558 },
-    { src: 'windows/icon/Square310x310Logo.scale-200.png', format: Format.PNG, width: 620, height: 620 },
-    { src: 'windows/icon/Square310x310Logo.scale-400.png', format: Format.PNG, width: 1240, height: 1240 },
-
-    // Wide Tile: Start Menu
-    { src: 'windows/icon/Wide310x150Logo.png', format: Format.NONE, width: 310, height : 150, target: Target.WIDE_310_X_150_LOGO },
-    { src: 'windows/icon/Wide310x150Logo.scale-80.png', format: Format.PNG, width: 248, height : 120 },
-    { src: 'windows/icon/Wide310x150Logo.scale-100.png', format: Format.PNG, width: 310, height : 150 },
-    { src: 'windows/icon/Wide310x150Logo.scale-125.png', format: Format.PNG, width: 388, height : 188 },
-    { src: 'windows/icon/Wide310x150Logo.scale-140.png', format: Format.PNG, width: 434, height : 210 },
-    { src: 'windows/icon/Wide310x150Logo.scale-150.png', format: Format.PNG, width: 465, height : 225 },
-    { src: 'windows/icon/Wide310x150Logo.scale-180.png', format: Format.PNG, width: 558, height : 270 },
-    { src: 'windows/icon/Wide310x150Logo.scale-200.png', format: Format.PNG, width: 620, height : 300 },
-    { src: 'windows/icon/Wide310x150Logo.scale-240.png', format: Format.PNG, width: 744, height : 360 },
-    { src: 'windows/icon/Wide310x150Logo.scale-400.png', format: Format.PNG, width: 1240, height : 600 },
-
-    // Store Logo: App installer, Partner Center, the "Report an app" option in the Store, the "Write a review" option in the Store
-    { src: 'windows/icon/StoreLogo.png', format: Format.NONE, width: 50, height: 50, target: Target.STORE_LOGO },
-    { src: 'windows/icon/StoreLogo.scale-100.png', format: Format.PNG, width: 50, height: 50 },
-    { src: 'windows/icon/StoreLogo.scale-125.png', format: Format.PNG, width: 63, height: 63 },
-    { src: 'windows/icon/StoreLogo.scale-140.png', format: Format.PNG, width: 70, height: 70 },
-    { src: 'windows/icon/StoreLogo.scale-150.png', format: Format.PNG, width: 75, height: 75 },
-    { src: 'windows/icon/StoreLogo.scale-180.png', format: Format.PNG, width: 90, height: 90 },
-    { src: 'windows/icon/StoreLogo.scale-200.png', format: Format.PNG, width: 100, height: 100 },
-    { src: 'windows/icon/StoreLogo.scale-240.png', format: Format.PNG, width: 120, height: 120 },
-    { src: 'windows/icon/StoreLogo.scale-400.png', format: Format.PNG, width: 200, height: 200 },
+    WINDOWS_SQUARE_44_X_44_ICON,
+    ...generateScaledWindowsResources(WINDOWS_SQUARE_44_X_44_ICON, [1, 1.25, 1.4, 1.5, 2, 2.4, 4]),
+    WINDOWS_SQUARE_71_X_71_ICON,
+    ...generateScaledWindowsResources(WINDOWS_SQUARE_71_X_71_ICON, [1, 1.25, 1.4, 1.5, 2, 2.4, 4]),
+    WINDOWS_SQUARE_150_X_150_ICON,
+    ...generateScaledWindowsResources(WINDOWS_SQUARE_150_X_150_ICON, [1, 1.25, 1.4, 1.5, 2, 2.4, 4]),
+    WINDOWS_SQUARE_310_X_310_ICON,
+    ...generateScaledWindowsResources(WINDOWS_SQUARE_310_X_310_ICON, [1, 1.25, 1.4, 1.5, 1.8, 2, 4]),
+    WINDOWS_WIDE_310_X_150_LOGO,
+    ...generateScaledWindowsResources(WINDOWS_WIDE_310_X_150_LOGO, [0.8, 1, 1.25, 1.4, 1.5, 1.8, 2, 2.4, 4]),
+    WINDOWS_STORE_LOGO,
+    ...generateScaledWindowsResources(WINDOWS_STORE_LOGO, [1, 1.25, 1.4, 1.5, 1.8, 2, 2.4, 4]),
   ],
   configXml: {
     nodeName: 'icon',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET],
     indexAttribute: NodeAttributes.SRC,
     includedResources: [
-      'windows/icon/Square44x44Logo.png',
-      'windows/icon/SmallTile.png',
-      'windows/icon/Square150x150Logo.png',
-      'windows/icon/Square310x310Logo.png',
-      'windows/icon/Wide310x150Logo.png',
-      'windows/icon/StoreLogo.png',
+      WINDOWS_SQUARE_44_X_44_ICON.src,
+      WINDOWS_SQUARE_71_X_71_ICON.src,
+      WINDOWS_SQUARE_150_X_150_ICON.src,
+      WINDOWS_SQUARE_310_X_310_ICON.src,
+      WINDOWS_WIDE_310_X_150_LOGO.src,
+      WINDOWS_STORE_LOGO.src,
     ],
   },
 };
 
+/**
+ * @see https://msdn.microsoft.com/en-us/windows/desktop/hh465338
+ * @see https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-splashscreen/index.html#windows-specific-information
+ */
 const WINDOWS_SPLASH_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey.SRC> = {
   resources: [
-    // @see https://msdn.microsoft.com/en-us/windows/desktop/hh465338
-    // @see https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-splashscreen/index.html#windows-specific-information
-    { src: 'windows/splash/Splash.png', format: Format.NONE, width: 620, height: 300, orientation: Orientation.LANDSCAPE, target: Target.SPLASH_SCREEN },
-    { src: 'windows/splash/Splash.scale-100.png', format: Format.PNG, width: 620, height: 300, orientation: Orientation.LANDSCAPE },
-    { src: 'windows/splash/Splash.scale-125.png', format: Format.PNG, width: 775, height: 375, orientation: Orientation.LANDSCAPE },
-    { src: 'windows/splash/Splash.scale-150.png', format: Format.PNG, width: 930, height: 450, orientation: Orientation.LANDSCAPE },
-    { src: 'windows/splash/Splash.scale-200.png', format: Format.PNG, width: 1240, height: 600, orientation: Orientation.LANDSCAPE },
-    { src: 'windows/splash/Splash.scale-400.png', format: Format.PNG, width: 2480, height: 1200, orientation: Orientation.LANDSCAPE },
+    WINDOWS_SPLASH_SCREEN,
+    ...generateScaledWindowsResources(WINDOWS_SPLASH_SCREEN, [1, 1.25, 1.5, 2, 4]),
   ],
   configXml: {
     nodeName: 'splash',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET],
     indexAttribute: NodeAttributes.SRC,
     includedResources: [
-      'windows/splash/Splash.png',
+      WINDOWS_SPLASH_SCREEN.src,
     ],
   },
 };
