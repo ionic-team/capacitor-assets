@@ -217,14 +217,21 @@ export interface ResourceKeyValues {
   readonly [ResourceKey.TARGET]?: string;
 }
 
-export type ResourcesImageConfig = (
+export type ImageResourceConfig = Required<Pick<ResourceKeyValues, ResourceKey.FORMAT | ResourceKey.WIDTH | ResourceKey.HEIGHT>>;
+export type AndroidAdaptiveIconConfig = ImageResourceConfig & Required<Pick<ResourceKeyValues, ResourceKey.FOREGROUND | ResourceKey.BACKGROUND | ResourceKey.DENSITY>>;
+export type AndroidIconConfig = ImageResourceConfig & Required<Pick<ResourceKeyValues, ResourceKey.SRC | ResourceKey.DENSITY>>;
+export type AndroidSplashConfig = ImageResourceConfig & Required<Pick<ResourceKeyValues, ResourceKey.SRC | ResourceKey.FORMAT | ResourceKey.WIDTH | ResourceKey.HEIGHT | ResourceKey.DENSITY | ResourceKey.ORIENTATION>>;
+export type IOSIconConfig = ImageResourceConfig & Required<Pick<ResourceKeyValues, ResourceKey.SRC>>;
+export type IOSSplashConfig = ImageResourceConfig & Required<Pick<ResourceKeyValues, ResourceKey.SRC | ResourceKey.ORIENTATION>>;
+
+export type WindowsIconConfig = (
   Required<Pick<ResourceKeyValues, ResourceKey.SRC | ResourceKey.FORMAT | ResourceKey.WIDTH | ResourceKey.HEIGHT>> &
-  Pick<ResourceKeyValues, ResourceKey.DENSITY | ResourceKey.ORIENTATION | ResourceKey.TARGET>
+  Pick<ResourceKeyValues, ResourceKey.TARGET>
 );
 
-export type AndroidAdaptiveIconConfig = (
-  Required<Pick<ResourceKeyValues, ResourceKey.FOREGROUND | ResourceKey.BACKGROUND | ResourceKey.FORMAT | ResourceKey.WIDTH | ResourceKey.HEIGHT>> &
-  Pick<ResourceKeyValues, ResourceKey.DENSITY>
+export type WindowsSplashConfig = (
+  Required<Pick<ResourceKeyValues, ResourceKey.SRC | ResourceKey.FORMAT | ResourceKey.WIDTH | ResourceKey.HEIGHT | ResourceKey.ORIENTATION>> &
+  Pick<ResourceKeyValues, ResourceKey.TARGET>
 );
 
 export const enum ResourceNodeAttributeType {
@@ -269,9 +276,6 @@ export interface ResourcesTypeConfig<C extends ResourceKeyValues, I extends Reso
   };
 }
 
-export type ResourcesPlatform = { readonly [T in ResourceType.ICON | ResourceType.SPLASH]: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey>; };
-export type ResourcesConfig = { readonly [P in Platform]: ResourcesPlatform; };
-
 export function validateResourceTypes(types: readonly string[]): ResourceType[] {
   const result: ResourceType[] = [];
 
@@ -301,13 +305,37 @@ const NodeAttributes = {
 } as const;
 
 export function getResourcesConfig(platform: Platform.ANDROID, type: ResourceType.ADAPTIVE_ICON): ResourcesTypeConfig<AndroidAdaptiveIconConfig, ResourceKey.DENSITY>;
-export function getResourcesConfig(platform: Platform, type: ResourceType): ResourcesTypeConfig<ResourcesImageConfig, ResourceKey>;
-export function getResourcesConfig(platform: Platform, type: ResourceType): ResourcesTypeConfig<ResourcesImageConfig, ResourceKey> | ResourcesTypeConfig<AndroidAdaptiveIconConfig, ResourceKey.DENSITY> {
-  if (type === ResourceType.ADAPTIVE_ICON) {
-    return ANDROID_ADAPTIVE_ICON_RESOURCES;
+export function getResourcesConfig(platform: Platform.ANDROID | Platform.IOS | Platform.WINDOWS, type: ResourceType.ICON | ResourceType.SPLASH): ResourcesTypeConfig<AndroidIconConfig | AndroidSplashConfig | IOSIconConfig | IOSSplashConfig | WindowsIconConfig | WindowsSplashConfig, ResourceKey>;
+export function getResourcesConfig(platform: Platform, type: ResourceType): ResourcesTypeConfig<ResourceKeyValues, ResourceKey> {
+  switch (platform) {
+    case Platform.ANDROID:
+      switch (type) {
+        case ResourceType.ADAPTIVE_ICON:
+          return ANDROID_ADAPTIVE_ICON_RESOURCES;
+        case ResourceType.ICON:
+          return ANDROID_ICON_RESOURCES;
+        case ResourceType.SPLASH:
+          return ANDROID_SPLASH_RESOURCES;
+      }
+    case Platform.IOS:
+      switch (type) {
+        case ResourceType.ICON:
+          return IOS_ICON_RESOURCES;
+        case ResourceType.SPLASH:
+          return IOS_SPLASH_RESOURCES;
+      }
+      break;
+    case Platform.WINDOWS:
+      switch (type) {
+        case ResourceType.ICON:
+          return WINDOWS_ICON_RESOURCES;
+        case ResourceType.SPLASH:
+          return WINDOWS_SPLASH_RESOURCES;
+      }
+      break;
   }
 
-  return RESOURCES[platform][type];
+  throw new BadInputError(`Unsupported platform/resource type combination: ${platform}/${type}`);
 }
 
 export function generateScaledWindowsResourceSrc(src: string, factor: number): string {
@@ -316,7 +344,7 @@ export function generateScaledWindowsResourceSrc(src: string, factor: number): s
   return pathlib.join(dir, `${name}.scale-${factor * 100}${ext}`);
 }
 
-export function generateScaledWindowsResource(resource: ResourcesImageConfig, factor: number): ResourcesImageConfig {
+export function generateScaledWindowsResource<T extends WindowsIconConfig | WindowsSplashConfig>(resource: T, factor: number): T {
   return {
     ...resource,
     src: generateScaledWindowsResourceSrc(resource.src, factor),
@@ -327,7 +355,7 @@ export function generateScaledWindowsResource(resource: ResourcesImageConfig, fa
   };
 }
 
-export function generateScaledWindowsResources(resource: ResourcesImageConfig, factors: readonly number[]): ResourcesImageConfig[] {
+export function generateScaledWindowsResources<T extends WindowsIconConfig | WindowsSplashConfig>(resource: T, factors: readonly number[]): T[] {
   return factors.map(factor => generateScaledWindowsResource(resource, factor));
 }
 
@@ -368,7 +396,7 @@ const WINDOWS_SPLASH_SCREEN = { src: 'windows/splash/Splash.png', format: Format
  * @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos
  * @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos#icon-types-locations-and-scale-factors
  */
-const WINDOWS_ICON_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey.SRC> = {
+const WINDOWS_ICON_RESOURCES: ResourcesTypeConfig<WindowsIconConfig, ResourceKey.SRC> = {
   resources: [
     WINDOWS_SQUARE_44_X_44_ICON,
     ...generateScaledWindowsResources(WINDOWS_SQUARE_44_X_44_ICON, [1, 1.25, 1.4, 1.5, 2, 2.4, 4]),
@@ -402,7 +430,7 @@ const WINDOWS_ICON_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, Resource
  * @see https://msdn.microsoft.com/en-us/windows/desktop/hh465338
  * @see https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-splashscreen/index.html#windows-specific-information
  */
-const WINDOWS_SPLASH_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey.SRC> = {
+const WINDOWS_SPLASH_RESOURCES: ResourcesTypeConfig<WindowsSplashConfig, ResourceKey.SRC> = {
   resources: [
     WINDOWS_SPLASH_SCREEN,
     ...generateScaledWindowsResources(WINDOWS_SPLASH_SCREEN, [1, 1.25, 1.5, 2, 4]),
@@ -441,7 +469,7 @@ const ANDROID_ADAPTIVE_ICON_RESOURCES: ResourcesTypeConfig<AndroidAdaptiveIconCo
   },
 };
 
-const ANDROID_ICON_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey.DENSITY> = {
+const ANDROID_ICON_RESOURCES: ResourcesTypeConfig<AndroidIconConfig, ResourceKey.DENSITY> = {
   resources: [
     { src: 'android/icon/drawable-ldpi-icon.png', format: Format.PNG, width: 36, height: 36, density: Density.LDPI },
     { src: 'android/icon/drawable-mdpi-icon.png', format: Format.PNG, width: 48, height: 48, density: Density.MDPI },
@@ -465,7 +493,7 @@ const ANDROID_ICON_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, Resource
   },
 };
 
-const ANDROID_SPLASH_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey.DENSITY> = {
+const ANDROID_SPLASH_RESOURCES: ResourcesTypeConfig<AndroidSplashConfig, ResourceKey.DENSITY> = {
   resources: [
     { src: 'android/splash/drawable-land-ldpi-screen.png', format: Format.PNG, width: 320, height: 240, density: Density.LAND_LDPI, orientation: Orientation.LANDSCAPE },
     { src: 'android/splash/drawable-land-mdpi-screen.png', format: Format.PNG, width: 480, height: 320, density: Density.LAND_MDPI, orientation: Orientation.LANDSCAPE },
@@ -503,7 +531,7 @@ const ANDROID_SPLASH_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, Resour
   },
 };
 
-const IOS_ICON_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey.SRC> = {
+const IOS_ICON_RESOURCES: ResourcesTypeConfig<IOSIconConfig, ResourceKey.SRC> = {
   resources: [
     { src: 'ios/icon/icon.png', format: Format.PNG, width: 57, height: 57 },
     { src: 'ios/icon/icon@2x.png', format: Format.PNG, width: 114, height: 114 },
@@ -577,7 +605,7 @@ const IOS_ICON_RESOURCES: ResourcesTypeConfig<ResourcesImageConfig, ResourceKey.
   },
 };
 
-const IOS_SPLASH_RESOURCES = {
+const IOS_SPLASH_RESOURCES: ResourcesTypeConfig<IOSSplashConfig, ResourceKey.SRC> = {
   resources: [
     { src: 'ios/splash/Default-568h@2x~iphone.png', format: Format.PNG, width: 640, height: 1136, orientation: Orientation.PORTRAIT },
     { src: 'ios/splash/Default-667h.png', format: Format.PNG, width: 750, height: 1334, orientation: Orientation.PORTRAIT },
@@ -597,7 +625,7 @@ const IOS_SPLASH_RESOURCES = {
     { src: 'ios/splash/Default-Portrait~ipad.png', format: Format.PNG, width: 768, height: 1024, orientation: Orientation.PORTRAIT },
     { src: 'ios/splash/Default@2x~iphone.png', format: Format.PNG, width: 640, height: 960, orientation: Orientation.PORTRAIT },
     { src: 'ios/splash/Default~iphone.png', format: Format.PNG, width: 320, height: 480, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default@2x~universal~anyany.png', format: Format.PNG, width: 2732, height: 2732 },
+    { src: 'ios/splash/Default@2x~universal~anyany.png', format: Format.PNG, width: 2732, height: 2732, orientation: Orientation.PORTRAIT },
   ],
   configXml: {
     nodeName: 'splash',
@@ -624,20 +652,5 @@ const IOS_SPLASH_RESOURCES = {
       'ios/splash/Default~iphone.png',
       'ios/splash/Default@2x~universal~anyany.png',
     ],
-  },
-};
-
-const RESOURCES: ResourcesConfig = {
-  [Platform.WINDOWS]: {
-    [ResourceType.ICON]: WINDOWS_ICON_RESOURCES,
-    [ResourceType.SPLASH]: WINDOWS_SPLASH_RESOURCES,
-  },
-  [Platform.ANDROID]: {
-    [ResourceType.ICON]: ANDROID_ICON_RESOURCES,
-    [ResourceType.SPLASH]: ANDROID_SPLASH_RESOURCES,
-  },
-  [Platform.IOS]: {
-    [ResourceType.ICON]: IOS_ICON_RESOURCES,
-    [ResourceType.SPLASH]: IOS_SPLASH_RESOURCES,
   },
 };
