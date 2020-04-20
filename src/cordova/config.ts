@@ -114,7 +114,7 @@ export function runResource(configPath: string, container: et.Element, resource:
 
   // We force the use of forward slashes here to provide cross-platform
   // compatibility for paths.
-  const imgElement = resolveResourceElement(container, nodeName, indexAttribute, conformPath(configPath, index));
+  const imgElement = resolveResourceElement(container, nodeName, indexAttribute, resolveAttributeValue(configPath, indexAttribute, index));
 
   for (const attr of nodeAttributes) {
     const v = resource[attr.key];
