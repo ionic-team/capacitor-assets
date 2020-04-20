@@ -1,14 +1,14 @@
 import * as et from 'elementtree';
 
-import { runResource } from '../cordova/config';
-import { GeneratedResource, Platform } from '../platform';
-import { ResourceKey, ResourceNodeAttributeType, ResourceType } from '../resources';
+import { runResource } from '../config';
+import { GeneratedResource, Platform } from '../../platform';
+import { ResourceKey, ResourceNodeAttributeType, ResourceType } from '../../resources';
 
 const SRC_ATTRIBUTE = { key: ResourceKey.SRC, type: ResourceNodeAttributeType.PATH };
 
 describe('cordova-res', () => {
 
-  describe('config', () => {
+  describe('cordova/config', () => {
 
     describe('runResource', () => {
 
