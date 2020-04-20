@@ -531,76 +531,201 @@ const ANDROID_SPLASH_RESOURCES: ResourcesTypeConfig<AndroidSplashConfig, Resourc
   },
 };
 
+/**
+ * 20pt Icon
+ *
+ * - iPhone Notification (iOS 7+)
+ * - iPad Notification (iOS 7+)
+ */
+const IOS_ICON_20_PT = { src: 'ios/icon/icon-20.png', format: Format.PNG, width: 20, height: 20 } as const;
+const IOS_ICON_20_PT_2X = { src: 'ios/icon/icon-20@2x.png', format: Format.PNG, width: 40, height: 40 } as const;
+const IOS_ICON_20_PT_3X = { src: 'ios/icon/icon-20@3x.png', format: Format.PNG, width: 60, height: 60 } as const;
+
+/**
+ * 29pt Icon
+ *
+ * - iPhone Settings (iOS 7+)
+ * - iPad Settings (iOS 7+)
+ * - Apple Watch Companion Settings
+ * - Apple Watch Notification Center
+ */
+const IOS_ICON_29_PT = { src: 'ios/icon/icon-29.png', format: Format.PNG, width: 29, height: 29 } as const;
+const IOS_ICON_29_PT_2X = { src: 'ios/icon/icon-29@2x.png', format: Format.PNG, width: 58, height: 58 } as const;
+const IOS_ICON_29_PT_3X = { src: 'ios/icon/icon-29@3x.png', format: Format.PNG, width: 87, height: 87 } as const;
+
+/**
+ * 40pt Icon
+ *
+ * - iPhone Spotlight (iOS 7+)
+ * - iPad Spotlight (iOS 7+)
+ * - Apple Watch Home Screen
+ */
+const IOS_ICON_40_PT = { src: 'ios/icon/icon-40.png', format: Format.PNG, width: 40, height: 40 } as const;
+const IOS_ICON_40_PT_2X = { src: 'ios/icon/icon-40@2x.png', format: Format.PNG, width: 80, height: 80 } as const;
+const IOS_ICON_40_PT_3X = { src: 'ios/icon/icon-40@3x.png', format: Format.PNG, width: 120, height: 120 } as const;
+
+/**
+ * 50pt Icon
+ *
+ * - iPad Spotlight (iOS 5,6)
+ * - Apple Watch Home Screen
+ */
+const IOS_ICON_50_PT = { src: 'ios/icon/icon-50.png', format: Format.PNG, width: 50, height: 50 } as const;
+const IOS_ICON_50_PT_2X = { src: 'ios/icon/icon-50@2x.png', format: Format.PNG, width: 100, height: 100 } as const;
+
+/**
+ * 57pt Icon
+ *
+ * - iPhone App (iOS 5,6)
+ */
+const IOS_ICON_57_PT = { src: 'ios/icon/icon.png', format: Format.PNG, width: 57, height: 57 } as const;
+const IOS_ICON_57_PT_2X = { src: 'ios/icon/icon@2x.png', format: Format.PNG, width: 114, height: 114 } as const;
+
+/**
+ * 60pt Icon
+ *
+ * - iPhone App (iOS 7+)
+ */
+const IOS_ICON_60_PT = { src: 'ios/icon/icon-60.png', format: Format.PNG, width: 60, height: 60 } as const;
+const IOS_ICON_60_PT_2X = { src: 'ios/icon/icon-60@2x.png', format: Format.PNG, width: 120, height: 120 } as const;
+const IOS_ICON_60_PT_3X = { src: 'ios/icon/icon-60@3x.png', format: Format.PNG, width: 180, height: 180 } as const;
+
+/**
+ * 72pt Icon
+ *
+ * - iPad App (iOS 5,6)
+ */
+const IOS_ICON_72_PT = { src: 'ios/icon/icon-72.png', format: Format.PNG, width: 72, height: 72 } as const;
+const IOS_ICON_72_PT_2X = { src: 'ios/icon/icon-72@2x.png', format: Format.PNG, width: 144, height: 144 } as const;
+
+/**
+ * 76pt Icon
+ *
+ * - iPad App (iOS 7+)
+ */
+const IOS_ICON_76_PT = { src: 'ios/icon/icon-76.png', format: Format.PNG, width: 76, height: 76 } as const;
+const IOS_ICON_76_PT_2X = { src: 'ios/icon/icon-76@2x.png', format: Format.PNG, width: 152, height: 152 } as const;
+
+/**
+ * 83.5pt Icon
+ *
+ * iPad Pro (12.9-inch)
+ */
+const IOS_ICON_83_5_PT_2X = { src: 'ios/icon/icon-83.5@2x.png', format: Format.PNG, width: 167, height: 167 } as const;
+
+/**
+ * 1024px Icon
+ *
+ * - App Store
+ */
+const IOS_ICON_1024 = { src: 'ios/icon/icon-1024.png', format: Format.PNG, width: 1024, height: 1024 } as const;
+
+/**
+ * 24pt Icon
+ *
+ * - Apple Watch Notification Center
+ */
+const IOS_ICON_24_PT = { src: 'ios/icon/icon-24@2x.png', format: Format.PNG, width: 48, height: 48 } as const;
+
+/**
+ * 27.5pt Icon
+ *
+ * - Apple Watch Notification Center
+ */
+const IOS_ICON_27_5_PT = { src: 'ios/icon/icon-27.5@2x.png', format: Format.PNG, width: 55, height: 55 } as const;
+
+/**
+ * 44pt Icon
+ *
+ * - Apple Watch Home Screen
+ */
+const IOS_ICON_44_PT_2X = { src: 'ios/icon/icon-44@2x.png', format: Format.PNG, width: 88, height: 88 } as const;
+
+/**
+ * 86pt Icon
+ *
+ * - Apple Watch Short Look
+ */
+const IOS_ICON_86_PT_2X = { src: 'ios/icon/icon-86@2x.png', format: Format.PNG, width: 172, height: 172 } as const;
+
+/**
+ * 98pt Icon
+ *
+ * - Apple Watch Short Look
+ */
+const IOS_ICON_98_PT_2X = { src: 'ios/icon/icon-98@2x.png', format: Format.PNG, width: 196, height: 196 } as const;
+
+/**
+ * 108pt Icon
+ *
+ * - Apple Watch Short Look
+ */
+const IOS_ICON_108_PT_2X = { src: 'ios/icon/icon-108@2x.png', format: Format.PNG, width: 216, height: 216 } as const;
+
 const IOS_ICON_RESOURCES: ResourcesTypeConfig<IOSIconConfig, ResourceKey.SRC> = {
   resources: [
-    { src: 'ios/icon/icon.png', format: Format.PNG, width: 57, height: 57 },
-    { src: 'ios/icon/icon@2x.png', format: Format.PNG, width: 114, height: 114 },
-    { src: 'ios/icon/icon-20.png', format: Format.PNG, width: 20, height: 20 },
-    { src: 'ios/icon/icon-20@2x.png', format: Format.PNG, width: 40, height: 40 },
-    { src: 'ios/icon/icon-20@3x.png', format: Format.PNG, width: 60, height: 60 },
-    { src: 'ios/icon/icon-29.png', format: Format.PNG, width: 29, height: 29 },
-    { src: 'ios/icon/icon-29@2x.png', format: Format.PNG, width: 58, height: 58 },
-    { src: 'ios/icon/icon-29@3x.png', format: Format.PNG, width: 87, height: 87 },
-    { src: 'ios/icon/icon-24@2x.png', format: Format.PNG, width: 48, height: 48 },
-    { src: 'ios/icon/icon-27.5@2x.png', format: Format.PNG, width: 55, height: 55 },
-    { src: 'ios/icon/icon-44@2x.png', format: Format.PNG, width: 88, height: 88 },
-    { src: 'ios/icon/icon-86@2x.png', format: Format.PNG, width: 172, height: 172 },
-    { src: 'ios/icon/icon-98@2x.png', format: Format.PNG, width: 196, height: 196 },
-    { src: 'ios/icon/icon-108@2x.png', format: Format.PNG, width: 216, height: 216 },
-    { src: 'ios/icon/icon-40.png', format: Format.PNG, width: 40, height: 40 },
-    { src: 'ios/icon/icon-40@2x.png', format: Format.PNG, width: 80, height: 80 },
-    { src: 'ios/icon/icon-40@3x.png', format: Format.PNG, width: 120, height: 120 },
-    { src: 'ios/icon/icon-50.png', format: Format.PNG, width: 50, height: 50 },
-    { src: 'ios/icon/icon-50@2x.png', format: Format.PNG, width: 100, height: 100 },
-    { src: 'ios/icon/icon-60.png', format: Format.PNG, width: 60, height: 60 },
-    { src: 'ios/icon/icon-60@2x.png', format: Format.PNG, width: 120, height: 120 },
-    { src: 'ios/icon/icon-60@3x.png', format: Format.PNG, width: 180, height: 180 },
-    { src: 'ios/icon/icon-72.png', format: Format.PNG, width: 72, height: 72 },
-    { src: 'ios/icon/icon-72@2x.png', format: Format.PNG, width: 144, height: 144 },
-    { src: 'ios/icon/icon-76.png', format: Format.PNG, width: 76, height: 76 },
-    { src: 'ios/icon/icon-76@2x.png', format: Format.PNG, width: 152, height: 152 },
-    { src: 'ios/icon/icon-83.5@2x.png', format: Format.PNG, width: 167, height: 167 },
-    { src: 'ios/icon/icon-small.png', format: Format.PNG, width: 29, height: 29 },
-    { src: 'ios/icon/icon-small@2x.png', format: Format.PNG, width: 58, height: 58 },
-    { src: 'ios/icon/icon-small@3x.png', format: Format.PNG, width: 87, height: 87 },
-    { src: 'ios/icon/icon-1024.png', format: Format.PNG, width: 1024, height: 1024 },
+    IOS_ICON_57_PT,
+    IOS_ICON_57_PT_2X,
+    IOS_ICON_20_PT,
+    IOS_ICON_20_PT_2X,
+    IOS_ICON_20_PT_3X,
+    IOS_ICON_29_PT,
+    IOS_ICON_29_PT_2X,
+    IOS_ICON_29_PT_3X,
+    IOS_ICON_24_PT,
+    IOS_ICON_27_5_PT,
+    IOS_ICON_44_PT_2X,
+    IOS_ICON_86_PT_2X,
+    IOS_ICON_98_PT_2X,
+    IOS_ICON_108_PT_2X,
+    IOS_ICON_40_PT,
+    IOS_ICON_40_PT_2X,
+    IOS_ICON_40_PT_3X,
+    IOS_ICON_50_PT,
+    IOS_ICON_50_PT_2X,
+    IOS_ICON_60_PT,
+    IOS_ICON_60_PT_2X,
+    IOS_ICON_60_PT_3X,
+    IOS_ICON_72_PT,
+    IOS_ICON_72_PT_2X,
+    IOS_ICON_76_PT,
+    IOS_ICON_76_PT_2X,
+    IOS_ICON_83_5_PT_2X,
+    IOS_ICON_1024,
   ],
   configXml: {
     nodeName: 'icon',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
     indexAttribute: NodeAttributes.SRC,
     includedResources: [
-      'ios/icon/icon.png',
-      'ios/icon/icon@2x.png',
-      'ios/icon/icon-20.png',
-      'ios/icon/icon-20@2x.png',
-      'ios/icon/icon-20@3x.png',
-      'ios/icon/icon-29.png',
-      'ios/icon/icon-29@2x.png',
-      'ios/icon/icon-29@3x.png',
-      'ios/icon/icon-24@2x.png',
-      'ios/icon/icon-27.5@2x.png',
-      'ios/icon/icon-44@2x.png',
-      'ios/icon/icon-86@2x.png',
-      'ios/icon/icon-98@2x.png',
-      'ios/icon/icon-108@2x.png',
-      'ios/icon/icon-40.png',
-      'ios/icon/icon-40@2x.png',
-      'ios/icon/icon-40@3x.png',
-      'ios/icon/icon-50.png',
-      'ios/icon/icon-50@2x.png',
-      'ios/icon/icon-60.png',
-      'ios/icon/icon-60@2x.png',
-      'ios/icon/icon-60@3x.png',
-      'ios/icon/icon-72.png',
-      'ios/icon/icon-72@2x.png',
-      'ios/icon/icon-76.png',
-      'ios/icon/icon-76@2x.png',
-      'ios/icon/icon-83.5@2x.png',
-      'ios/icon/icon-small.png',
-      'ios/icon/icon-small@2x.png',
-      'ios/icon/icon-small@3x.png',
-      'ios/icon/icon-1024.png',
+      IOS_ICON_57_PT.src,
+      IOS_ICON_57_PT_2X.src,
+      IOS_ICON_20_PT.src,
+      IOS_ICON_20_PT_2X.src,
+      IOS_ICON_20_PT_3X.src,
+      IOS_ICON_29_PT.src,
+      IOS_ICON_29_PT_2X.src,
+      IOS_ICON_29_PT_3X.src,
+      IOS_ICON_24_PT.src,
+      IOS_ICON_27_5_PT.src,
+      IOS_ICON_44_PT_2X.src,
+      IOS_ICON_86_PT_2X.src,
+      IOS_ICON_98_PT_2X.src,
+      IOS_ICON_108_PT_2X.src,
+      IOS_ICON_40_PT.src,
+      IOS_ICON_40_PT_2X.src,
+      IOS_ICON_40_PT_3X.src,
+      IOS_ICON_50_PT.src,
+      IOS_ICON_50_PT_2X.src,
+      IOS_ICON_60_PT.src,
+      IOS_ICON_60_PT_2X.src,
+      IOS_ICON_60_PT_3X.src,
+      IOS_ICON_72_PT.src,
+      IOS_ICON_72_PT_2X.src,
+      IOS_ICON_76_PT.src,
+      IOS_ICON_76_PT_2X.src,
+      IOS_ICON_83_5_PT_2X.src,
+      IOS_ICON_1024.src,
     ],
   },
 };
