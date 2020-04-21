@@ -179,12 +179,11 @@ describe('cordova-res', () => {
     describe('resolveOptions', () => {
 
       it('should pull platforms from config.xml if none provided', async () => {
-
         const configXml: et.Element = et.Element('widget');
         configXml.append(et.Element('platform', { name: 'android' }));
         configXml.append(et.Element('platform', { name: 'ios' }));
 
-        const options: Options = await resolveOptions([], 'resources', new et.ElementTree(configXml));
+        const options = await resolveOptions([], new et.ElementTree(configXml));
 
         expect(options.platforms).toEqual({
           ...generatePlatformsConfig('resources'),
@@ -193,12 +192,11 @@ describe('cordova-res', () => {
       });
 
       it('should use runtime platform if provided', async () => {
-
         const configXml: et.Element = et.Element('widget');
         configXml.append(et.Element('platform', { name: 'android' }));
         configXml.append(et.Element('platform', { name: 'ios' }));
 
-        const options: Options = await resolveOptions(['android'], 'resources', new et.ElementTree(configXml));
+        const options = await resolveOptions(['android'], new et.ElementTree(configXml));
 
         expect(options.platforms).toEqual({
           ...generatePlatformsConfig('resources'),
@@ -208,18 +206,11 @@ describe('cordova-res', () => {
       });
 
       it('should generate for all platforms if no config.xml and no runtime platform', async () => {
-
         const configXml: et.Element = et.Element('widget');
-        configXml.append(et.Element('platform', { name: 'android' }));
-        configXml.append(et.Element('platform', { name: 'ios' }));
 
-        const options: Options = await resolveOptions(['android'], 'resources', new et.ElementTree(configXml));
+        const options = await resolveOptions([], new et.ElementTree(configXml));
 
-        expect(options.platforms).toEqual({
-          ...generatePlatformsConfig('resources'),
-          windows: undefined,
-          ios: undefined,
-        });
+        expect(options.platforms).toEqual(generatePlatformsConfig('resources'));
       });
 
     });

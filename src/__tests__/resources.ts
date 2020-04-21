@@ -1,4 +1,10 @@
-import { generateScaledWindowsResource, isSupportedResourceType, Format } from '../resources';
+import {
+  Format,
+  ResourceKey,
+  generateScaledWindowsResource,
+  isSupportedResourceType,
+  xpathsForPathAttribute,
+} from '../resources';
 
 describe('cordova-res', () => {
 
@@ -27,6 +33,25 @@ describe('cordova-res', () => {
         const expected = { src: 'dir/icon.scale-150.png', width: 150, height: 150, format: Format.PNG };
 
         expect(generateScaledWindowsResource(resource, 1.5)).toEqual(expected);
+      });
+
+    });
+
+    describe('xpathsForPathAttribute', () => {
+
+      it('should not generate paths for non-strings', () => {
+        const xpaths = xpathsForPathAttribute('icon', ResourceKey.SRC);
+        const paths = xpaths({});
+
+        expect(paths).toEqual([]);
+      });
+
+      it('should generate xpaths for posix and win32', () => {
+        const xpaths = xpathsForPathAttribute('icon', ResourceKey.SRC);
+        const src = 'path/to/icon.png';
+        const paths = xpaths({ src });
+
+        expect(paths).toEqual([`icon[@src='${src}']`, `icon[@src='${src.replace(/\//g, '\\')}']`]);
       });
 
     });

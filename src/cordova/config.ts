@@ -4,7 +4,6 @@ import et from 'elementtree';
 import pathlib from 'path';
 import util from 'util';
 
-import { BadInputError } from '../error';
 import { GeneratedResource, Platform } from '../platform';
 import { ResolvedColorSource, ResolvedSource, ResourceNodeAttribute, ResourceNodeAttributeType, SourceType } from '../resources';
 
@@ -14,7 +13,7 @@ export function getConfigPath(directory: string): string {
   return pathlib.resolve(directory, 'config.xml');
 }
 
-export async function run(configPath: string, resourcesDirectory: string, doc: et.ElementTree, sources: readonly ResolvedSource[], resources: readonly GeneratedResource[], errstream: NodeJS.WritableStream | null): Promise<void> {
+export async function run(resourcesDirectory: string, doc: et.ElementTree, sources: readonly ResolvedSource[], resources: readonly GeneratedResource[], errstream: NodeJS.WritableStream | null): Promise<void> {
   const colors = sources.filter((source): source is ResolvedColorSource => source.type === SourceType.COLOR);
 
   if (colors.length > 0) {
@@ -25,17 +24,13 @@ export async function run(configPath: string, resourcesDirectory: string, doc: e
     const colorsPath = pathlib.join(resourcesDirectory, 'values', 'colors.xml');
     await runColorsConfig(colorsPath, colors);
 
-    let resourceFileElement = androidPlatformElement.find(`resource-file[@src='${colorsPath}']`);
-
-    if (!resourceFileElement) {
-      resourceFileElement = et.SubElement(androidPlatformElement, 'resource-file');
-    }
+    const resourceFileElement = resolveElement(androidPlatformElement, 'resource-file', [`resource-file[@src='${colorsPath}']`]);
 
     resourceFileElement.set('src', colorsPath);
     resourceFileElement.set('target', '/app/src/main/res/values/colors.xml');
   }
 
-  runConfig(configPath, doc, resources, errstream);
+  runConfig(doc, resources, errstream);
 }
 
 export async function resolveColorsDocument(colorsPath: string): Promise<et.ElementTree> {
@@ -71,7 +66,7 @@ export async function runColorsConfig(colorsPath: string, colors: readonly Resol
   await write(colorsPath, colorsDocument);
 }
 
-export function runConfig(configPath: string, doc: et.ElementTree, resources: readonly GeneratedResource[], errstream: NodeJS.WritableStream | null): void {
+export function runConfig(doc: et.ElementTree, resources: readonly GeneratedResource[], errstream: NodeJS.WritableStream | null): void {
   const root = doc.getroot();
   const orientationPreference = getPreference(root, 'Orientation');
   debug('Orientation preference: %O', orientationPreference);
@@ -88,73 +83,65 @@ export function runConfig(configPath: string, doc: et.ElementTree, resources: re
     const platformElement = resolvePlatformElement(root, platform);
     const filteredResources = platformResources
       .filter(img => orientation === 'default' || typeof img.orientation === 'undefined' || img.orientation === orientation)
-      .filter(img => img.configXml.included);
+      .filter(img => img.configXml.included(img));
 
     for (const resource of filteredResources) {
-      runResource(configPath, platformElement, resource);
+      runResource(platformElement, resource);
     }
   }
 }
 
-export function conformPath(configPath: string, value: string | number): string {
-  return pathlib.relative(pathlib.dirname(configPath), value.toString()).replace(/\\/g, '/');
-}
+export function runResource(container: et.Element, resource: GeneratedResource): void {
+  const { nodeName, nodeAttributes, xpaths } = resource.configXml;
 
-export function resolveAttributeValue(configPath: string, attr: ResourceNodeAttribute, value: string | number): string {
-  return attr.type === ResourceNodeAttributeType.PATH ? conformPath(configPath, value) : value.toString();
-}
-
-export function runResource(configPath: string, container: et.Element, resource: GeneratedResource): void {
-  const { nodeName, nodeAttributes, indexAttribute } = resource.configXml;
-  const index = resource[indexAttribute.key];
-
-  if (typeof index !== 'string' && typeof index !== 'number') {
-    throw new BadInputError(`Bad value for index "${indexAttribute.key}": ${index}`);
-  }
-
-  // We force the use of forward slashes here to provide cross-platform
-  // compatibility for paths.
-  const imgElement = resolveResourceElement(container, nodeName, indexAttribute, resolveAttributeValue(configPath, indexAttribute, index));
+  const imgElement = resolveElement(container, nodeName, xpaths(resource));
 
   for (const attr of nodeAttributes) {
-    const v = resource[attr.key];
+    const v = resolveAttribute(resource, attr);
 
     if (v) {
-      imgElement.set(attr.key, resolveAttributeValue(configPath, attr, v));
+      imgElement.set(attr.key, v);
     }
   }
 }
 
 export function resolvePlatformElement(container: et.Element, platform: Platform): et.Element {
-  const platformElement = container.find(`platform[@name='${platform}']`);
+  const platformElement = resolveElement(container, 'platform', [`platform[@name='${platform}']`]);
+  platformElement.set('name', platform);
 
-  if (platformElement) {
-    return platformElement;
-  }
-
-  debug('Creating node for %o', platform);
-  return et.SubElement(container, 'platform', { name: platform });
+  return platformElement;
 }
 
-export function resolveResourceElement(container: et.Element, nodeName: string, indexAttr: ResourceNodeAttribute, index: string): et.Element {
-  const imgElement = container.find(`${nodeName}[@${indexAttr.key}='${index}']`);
+/**
+ * Query a container for a subelement and create it if it doesn't exist
+ */
+export function resolveElement(container: et.Element, nodeName: string, xpaths: string[]): et.Element {
+  for (const xpath of xpaths) {
+    const imgElement = container.find(xpath);
 
-  if (imgElement) {
-    return imgElement;
-  }
-
-  if (indexAttr.type === ResourceNodeAttributeType.PATH) {
-    // We didn't find the element using forward slashes, so let's try to
-    // find it with backslashes if the index is a path.
-    const imgElementByBackslashes = container.find(`${nodeName}[@${indexAttr.key}='${index.replace(/\//g, '\\')}']`);
-
-    if (imgElementByBackslashes) {
-      return imgElementByBackslashes;
+    if (imgElement) {
+      return imgElement;
     }
   }
 
-  debug('Creating %O node for %o', nodeName, index);
+  debug('Creating %O node (not found by xpaths: %O)', nodeName, xpaths);
   return et.SubElement(container, nodeName);
+}
+
+export function conformPath(value: string | number): string {
+  return value.toString().replace(/\\/g, '/');
+}
+
+export function resolveAttributeValue(attr: ResourceNodeAttribute, value: string | number): string {
+  return attr.type === ResourceNodeAttributeType.PATH ? conformPath(value) : value.toString();
+}
+
+export function resolveAttribute(resource: GeneratedResource, attr: ResourceNodeAttribute): string | undefined {
+  const v = resource[attr.key];
+
+  if (v) {
+    return resolveAttributeValue(attr, v);
+  }
 }
 
 export function groupImages(images: readonly GeneratedResource[]): Map<Platform, GeneratedResource[]> {

@@ -86,7 +86,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
   }
 
   if (config) {
-    await runConfig(configPath, resourcesDirectory, config, sources, resources, errstream);
+    await runConfig(resourcesDirectory, config, sources, resources, errstream);
     await writeConfig(configPath, config);
 
     logstream?.write(`Wrote to config.xml\n`);
@@ -202,7 +202,7 @@ namespace CordovaRes {
       const directory = getDirectory();
       const configPath = getConfigPath(directory);
       const config = await tryFn(() => readConfig(configPath));
-      const options = await resolveOptions(args, directory, config);
+      const options = await resolveOptions(args, config);
       const result = await run(options);
 
       if (args.includes('--json')) {

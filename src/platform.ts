@@ -5,7 +5,7 @@ import { Sharp } from 'sharp';
 
 import { BadInputError, ResolveSourceImageError } from './error';
 import { ImageSchema, debugSourceImage, generateImage, readSourceImage, resolveSourceImage } from './image';
-import { COLOR_REGEX, ColorSource, ImageSource, ImageSourceData, ResolvedImageSource, ResolvedSource, ResourceKey, ResourceKeyValues, ResourceNodeAttribute, ResourceType, ResourcesTypeConfig, SourceType, getResourcesConfig } from './resources';
+import { COLOR_REGEX, ColorSource, ImageSource, ImageSourceData, ResolvedImageSource, ResolvedSource, ResourceKey, ResourceKeyValues, ResourceType, ResourcesTypeConfig, ResourcesTypeConfigXml, SourceType, getResourcesConfig } from './resources';
 
 const debug = Debug('cordova-res:platform');
 
@@ -20,12 +20,7 @@ export const PLATFORMS: readonly Platform[] = [Platform.ANDROID, Platform.IOS, P
 export interface GeneratedResource extends ResourceKeyValues {
   readonly type: ResourceType;
   readonly platform: Platform;
-  readonly configXml: {
-    readonly nodeName: string;
-    readonly nodeAttributes: readonly ResourceNodeAttribute[];
-    readonly indexAttribute: ResourceNodeAttribute;
-    readonly included: boolean;
-  };
+  readonly configXml: ResourcesTypeConfigXml;
 }
 
 export type TransformFunction = (image: ImageSchema, pipeline: Sharp) => Sharp;
@@ -242,13 +237,11 @@ export async function generateAdaptiveIconResources(resourcesDirectory: string, 
 
 export async function consolidateAdaptiveIconResources(foregrounds: readonly GeneratedResource[], backgrounds: readonly GeneratedResource[]): Promise<GeneratedResource[]> {
   return foregrounds.map(foreground => {
-    const background = backgrounds.find(r => r[r.configXml.indexAttribute.key] === foreground[foreground.configXml.indexAttribute.key]);
+    const background = backgrounds.find(r => r.density === foreground.density);
 
     if (!background) {
       throw new BadInputError(`Cannot consolidate adaptive icon resources: No background for foreground: ${foreground.src}`);
     }
-
-    const { nodeName, nodeAttributes, indexAttribute, included } = foreground.configXml;
 
     return {
       platform: foreground.platform,
@@ -258,12 +251,7 @@ export async function consolidateAdaptiveIconResources(foregrounds: readonly Gen
       density: foreground.density,
       width: foreground.width,
       height: foreground.height,
-      configXml: {
-        nodeName,
-        nodeAttributes,
-        indexAttribute,
-        included,
-      },
+      configXml: foreground.configXml,
     };
   });
 }
@@ -302,13 +290,10 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(resour
   return resources;
 }
 
-export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<ResourceKeyValues, ResourceKey>, image: ImageSourceData, schema: ResourceKeyValues & ImageSchema, transform: TransformFunction = (image, pipeline) => pipeline, errstream: NodeJS.WritableStream | null): Promise<GeneratedResource> {
+export async function generateImageResource(type: ResourceType, platform: Platform, resourcesDirectory: string, config: ResourcesTypeConfig<ResourceKeyValues>, image: ImageSourceData, schema: ResourceKeyValues & ImageSchema, transform: TransformFunction = (image, pipeline) => pipeline, errstream: NodeJS.WritableStream | null): Promise<GeneratedResource> {
   const { pipeline, metadata } = image;
   const { src, format, width, height } = schema;
-  const { nodeName, nodeAttributes, indexAttribute, includedResources } = config.configXml;
 
-  const index = schema[indexAttribute.key];
-  const included = index ? includedResources.includes(index) : false;
   const dest = pathlib.join(resourcesDirectory, src);
 
   await ensureDir(pathlib.dirname(dest));
@@ -323,12 +308,7 @@ export async function generateImageResource(type: ResourceType, platform: Platfo
     height,
     src: dest,
     platform,
-    configXml: {
-      nodeName,
-      nodeAttributes,
-      indexAttribute,
-      included,
-    },
+    configXml: config.configXml,
   };
 }
 

@@ -12,27 +12,24 @@ export function getDirectory(): string {
   return process.cwd();
 }
 
-export async function resolveOptions(args: readonly string[], directory: string, config?: et.ElementTree): Promise<Options> {
+export async function resolveOptions(args: readonly string[], config?: et.ElementTree): Promise<Options> {
   const doc = config ? config.getroot() : undefined;
-  const platformList = filterSupportedPlatforms(doc ? getPlatforms(doc) : []);
+  const platform = parsePlatformOption(args);
+  const platformList = validatePlatforms(platform ? [platform] : filterSupportedPlatforms(doc ? getPlatforms(doc) : []));
   const parsedOptions = parseOptions(args);
-  const { resourcesDirectory = DEFAULT_RESOURCES_DIRECTORY } = parsedOptions;
-  const platformOption = parsePlatformOption(args);
+  const { resourcesDirectory } = parsedOptions;
 
   return {
-  ...{
-      directory,
-      ...parsedOptions,
-      platforms: platformOption ? parsedOptions.platforms : generatePlatformOptions(platformList, resourcesDirectory, args),
-    },
+    ...parsedOptions,
+    ...platformList.length > 0 ? { platforms: generatePlatformOptions(platformList, resourcesDirectory, args) } : {},
   };
 }
 
 export function parseOptions(args: readonly string[]): Required<Options> {
   const json = args.includes('--json');
   const resourcesDirectory = getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
-  const platformArg = parsePlatformOption(args);
-  const platformList = validatePlatforms(platformArg && !platformArg.startsWith('-') ? [platformArg] : PLATFORMS);
+  const platform = parsePlatformOption(args);
+  const platformList = validatePlatforms(platform ? [platform] : PLATFORMS);
 
   return {
     directory: getDirectory(),
@@ -47,7 +44,13 @@ export function parseOptions(args: readonly string[]): Required<Options> {
 }
 
 export function parsePlatformOption(args: readonly string[]): string | undefined {
-  return args[0] ? args[0] : undefined;
+  const [ platform ] = args;
+
+  if (!platform || platform.startsWith('-')) {
+    return;
+  }
+
+  return platform;
 }
 
 export function generatePlatformOptions(platforms: readonly Platform[], resourcesDirectory: string, args: readonly string[]): PlatformOptions {

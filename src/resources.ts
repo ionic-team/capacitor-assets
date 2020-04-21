@@ -238,42 +238,42 @@ export const enum ResourceNodeAttributeType {
   PATH = 'path',
 }
 
-export interface ResourceNodeAttribute<K = ResourceKey> {
-  readonly key: K;
+export interface ResourceNodeAttribute {
+  readonly key: ResourceKey;
   readonly type?: ResourceNodeAttributeType;
 }
 
-export interface ResourcesTypeConfig<C extends ResourceKeyValues, I extends ResourceKey> {
-  readonly resources: readonly C[];
+/**
+ * Metadata for Cordova's config.xml
+ */
+export interface ResourcesTypeConfigXml {
+  /**
+   * XML node name of this resource (e.g. 'icon', 'splash')
+   */
+  readonly nodeName: string;
 
   /**
-   * Metadata for Cordova's config.xml
+   * An array of resource keys to copy into the XML node as attributes
    */
-  readonly configXml: {
+  readonly nodeAttributes: readonly ResourceNodeAttribute[];
 
-    /**
-     * XML node name of this resource (e.g. 'icon', 'splash')
-     */
-    readonly nodeName: string;
+  /**
+   * Get the XPath expression(s) for a resource
+   *
+   * This function is used to look up existing nodes in the XML. This is
+   * important because nodes need to be replaced if found.
+   */
+  readonly xpaths: (resource: ResourceKeyValues) => string[];
 
-    /**
-     * An array of resource keys to copy into the XML node as attributes
-     */
-    readonly nodeAttributes: readonly ResourceNodeAttribute[];
+  /**
+   * Get whether a resource should be included in the XML or not
+   */
+  readonly included: (resource: ResourceKeyValues) => boolean;
+}
 
-    /**
-     * Uniquely identifies a node.
-     *
-     * Use `nodeName` and this attribute to look up existing nodes in the XML.
-     * This is important because nodes need to be replaced if found.
-     */
-    readonly indexAttribute: ResourceNodeAttribute<I>;
-
-    /**
-     * Resources to include in the XML keyed by indexAttribute values
-     */
-    readonly includedResources: readonly Required<ResourceKeyValues>[I][];
-  };
+export interface ResourcesTypeConfig<C extends ResourceKeyValues> {
+  readonly resources: readonly C[];
+  readonly configXml: ResourcesTypeConfigXml;
 }
 
 export function validateResourceTypes(types: readonly string[]): ResourceType[] {
@@ -304,33 +304,33 @@ const NodeAttributes = {
   TARGET: { key: ResourceKey.TARGET },
 } as const;
 
-export function getResourcesConfig(platform: Platform.ANDROID, type: ResourceType.ADAPTIVE_ICON): ResourcesTypeConfig<AndroidAdaptiveIconConfig, ResourceKey.DENSITY>;
-export function getResourcesConfig(platform: Platform.ANDROID | Platform.IOS | Platform.WINDOWS, type: ResourceType.ICON | ResourceType.SPLASH): ResourcesTypeConfig<AndroidIconConfig | AndroidSplashConfig | IOSIconConfig | IOSSplashConfig | WindowsIconConfig | WindowsSplashConfig, ResourceKey>;
-export function getResourcesConfig(platform: Platform, type: ResourceType): ResourcesTypeConfig<ResourceKeyValues, ResourceKey> {
+export function getResourcesConfig(platform: Platform.ANDROID, type: ResourceType.ADAPTIVE_ICON): ResourcesTypeConfig<AndroidAdaptiveIconConfig>;
+export function getResourcesConfig(platform: Platform.ANDROID | Platform.IOS | Platform.WINDOWS, type: ResourceType.ICON | ResourceType.SPLASH): ResourcesTypeConfig<AndroidIconConfig | AndroidSplashConfig | IOSIconConfig | IOSSplashConfig | WindowsIconConfig | WindowsSplashConfig>;
+export function getResourcesConfig(platform: Platform, type: ResourceType): ResourcesTypeConfig<ResourceKeyValues> {
   switch (platform) {
     case Platform.ANDROID:
       switch (type) {
         case ResourceType.ADAPTIVE_ICON:
-          return ANDROID_ADAPTIVE_ICON_RESOURCES;
+          return ANDROID_ADAPTIVE_ICON_RESOURCES_CONFIG;
         case ResourceType.ICON:
-          return ANDROID_ICON_RESOURCES;
+          return ANDROID_ICON_RESOURCES_CONFIG;
         case ResourceType.SPLASH:
-          return ANDROID_SPLASH_RESOURCES;
+          return ANDROID_SPLASH_RESOURCES_CONFIG;
       }
     case Platform.IOS:
       switch (type) {
         case ResourceType.ICON:
-          return IOS_ICON_RESOURCES;
+          return IOS_ICON_RESOURCES_CONFIG;
         case ResourceType.SPLASH:
-          return IOS_SPLASH_RESOURCES;
+          return IOS_SPLASH_RESOURCES_CONFIG;
       }
       break;
     case Platform.WINDOWS:
       switch (type) {
         case ResourceType.ICON:
-          return WINDOWS_ICON_RESOURCES;
+          return WINDOWS_ICON_RESOURCES_CONFIG;
         case ResourceType.SPLASH:
-          return WINDOWS_SPLASH_RESOURCES;
+          return WINDOWS_SPLASH_RESOURCES_CONFIG;
       }
       break;
   }
@@ -338,10 +338,25 @@ export function getResourcesConfig(platform: Platform, type: ResourceType): Reso
   throw new BadInputError(`Unsupported platform/resource type combination: ${platform}/${type}`);
 }
 
+export function xpathsForPathAttribute(nodeName: string, attr: ResourceKey) {
+  return function xpaths(resource: ResourceKeyValues): string[] {
+    const path = resource[attr];
+
+    if (typeof path !== 'string') {
+      return [];
+    }
+
+    return [
+      `${nodeName}[@${attr}='${path}']`,
+      `${nodeName}[@${attr}='${path.replace(/\//g, '\\')}']`, // Check for XML paths that use backslashes
+    ];
+  };
+}
+
 export function generateScaledWindowsResourceSrc(src: string, factor: number): string {
   const { dir, name, ext } = pathlib.parse(src);
 
-  return pathlib.join(dir, `${name}.scale-${factor * 100}${ext}`);
+  return pathlib.posix.join(dir, `${name}.scale-${factor * 100}${ext}`);
 }
 
 export function generateScaledWindowsResource<T extends WindowsIconConfig | WindowsSplashConfig>(resource: T, factor: number): T {
@@ -396,7 +411,7 @@ const WINDOWS_SPLASH_SCREEN = { src: 'windows/splash/Splash.png', format: Format
  * @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos
  * @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos#icon-types-locations-and-scale-factors
  */
-const WINDOWS_ICON_RESOURCES: ResourcesTypeConfig<WindowsIconConfig, ResourceKey.SRC> = {
+const WINDOWS_ICON_RESOURCES_CONFIG: ResourcesTypeConfig<WindowsIconConfig> = {
   resources: [
     WINDOWS_SQUARE_44_X_44_ICON,
     ...generateScaledWindowsResources(WINDOWS_SQUARE_44_X_44_ICON, [1, 1.25, 1.4, 1.5, 2, 2.4, 4]),
@@ -414,15 +429,8 @@ const WINDOWS_ICON_RESOURCES: ResourcesTypeConfig<WindowsIconConfig, ResourceKey
   configXml: {
     nodeName: 'icon',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET],
-    indexAttribute: NodeAttributes.SRC,
-    includedResources: [
-      WINDOWS_SQUARE_44_X_44_ICON.src,
-      WINDOWS_SQUARE_71_X_71_ICON.src,
-      WINDOWS_SQUARE_150_X_150_ICON.src,
-      WINDOWS_SQUARE_310_X_310_ICON.src,
-      WINDOWS_WIDE_310_X_150_LOGO.src,
-      WINDOWS_STORE_LOGO.src,
-    ],
+    xpaths: xpathsForPathAttribute('icon', NodeAttributes.SRC.key),
+    included: resource => !!resource.target,
   },
 };
 
@@ -430,7 +438,7 @@ const WINDOWS_ICON_RESOURCES: ResourcesTypeConfig<WindowsIconConfig, ResourceKey
  * @see https://msdn.microsoft.com/en-us/windows/desktop/hh465338
  * @see https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-splashscreen/index.html#windows-specific-information
  */
-const WINDOWS_SPLASH_RESOURCES: ResourcesTypeConfig<WindowsSplashConfig, ResourceKey.SRC> = {
+const WINDOWS_SPLASH_RESOURCES_CONFIG: ResourcesTypeConfig<WindowsSplashConfig> = {
   resources: [
     WINDOWS_SPLASH_SCREEN,
     ...generateScaledWindowsResources(WINDOWS_SPLASH_SCREEN, [1, 1.25, 1.5, 2, 4]),
@@ -438,96 +446,98 @@ const WINDOWS_SPLASH_RESOURCES: ResourcesTypeConfig<WindowsSplashConfig, Resourc
   configXml: {
     nodeName: 'splash',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.TARGET],
-    indexAttribute: NodeAttributes.SRC,
-    includedResources: [
-      WINDOWS_SPLASH_SCREEN.src,
-    ],
+    xpaths: xpathsForPathAttribute('splash', NodeAttributes.SRC.key),
+    included: resource => !!resource.target,
   },
 };
 
-const ANDROID_ADAPTIVE_ICON_RESOURCES: ResourcesTypeConfig<AndroidAdaptiveIconConfig, ResourceKey.DENSITY> = {
-  resources: [
-    { foreground: 'android/icon/ldpi-foreground.png', background: 'android/icon/ldpi-background.png', format: Format.PNG, width: 81, height: 81, density: Density.LDPI },
-    { foreground: 'android/icon/mdpi-foreground.png', background: 'android/icon/mdpi-background.png', format: Format.PNG, width: 108, height: 108, density: Density.MDPI },
-    { foreground: 'android/icon/hdpi-foreground.png', background: 'android/icon/hdpi-background.png', format: Format.PNG, width: 162, height: 162, density: Density.HDPI },
-    { foreground: 'android/icon/xhdpi-foreground.png', background: 'android/icon/xhdpi-background.png', format: Format.PNG, width: 216, height: 216, density: Density.XHDPI },
-    { foreground: 'android/icon/xxhdpi-foreground.png', background: 'android/icon/xxhdpi-background.png', format: Format.PNG, width: 324, height: 324, density: Density.XXHDPI },
-    { foreground: 'android/icon/xxxhdpi-foreground.png', background: 'android/icon/xxxhdpi-background.png', format: Format.PNG, width: 432, height: 432, density: Density.XXXHDPI },
-  ],
+const ANDROID_LDPI_ADAPTIVE_ICON = { foreground: 'android/icon/ldpi-foreground.png', background: 'android/icon/ldpi-background.png', format: Format.PNG, width: 81, height: 81, density: Density.LDPI } as const;
+const ANDROID_MDPI_ADAPTIVE_ICON = { foreground: 'android/icon/mdpi-foreground.png', background: 'android/icon/mdpi-background.png', format: Format.PNG, width: 108, height: 108, density: Density.MDPI } as const;
+const ANDROID_HDPI_ADAPTIVE_ICON = { foreground: 'android/icon/hdpi-foreground.png', background: 'android/icon/hdpi-background.png', format: Format.PNG, width: 162, height: 162, density: Density.HDPI } as const;
+const ANDROID_XHDPI_ADAPTIVE_ICON = { foreground: 'android/icon/xhdpi-foreground.png', background: 'android/icon/xhdpi-background.png', format: Format.PNG, width: 216, height: 216, density: Density.XHDPI } as const;
+const ANDROID_XXHDPI_ADAPTIVE_ICON = { foreground: 'android/icon/xxhdpi-foreground.png', background: 'android/icon/xxhdpi-background.png', format: Format.PNG, width: 324, height: 324, density: Density.XXHDPI } as const;
+const ANDROID_XXXHDPI_ADAPTIVE_ICON = { foreground: 'android/icon/xxxhdpi-foreground.png', background: 'android/icon/xxxhdpi-background.png', format: Format.PNG, width: 432, height: 432, density: Density.XXXHDPI } as const;
+
+const ANDROID_ADAPTIVE_ICON_RESOURCES = [
+  ANDROID_LDPI_ADAPTIVE_ICON,
+  ANDROID_MDPI_ADAPTIVE_ICON,
+  ANDROID_HDPI_ADAPTIVE_ICON,
+  ANDROID_XHDPI_ADAPTIVE_ICON,
+  ANDROID_XXHDPI_ADAPTIVE_ICON,
+  ANDROID_XXXHDPI_ADAPTIVE_ICON,
+] as const;
+
+const ANDROID_ADAPTIVE_ICON_RESOURCES_CONFIG: ResourcesTypeConfig<AndroidAdaptiveIconConfig> = {
+  resources: ANDROID_ADAPTIVE_ICON_RESOURCES,
   configXml: {
     nodeName: 'icon',
     nodeAttributes: [NodeAttributes.FOREGROUND, NodeAttributes.DENSITY, NodeAttributes.BACKGROUND],
-    indexAttribute: NodeAttributes.DENSITY,
-    includedResources: [
-      Density.LDPI,
-      Density.MDPI,
-      Density.HDPI,
-      Density.XHDPI,
-      Density.XXHDPI,
-      Density.XXXHDPI,
-    ],
+    xpaths: resource => [`icon[@foreground][@background][@density='${resource.density}']`],
+    included: resource => ANDROID_ADAPTIVE_ICON_RESOURCES.map(r => `${r.density}`).includes(`${resource.density}`),
   },
 };
 
-const ANDROID_ICON_RESOURCES: ResourcesTypeConfig<AndroidIconConfig, ResourceKey.DENSITY> = {
-  resources: [
-    { src: 'android/icon/drawable-ldpi-icon.png', format: Format.PNG, width: 36, height: 36, density: Density.LDPI },
-    { src: 'android/icon/drawable-mdpi-icon.png', format: Format.PNG, width: 48, height: 48, density: Density.MDPI },
-    { src: 'android/icon/drawable-hdpi-icon.png', format: Format.PNG, width: 72, height: 72, density: Density.HDPI },
-    { src: 'android/icon/drawable-xhdpi-icon.png', format: Format.PNG, width: 96, height: 96, density: Density.XHDPI },
-    { src: 'android/icon/drawable-xxhdpi-icon.png', format: Format.PNG, width: 144, height: 144, density: Density.XXHDPI },
-    { src: 'android/icon/drawable-xxxhdpi-icon.png', format: Format.PNG, width: 192, height: 192, density: Density.XXXHDPI },
-  ],
+const ANDROID_LDPI_ICON = { src: 'android/icon/drawable-ldpi-icon.png', format: Format.PNG, width: 36, height: 36, density: Density.LDPI } as const;
+const ANDROID_MDPI_ICON = { src: 'android/icon/drawable-mdpi-icon.png', format: Format.PNG, width: 48, height: 48, density: Density.MDPI } as const;
+const ANDROID_HDPI_ICON = { src: 'android/icon/drawable-hdpi-icon.png', format: Format.PNG, width: 72, height: 72, density: Density.HDPI } as const;
+const ANDROID_XHDPI_ICON = { src: 'android/icon/drawable-xhdpi-icon.png', format: Format.PNG, width: 96, height: 96, density: Density.XHDPI } as const;
+const ANDROID_XXHDPI_ICON = { src: 'android/icon/drawable-xxhdpi-icon.png', format: Format.PNG, width: 144, height: 144, density: Density.XXHDPI } as const;
+const ANDROID_XXXHDPI_ICON = { src: 'android/icon/drawable-xxxhdpi-icon.png', format: Format.PNG, width: 192, height: 192, density: Density.XXXHDPI } as const;
+
+const ANDROID_ICON_RESOURCES = [
+  ANDROID_LDPI_ICON,
+  ANDROID_MDPI_ICON,
+  ANDROID_HDPI_ICON,
+  ANDROID_XHDPI_ICON,
+  ANDROID_XXHDPI_ICON,
+  ANDROID_XXXHDPI_ICON,
+] as const;
+
+const ANDROID_ICON_RESOURCES_CONFIG: ResourcesTypeConfig<AndroidIconConfig> = {
+  resources: ANDROID_ICON_RESOURCES,
   configXml: {
     nodeName: 'icon',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.DENSITY],
-    indexAttribute: NodeAttributes.DENSITY,
-    includedResources: [
-      Density.LDPI,
-      Density.MDPI,
-      Density.HDPI,
-      Density.XHDPI,
-      Density.XXHDPI,
-      Density.XXXHDPI,
-    ],
+    xpaths: resource => [`icon[@src][@density='${resource.density}']`],
+    included: () => true,
   },
 };
 
-const ANDROID_SPLASH_RESOURCES: ResourcesTypeConfig<AndroidSplashConfig, ResourceKey.DENSITY> = {
-  resources: [
-    { src: 'android/splash/drawable-land-ldpi-screen.png', format: Format.PNG, width: 320, height: 240, density: Density.LAND_LDPI, orientation: Orientation.LANDSCAPE },
-    { src: 'android/splash/drawable-land-mdpi-screen.png', format: Format.PNG, width: 480, height: 320, density: Density.LAND_MDPI, orientation: Orientation.LANDSCAPE },
-    { src: 'android/splash/drawable-land-hdpi-screen.png', format: Format.PNG, width: 800, height: 480, density: Density.LAND_HDPI, orientation: Orientation.LANDSCAPE },
-    { src: 'android/splash/drawable-land-xhdpi-screen.png', format: Format.PNG, width: 1280, height: 720, density: Density.LAND_XHDPI, orientation: Orientation.LANDSCAPE },
-    { src: 'android/splash/drawable-land-xxhdpi-screen.png', format: Format.PNG, width: 1600, height: 960, density: Density.LAND_XXHDPI, orientation: Orientation.LANDSCAPE },
-    { src: 'android/splash/drawable-land-xxxhdpi-screen.png', format: Format.PNG, width: 1920, height: 1280, density: Density.LAND_XXXHDPI, orientation: Orientation.LANDSCAPE },
-    { src: 'android/splash/drawable-port-ldpi-screen.png', format: Format.PNG, width: 240, height: 320, density: Density.PORT_LDPI, orientation: Orientation.PORTRAIT },
-    { src: 'android/splash/drawable-port-mdpi-screen.png', format: Format.PNG, width: 320, height: 480, density: Density.PORT_MDPI, orientation: Orientation.PORTRAIT },
-    { src: 'android/splash/drawable-port-hdpi-screen.png', format: Format.PNG, width: 480, height: 800, density: Density.PORT_HDPI, orientation: Orientation.PORTRAIT },
-    { src: 'android/splash/drawable-port-xhdpi-screen.png', format: Format.PNG, width: 720, height: 1280, density: Density.PORT_XHDPI, orientation: Orientation.PORTRAIT },
-    { src: 'android/splash/drawable-port-xxhdpi-screen.png', format: Format.PNG, width: 960, height: 1600, density: Density.PORT_XXHDPI, orientation: Orientation.PORTRAIT },
-    { src: 'android/splash/drawable-port-xxxhdpi-screen.png', format: Format.PNG, width: 1280, height: 1920, density: Density.PORT_XXXHDPI, orientation: Orientation.PORTRAIT },
-  ],
+const ANDROID_LAND_LDPI_SCREEN = { src: 'android/splash/drawable-land-ldpi-screen.png', format: Format.PNG, width: 320, height: 240, density: Density.LAND_LDPI, orientation: Orientation.LANDSCAPE } as const;
+const ANDROID_LAND_MDPI_SCREEN = { src: 'android/splash/drawable-land-mdpi-screen.png', format: Format.PNG, width: 480, height: 320, density: Density.LAND_MDPI, orientation: Orientation.LANDSCAPE } as const;
+const ANDROID_LAND_HDPI_SCREEN = { src: 'android/splash/drawable-land-hdpi-screen.png', format: Format.PNG, width: 800, height: 480, density: Density.LAND_HDPI, orientation: Orientation.LANDSCAPE } as const;
+const ANDROID_LAND_XHDPI_SCREEN = { src: 'android/splash/drawable-land-xhdpi-screen.png', format: Format.PNG, width: 1280, height: 720, density: Density.LAND_XHDPI, orientation: Orientation.LANDSCAPE } as const;
+const ANDROID_LAND_XXHDPI_SCREEN = { src: 'android/splash/drawable-land-xxhdpi-screen.png', format: Format.PNG, width: 1600, height: 960, density: Density.LAND_XXHDPI, orientation: Orientation.LANDSCAPE } as const;
+const ANDROID_LAND_XXXHDPI_SCREEN = { src: 'android/splash/drawable-land-xxxhdpi-screen.png', format: Format.PNG, width: 1920, height: 1280, density: Density.LAND_XXXHDPI, orientation: Orientation.LANDSCAPE } as const;
+const ANDROID_PORT_LDPI_SCREEN = { src: 'android/splash/drawable-port-ldpi-screen.png', format: Format.PNG, width: 240, height: 320, density: Density.PORT_LDPI, orientation: Orientation.PORTRAIT } as const;
+const ANDROID_PORT_MDPI_SCREEN = { src: 'android/splash/drawable-port-mdpi-screen.png', format: Format.PNG, width: 320, height: 480, density: Density.PORT_MDPI, orientation: Orientation.PORTRAIT } as const;
+const ANDROID_PORT_HDPI_SCREEN = { src: 'android/splash/drawable-port-hdpi-screen.png', format: Format.PNG, width: 480, height: 800, density: Density.PORT_HDPI, orientation: Orientation.PORTRAIT } as const;
+const ANDROID_PORT_XHDPI_SCREEN = { src: 'android/splash/drawable-port-xhdpi-screen.png', format: Format.PNG, width: 720, height: 1280, density: Density.PORT_XHDPI, orientation: Orientation.PORTRAIT } as const;
+const ANDROID_PORT_XXHDPI_SCREEN = { src: 'android/splash/drawable-port-xxhdpi-screen.png', format: Format.PNG, width: 960, height: 1600, density: Density.PORT_XXHDPI, orientation: Orientation.PORTRAIT } as const;
+const ANDROID_PORT_XXXHDPI_SCREEN = { src: 'android/splash/drawable-port-xxxhdpi-screen.png', format: Format.PNG, width: 1280, height: 1920, density: Density.PORT_XXXHDPI, orientation: Orientation.PORTRAIT } as const;
+
+const ANDROID_SPLASH_RESOURCES = [
+  ANDROID_LAND_LDPI_SCREEN,
+  ANDROID_LAND_MDPI_SCREEN,
+  ANDROID_LAND_HDPI_SCREEN,
+  ANDROID_LAND_XHDPI_SCREEN,
+  ANDROID_LAND_XXHDPI_SCREEN,
+  ANDROID_LAND_XXXHDPI_SCREEN,
+  ANDROID_PORT_LDPI_SCREEN,
+  ANDROID_PORT_MDPI_SCREEN,
+  ANDROID_PORT_HDPI_SCREEN,
+  ANDROID_PORT_XHDPI_SCREEN,
+  ANDROID_PORT_XXHDPI_SCREEN,
+  ANDROID_PORT_XXXHDPI_SCREEN,
+] as const;
+
+const ANDROID_SPLASH_RESOURCES_CONFIG: ResourcesTypeConfig<AndroidSplashConfig> = {
+  resources: ANDROID_SPLASH_RESOURCES,
   configXml: {
     nodeName: 'splash',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.DENSITY],
-    indexAttribute: NodeAttributes.DENSITY,
-    includedResources: [
-      Density.LAND_LDPI,
-      Density.LAND_MDPI,
-      Density.LAND_HDPI,
-      Density.LAND_XHDPI,
-      Density.LAND_XXHDPI,
-      Density.LAND_XXHDPI,
-      Density.LAND_XXXHDPI,
-      Density.PORT_LDPI,
-      Density.PORT_MDPI,
-      Density.PORT_HDPI,
-      Density.PORT_XHDPI,
-      Density.PORT_XXHDPI,
-      Density.PORT_XXHDPI,
-      Density.PORT_XXXHDPI,
-    ],
+    xpaths: resource => [`splash[@density='${resource.density}']`],
+    included: () => true,
   },
 };
 
@@ -662,120 +672,95 @@ const IOS_ICON_98_PT_2X = { src: 'ios/icon/icon-98@2x.png', format: Format.PNG, 
  */
 const IOS_ICON_108_PT_2X = { src: 'ios/icon/icon-108@2x.png', format: Format.PNG, width: 216, height: 216 } as const;
 
-const IOS_ICON_RESOURCES: ResourcesTypeConfig<IOSIconConfig, ResourceKey.SRC> = {
-  resources: [
-    IOS_ICON_57_PT,
-    IOS_ICON_57_PT_2X,
-    IOS_ICON_20_PT,
-    IOS_ICON_20_PT_2X,
-    IOS_ICON_20_PT_3X,
-    IOS_ICON_29_PT,
-    IOS_ICON_29_PT_2X,
-    IOS_ICON_29_PT_3X,
-    IOS_ICON_24_PT,
-    IOS_ICON_27_5_PT,
-    IOS_ICON_44_PT_2X,
-    IOS_ICON_86_PT_2X,
-    IOS_ICON_98_PT_2X,
-    IOS_ICON_108_PT_2X,
-    IOS_ICON_40_PT,
-    IOS_ICON_40_PT_2X,
-    IOS_ICON_40_PT_3X,
-    IOS_ICON_50_PT,
-    IOS_ICON_50_PT_2X,
-    IOS_ICON_60_PT,
-    IOS_ICON_60_PT_2X,
-    IOS_ICON_60_PT_3X,
-    IOS_ICON_72_PT,
-    IOS_ICON_72_PT_2X,
-    IOS_ICON_76_PT,
-    IOS_ICON_76_PT_2X,
-    IOS_ICON_83_5_PT_2X,
-    IOS_ICON_1024,
-  ],
+const IOS_ICON_RESOURCES = [
+  IOS_ICON_57_PT,
+  IOS_ICON_57_PT_2X,
+  IOS_ICON_20_PT,
+  IOS_ICON_20_PT_2X,
+  IOS_ICON_20_PT_3X,
+  IOS_ICON_29_PT,
+  IOS_ICON_29_PT_2X,
+  IOS_ICON_29_PT_3X,
+  IOS_ICON_24_PT,
+  IOS_ICON_27_5_PT,
+  IOS_ICON_44_PT_2X,
+  IOS_ICON_86_PT_2X,
+  IOS_ICON_98_PT_2X,
+  IOS_ICON_108_PT_2X,
+  IOS_ICON_40_PT,
+  IOS_ICON_40_PT_2X,
+  IOS_ICON_40_PT_3X,
+  IOS_ICON_50_PT,
+  IOS_ICON_50_PT_2X,
+  IOS_ICON_60_PT,
+  IOS_ICON_60_PT_2X,
+  IOS_ICON_60_PT_3X,
+  IOS_ICON_72_PT,
+  IOS_ICON_72_PT_2X,
+  IOS_ICON_76_PT,
+  IOS_ICON_76_PT_2X,
+  IOS_ICON_83_5_PT_2X,
+  IOS_ICON_1024,
+] as const;
+
+const IOS_ICON_RESOURCES_CONFIG: ResourcesTypeConfig<IOSIconConfig> = {
+  resources: IOS_ICON_RESOURCES,
   configXml: {
     nodeName: 'icon',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
-    indexAttribute: NodeAttributes.SRC,
-    includedResources: [
-      IOS_ICON_57_PT.src,
-      IOS_ICON_57_PT_2X.src,
-      IOS_ICON_20_PT.src,
-      IOS_ICON_20_PT_2X.src,
-      IOS_ICON_20_PT_3X.src,
-      IOS_ICON_29_PT.src,
-      IOS_ICON_29_PT_2X.src,
-      IOS_ICON_29_PT_3X.src,
-      IOS_ICON_24_PT.src,
-      IOS_ICON_27_5_PT.src,
-      IOS_ICON_44_PT_2X.src,
-      IOS_ICON_86_PT_2X.src,
-      IOS_ICON_98_PT_2X.src,
-      IOS_ICON_108_PT_2X.src,
-      IOS_ICON_40_PT.src,
-      IOS_ICON_40_PT_2X.src,
-      IOS_ICON_40_PT_3X.src,
-      IOS_ICON_50_PT.src,
-      IOS_ICON_50_PT_2X.src,
-      IOS_ICON_60_PT.src,
-      IOS_ICON_60_PT_2X.src,
-      IOS_ICON_60_PT_3X.src,
-      IOS_ICON_72_PT.src,
-      IOS_ICON_72_PT_2X.src,
-      IOS_ICON_76_PT.src,
-      IOS_ICON_76_PT_2X.src,
-      IOS_ICON_83_5_PT_2X.src,
-      IOS_ICON_1024.src,
-    ],
+    xpaths: xpathsForPathAttribute('icon', NodeAttributes.SRC.key),
+    included: () => true,
   },
 };
 
-const IOS_SPLASH_RESOURCES: ResourcesTypeConfig<IOSSplashConfig, ResourceKey.SRC> = {
-  resources: [
-    { src: 'ios/splash/Default-568h@2x~iphone.png', format: Format.PNG, width: 640, height: 1136, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default-667h.png', format: Format.PNG, width: 750, height: 1334, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default-2688h~iphone.png', format: Format.PNG, width: 1242, height: 2688, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default-Landscape-2688h~iphone.png', format: Format.PNG, width: 2688, height: 1242, orientation: Orientation.LANDSCAPE },
-    { src: 'ios/splash/Default-1792h~iphone.png', format: Format.PNG, width: 828, height: 1792, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default-Landscape-1792h~iphone.png', format: Format.PNG, width: 1792, height: 828, orientation: Orientation.LANDSCAPE },
-    { src: 'ios/splash/Default-2436h.png', format: Format.PNG, width: 1125, height: 2436, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default-Landscape-2436h.png', format: Format.PNG, width: 2436, height: 1125, orientation: Orientation.LANDSCAPE },
-    { src: 'ios/splash/Default-736h.png', format: Format.PNG, width: 1242, height: 2208, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default-Landscape-736h.png', format: Format.PNG, width: 2208, height: 1242, orientation: Orientation.LANDSCAPE },
-    { src: 'ios/splash/Default-Landscape@2x~ipad.png', format: Format.PNG, width: 2048, height: 1536, orientation: Orientation.LANDSCAPE },
-    { src: 'ios/splash/Default-Landscape@~ipadpro.png', format: Format.PNG, width: 2732, height: 2048, orientation: Orientation.LANDSCAPE },
-    { src: 'ios/splash/Default-Landscape~ipad.png', format: Format.PNG, width: 1024, height: 768, orientation: Orientation.LANDSCAPE },
-    { src: 'ios/splash/Default-Portrait@2x~ipad.png', format: Format.PNG, width: 1536, height: 2048, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default-Portrait@~ipadpro.png', format: Format.PNG, width: 2048, height: 2732, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default-Portrait~ipad.png', format: Format.PNG, width: 768, height: 1024, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default@2x~iphone.png', format: Format.PNG, width: 640, height: 960, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default~iphone.png', format: Format.PNG, width: 320, height: 480, orientation: Orientation.PORTRAIT },
-    { src: 'ios/splash/Default@2x~universal~anyany.png', format: Format.PNG, width: 2732, height: 2732, orientation: Orientation.PORTRAIT },
-  ],
+const IOS_SPLASH_568H_2X_IPHONE = { src: 'ios/splash/Default-568h@2x~iphone.png', format: Format.PNG, width: 640, height: 1136, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_667H = { src: 'ios/splash/Default-667h.png', format: Format.PNG, width: 750, height: 1334, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_2688H_IPHONE = { src: 'ios/splash/Default-2688h~iphone.png', format: Format.PNG, width: 1242, height: 2688, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_2688H_LANDSCAPE_IPHONE = { src: 'ios/splash/Default-Landscape-2688h~iphone.png', format: Format.PNG, width: 2688, height: 1242, orientation: Orientation.LANDSCAPE } as const;
+const IOS_SPLASH_1792H_IPHONE = { src: 'ios/splash/Default-1792h~iphone.png', format: Format.PNG, width: 828, height: 1792, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_1792H_LANDSCAPE_IPHONE = { src: 'ios/splash/Default-Landscape-1792h~iphone.png', format: Format.PNG, width: 1792, height: 828, orientation: Orientation.LANDSCAPE } as const;
+const IOS_SPLASH_2436H = { src: 'ios/splash/Default-2436h.png', format: Format.PNG, width: 1125, height: 2436, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_2436H_LANDSCAPE = { src: 'ios/splash/Default-Landscape-2436h.png', format: Format.PNG, width: 2436, height: 1125, orientation: Orientation.LANDSCAPE } as const;
+const IOS_SPLASH_736H = { src: 'ios/splash/Default-736h.png', format: Format.PNG, width: 1242, height: 2208, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_736H_LANDSCAPE = { src: 'ios/splash/Default-Landscape-736h.png', format: Format.PNG, width: 2208, height: 1242, orientation: Orientation.LANDSCAPE } as const;
+const IOS_SPLASH_LANDSCAPE_2X_IPAD = { src: 'ios/splash/Default-Landscape@2x~ipad.png', format: Format.PNG, width: 2048, height: 1536, orientation: Orientation.LANDSCAPE } as const;
+const IOS_SPLASH_LANDSCAPE_IPADPRO = { src: 'ios/splash/Default-Landscape@~ipadpro.png', format: Format.PNG, width: 2732, height: 2048, orientation: Orientation.LANDSCAPE } as const;
+const IOS_SPLASH_LANDSCAPE_IPAD = { src: 'ios/splash/Default-Landscape~ipad.png', format: Format.PNG, width: 1024, height: 768, orientation: Orientation.LANDSCAPE } as const;
+const IOS_SPLASH_PORTRAIT_2X_IPAD = { src: 'ios/splash/Default-Portrait@2x~ipad.png', format: Format.PNG, width: 1536, height: 2048, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_PORTRAIT_IPADPRO = { src: 'ios/splash/Default-Portrait@~ipadpro.png', format: Format.PNG, width: 2048, height: 2732, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_PORTRAIT_IPAD = { src: 'ios/splash/Default-Portrait~ipad.png', format: Format.PNG, width: 768, height: 1024, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_2X_IPHONE = { src: 'ios/splash/Default@2x~iphone.png', format: Format.PNG, width: 640, height: 960, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_IPHONE = { src: 'ios/splash/Default~iphone.png', format: Format.PNG, width: 320, height: 480, orientation: Orientation.PORTRAIT } as const;
+const IOS_SPLASH_2X_UNIVERSAL_ANYANY = { src: 'ios/splash/Default@2x~universal~anyany.png', format: Format.PNG, width: 2732, height: 2732, orientation: Orientation.PORTRAIT } as const;
+
+const IOS_SPLASH_RESOURCES = [
+  IOS_SPLASH_568H_2X_IPHONE,
+  IOS_SPLASH_667H,
+  IOS_SPLASH_2688H_IPHONE,
+  IOS_SPLASH_2688H_LANDSCAPE_IPHONE,
+  IOS_SPLASH_1792H_IPHONE,
+  IOS_SPLASH_1792H_LANDSCAPE_IPHONE,
+  IOS_SPLASH_2436H,
+  IOS_SPLASH_2436H_LANDSCAPE,
+  IOS_SPLASH_736H,
+  IOS_SPLASH_736H_LANDSCAPE,
+  IOS_SPLASH_LANDSCAPE_2X_IPAD,
+  IOS_SPLASH_LANDSCAPE_IPADPRO,
+  IOS_SPLASH_LANDSCAPE_IPAD,
+  IOS_SPLASH_PORTRAIT_2X_IPAD,
+  IOS_SPLASH_PORTRAIT_IPADPRO,
+  IOS_SPLASH_PORTRAIT_IPAD,
+  IOS_SPLASH_2X_IPHONE,
+  IOS_SPLASH_IPHONE,
+  IOS_SPLASH_2X_UNIVERSAL_ANYANY,
+] as const;
+
+const IOS_SPLASH_RESOURCES_CONFIG: ResourcesTypeConfig<IOSSplashConfig> = {
+  resources: IOS_SPLASH_RESOURCES,
   configXml: {
     nodeName: 'splash',
     nodeAttributes: [NodeAttributes.SRC, NodeAttributes.WIDTH, NodeAttributes.HEIGHT],
-    indexAttribute: NodeAttributes.SRC,
-    includedResources: [
-      'ios/splash/Default-568h@2x~iphone.png',
-      'ios/splash/Default-667h.png',
-      'ios/splash/Default-2688h~iphone.png',
-      'ios/splash/Default-Landscape-2688h~iphone.png',
-      'ios/splash/Default-1792h~iphone.png',
-      'ios/splash/Default-Landscape-1792h~iphone.png',
-      'ios/splash/Default-2436h.png',
-      'ios/splash/Default-Landscape-2436h.png',
-      'ios/splash/Default-736h.png',
-      'ios/splash/Default-Landscape-736h.png',
-      'ios/splash/Default-Landscape@2x~ipad.png',
-      'ios/splash/Default-Landscape@~ipadpro.png',
-      'ios/splash/Default-Landscape~ipad.png',
-      'ios/splash/Default-Portrait@2x~ipad.png',
-      'ios/splash/Default-Portrait@~ipadpro.png',
-      'ios/splash/Default-Portrait~ipad.png',
-      'ios/splash/Default@2x~iphone.png',
-      'ios/splash/Default~iphone.png',
-      'ios/splash/Default@2x~universal~anyany.png',
-    ],
+    xpaths: xpathsForPathAttribute('splash', NodeAttributes.SRC.key),
+    included: () => true,
   },
 };

@@ -13,14 +13,14 @@ describe('cordova-res', () => {
     describe('runResource', () => {
 
       const resource: GeneratedResource = {
-        [ResourceKey.SRC]: '/path/to/resources/icon.png',
+        [ResourceKey.SRC]: 'resources/icon.png',
         type: ResourceType.ICON,
         platform: Platform.ANDROID,
         configXml: {
           nodeName: 'icon',
           nodeAttributes: [SRC_ATTRIBUTE],
-          indexAttribute: SRC_ATTRIBUTE,
-          included: true,
+          xpaths: resource => [`icon[@src='${resource.src}']`, `icon[@src='${resource.src!.replace(/\//g, '\\')}']`],
+          included: () => true,
         },
       };
 
@@ -28,7 +28,7 @@ describe('cordova-res', () => {
         const src = 'resources/icon.png';
         const container = et.Element('platform');
 
-        runResource('/path/to/config.xml', container, resource);
+        runResource(container, resource);
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);
@@ -41,7 +41,7 @@ describe('cordova-res', () => {
         const container = et.Element('platform');
         et.SubElement(container, 'icon', { src });
 
-        runResource('/path/to/config.xml', container, resource);
+        runResource(container, resource);
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);
@@ -54,7 +54,7 @@ describe('cordova-res', () => {
         const container = et.Element('platform');
         et.SubElement(container, 'icon', { src: 'resources\\icon.png' });
 
-        runResource('/path/to/config.xml', container, resource);
+        runResource(container, resource);
 
         const children = container.findall('icon');
         expect(children.length).toEqual(1);
