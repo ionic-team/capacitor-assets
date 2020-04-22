@@ -17,12 +17,13 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest --maxWorkers=4",
-    "lint": "tslint --project tsconfig.json",
+    "prettier": "prettier 'src/**/*.ts'",
+    "fmt": "npm run prettier -- --write",
     "prepublishOnly": "npm run build"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint"
+      "pre-commit": "npm run prettier -- --check"
     }
   },
   "files": [
@@ -62,9 +63,8 @@
     "@types/sharp": "^0.24.0",
     "husky": "^4.0.9",
     "jest": "~25.4.0",
+    "prettier": "^2.0.5",
     "ts-jest": "~25.4.0",
-    "tslint": "^5.12.1",
-    "tslint-ionic-rules": "0.0.21",
     "typescript": "~3.8.2"
   }
 }

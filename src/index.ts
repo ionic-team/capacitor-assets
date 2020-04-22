@@ -5,11 +5,29 @@ import path from 'path';
 import util from 'util';
 
 import { getDirectory, parseOptions, resolveOptions } from './cli';
-import { getConfigPath, read as readConfig, run as runConfig, write as writeConfig } from './cordova/config';
+import {
+  getConfigPath,
+  read as readConfig,
+  run as runConfig,
+  write as writeConfig,
+} from './cordova/config';
 import { BaseError } from './error';
 import { NativeProjectConfig, copyToNativeProject } from './native';
-import { GeneratedResource, PLATFORMS, Platform, RunPlatformOptions, prettyPlatform, run as runPlatform } from './platform';
-import { Density, Orientation, ResolvedSource, ResourceType, SourceType } from './resources';
+import {
+  GeneratedResource,
+  PLATFORMS,
+  Platform,
+  RunPlatformOptions,
+  prettyPlatform,
+  run as runPlatform,
+} from './platform';
+import {
+  Density,
+  Orientation,
+  ResolvedSource,
+  ResourceType,
+  SourceType,
+} from './resources';
 import { tryFn } from './utils/fn';
 
 const debug = Debug('cordova-res');
@@ -50,7 +68,11 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
 
   const configPath = getConfigPath(directory);
 
-  debug('Paths: (config: %O) (resources dir: %O)', configPath, resourcesDirectory);
+  debug(
+    'Paths: (config: %O) (resources dir: %O)',
+    configPath,
+    resourcesDirectory,
+  );
 
   let config: et.ElementTree | undefined;
   const resources: GeneratedResource[] = [];
@@ -60,7 +82,9 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     if (await pathWritable(configPath)) {
       config = await readConfig(configPath);
     } else {
-      errstream?.write(`WARN:\tNo config.xml file in directory. Skipping config.\n`);
+      errstream?.write(
+        `WARN:\tNo config.xml file in directory. Skipping config.\n`,
+      );
       debug('File missing/not writable: %O', configPath);
     }
   }
@@ -70,17 +94,41 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     const nativeProject = projectConfig[platform];
 
     if (platformOptions) {
-      const platformResult = await runPlatform(platform, resourcesDirectory, platformOptions, errstream);
+      const platformResult = await runPlatform(
+        platform,
+        resourcesDirectory,
+        platformOptions,
+        errstream,
+      );
 
-      logstream?.write(util.format(`Generated %s resources for %s`, platformResult.resources.length, prettyPlatform(platform)) + '\n');
+      logstream?.write(
+        util.format(
+          `Generated %s resources for %s`,
+          platformResult.resources.length,
+          prettyPlatform(platform),
+        ) + '\n',
+      );
 
       resources.push(...platformResult.resources);
       sources.push(...platformResult.sources);
 
       if (copy && nativeProject) {
-        const shouldCopyIcons = resources.findIndex(res => res.type === ResourceType.ICON || res.type === ResourceType.ADAPTIVE_ICON) !== -1;
-        const shouldCopySplash = resources.findIndex(res => res.type === ResourceType.SPLASH) !== -1;
-        await copyToNativeProject(platform, nativeProject, shouldCopyIcons, shouldCopySplash, logstream, errstream);
+        const shouldCopyIcons =
+          resources.findIndex(
+            res =>
+              res.type === ResourceType.ICON ||
+              res.type === ResourceType.ADAPTIVE_ICON,
+          ) !== -1;
+        const shouldCopySplash =
+          resources.findIndex(res => res.type === ResourceType.SPLASH) !== -1;
+        await copyToNativeProject(
+          platform,
+          nativeProject,
+          shouldCopyIcons,
+          shouldCopySplash,
+          logstream,
+          errstream,
+        );
       }
     }
   }
@@ -94,7 +142,17 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
 
   return {
     resources: resources.map(resource => {
-      const { platform, type, src, foreground, background, width, height, density, orientation } = resource;
+      const {
+        platform,
+        type,
+        src,
+        foreground,
+        background,
+        width,
+        height,
+        density,
+        orientation,
+      } = resource;
 
       return {
         platform,
@@ -111,9 +169,20 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     sources: sources.map(source => {
       switch (source.type) {
         case SourceType.RASTER:
-          return { platform: source.platform, resource: source.resource, type: SourceType.RASTER, value: source.src };
+          return {
+            platform: source.platform,
+            resource: source.resource,
+            type: SourceType.RASTER,
+            value: source.src,
+          };
         case SourceType.COLOR:
-          return { platform: source.platform, resource: source.resource, type: SourceType.COLOR, value: source.color, name: source.name };
+          return {
+            platform: source.platform,
+            resource: source.resource,
+            type: SourceType.COLOR,
+            value: source.color,
+            name: source.name,
+          };
       }
     }),
   };
@@ -122,8 +191,13 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
 namespace CordovaRes {
   export const run = CordovaRes;
 
-  export type PlatformOptions = { [P in Platform]?: Readonly<RunPlatformOptions>; };
-  export type NativeProjectConfigByPlatform = { [P in Platform]?: Readonly<NativeProjectConfig>; };
+  export type PlatformOptions = {
+    [P in Platform]?: Readonly<RunPlatformOptions>;
+  };
+
+  export type NativeProjectConfigByPlatform = {
+    [P in Platform]?: Readonly<NativeProjectConfig>;
+  };
 
   /**
    * Options for `cordova-res`.
@@ -213,9 +287,23 @@ namespace CordovaRes {
       process.exitCode = 1;
 
       if (args.includes('--json')) {
-        process.stdout.write(JSON.stringify({ error: e instanceof BaseError ? e : e.toString() }, undefined, '\t'));
+        process.stdout.write(
+          JSON.stringify(
+            { error: e instanceof BaseError ? e : e.toString() },
+            undefined,
+            '\t',
+          ),
+        );
       } else {
-        process.stderr.write(`${e instanceof BaseError ? `ERROR: ${e.toString()}` : (e.stack ? e.stack : String(e))}\n`);
+        process.stderr.write(
+          `${
+            e instanceof BaseError
+              ? `ERROR: ${e.toString()}`
+              : e.stack
+              ? e.stack
+              : String(e)
+          }\n`,
+        );
       }
     }
   }

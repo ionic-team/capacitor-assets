@@ -169,42 +169,82 @@ const ANDROID_SPLASHES: readonly ProcessItem[] = [
   },
 ];
 
-async function copyImages(sourcePath: string, targetPath: string, images: readonly ProcessItem[]): Promise<number> {
-  await Promise.all(images.map(async item => {
-    const source = path.join(sourcePath, item.source);
-    const target = path.join(targetPath, item.target);
+async function copyImages(
+  sourcePath: string,
+  targetPath: string,
+  images: readonly ProcessItem[],
+): Promise<number> {
+  await Promise.all(
+    images.map(async item => {
+      const source = path.join(sourcePath, item.source);
+      const target = path.join(targetPath, item.target);
 
-    debug('Copying generated resource from %O to %O', source, target);
+      debug('Copying generated resource from %O to %O', source, target);
 
-    await copy(source, target);
-  }));
+      await copy(source, target);
+    }),
+  );
 
   return images.length;
 }
 
-export async function copyToNativeProject(platform: Platform, nativeProject: NativeProjectConfig, shouldCopyIcons: boolean, shouldCopySplash: boolean, logstream: NodeJS.WritableStream | null, errstream: NodeJS.WritableStream | null) {
+export async function copyToNativeProject(
+  platform: Platform,
+  nativeProject: NativeProjectConfig,
+  shouldCopyIcons: boolean,
+  shouldCopySplash: boolean,
+  logstream: NodeJS.WritableStream | null,
+  errstream: NodeJS.WritableStream | null,
+) {
   let count = 0;
 
   if (platform === Platform.IOS) {
     const iosProjectDirectory = nativeProject.directory || 'ios';
     if (shouldCopyIcons) {
-      count += await copyImages(SOURCE_IOS_ICON, path.join(iosProjectDirectory, TARGET_IOS_ICON), IOS_ICONS);
+      count += await copyImages(
+        SOURCE_IOS_ICON,
+        path.join(iosProjectDirectory, TARGET_IOS_ICON),
+        IOS_ICONS,
+      );
     }
     if (shouldCopySplash) {
-      count += await copyImages(SOURCE_IOS_SPLASH, path.join(iosProjectDirectory, TARGET_IOS_SPLASH), IOS_SPLASHES);
+      count += await copyImages(
+        SOURCE_IOS_SPLASH,
+        path.join(iosProjectDirectory, TARGET_IOS_SPLASH),
+        IOS_SPLASHES,
+      );
     }
   } else if (platform === Platform.ANDROID) {
     const androidProjectDirectory = nativeProject.directory || 'android';
     if (shouldCopyIcons) {
-      count += await copyImages(SOURCE_ANDROID_ICON, path.join(androidProjectDirectory, TARGET_ANDROID_ICON), ANDROID_ICONS);
+      count += await copyImages(
+        SOURCE_ANDROID_ICON,
+        path.join(androidProjectDirectory, TARGET_ANDROID_ICON),
+        ANDROID_ICONS,
+      );
     }
     if (shouldCopySplash) {
-      count += await copyImages(SOURCE_ANDROID_SPLASH, path.join(androidProjectDirectory, TARGET_ANDROID_SPLASH), ANDROID_SPLASHES);
+      count += await copyImages(
+        SOURCE_ANDROID_SPLASH,
+        path.join(androidProjectDirectory, TARGET_ANDROID_SPLASH),
+        ANDROID_SPLASHES,
+      );
     }
   } else {
-    errstream?.write(util.format('WARN:\tCopying to native projects is not supported for %s', prettyPlatform(platform)) + '\n');
+    errstream?.write(
+      util.format(
+        'WARN:\tCopying to native projects is not supported for %s',
+        prettyPlatform(platform),
+      ) + '\n',
+    );
     return;
   }
 
-  logstream?.write(util.format(`Copied %s resource items to %s`, count, prettyPlatform(platform)) + '\n');
+  logstream?.write(
+    util.format(
+      `Copied %s resource items to %s`,
+      count,
+      prettyPlatform(platform),
+    ) + '\n',
+  );
 }

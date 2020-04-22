@@ -102,11 +102,8 @@ function generatePlatformsConfig(resourcesDirectory: string) {
 }
 
 describe('cordova-res', () => {
-
   describe('cli', () => {
-
     describe('parseOptions', () => {
-
       const DEFAULT_OPTIONS: Options = {
         directory: process.cwd(),
         logstream: process.stdout,
@@ -130,7 +127,13 @@ describe('cordova-res', () => {
       it('should parse options for android', () => {
         const args = ['android'];
         const result = parseOptions(args);
-        expect(result).toEqual({ ...DEFAULT_OPTIONS, platforms: { android: generateRunOptions(Platform.ANDROID, 'resources', args), }, projectConfig: { android: { directory: 'android' } } });
+        expect(result).toEqual({
+          ...DEFAULT_OPTIONS,
+          platforms: {
+            android: generateRunOptions(Platform.ANDROID, 'resources', args),
+          },
+          projectConfig: { android: { directory: 'android' } },
+        });
       });
 
       it('should parse default options when the first argument is not a platform', () => {
@@ -142,48 +145,98 @@ describe('cordova-res', () => {
       it('should accept --resources flag', () => {
         const args = ['--resources', 'res'];
         const result = parseOptions(args);
-        expect(result).toEqual({ ...DEFAULT_OPTIONS, platforms: generatePlatformsConfig('res'), resourcesDirectory: 'res' });
+        const platforms = generatePlatformsConfig('res');
+        const resourcesDirectory = 'res';
+        expect(result).toEqual({
+          ...DEFAULT_OPTIONS,
+          platforms,
+          resourcesDirectory,
+        });
       });
 
       it('should log to stderr with --json flag', () => {
         const args = ['--json'];
         const result = parseOptions(args);
-        expect(result).toEqual({ ...DEFAULT_OPTIONS, logstream: process.stderr });
+        const logstream = process.stderr;
+        expect(result).toEqual({ ...DEFAULT_OPTIONS, logstream });
       });
-
     });
 
     describe('generateRunOptions', () => {
-
       it('should provide defaults with no args', async () => {
         expect(generateRunOptions(Platform.ANDROID, 'resources', [])).toEqual({
           'adaptive-icon': {
-            icon: { sources: ['resources/android/icon.png', 'resources/android/icon.jpg', 'resources/android/icon.jpeg', 'resources/icon.png', 'resources/icon.jpg', 'resources/icon.jpeg'] },
-            foreground: { sources: ['resources/android/icon-foreground.png', 'resources/android/icon-foreground.jpg', 'resources/android/icon-foreground.jpeg'] },
-            background: { sources: ['resources/android/icon-background.png', 'resources/android/icon-background.jpg', 'resources/android/icon-background.jpeg'] },
+            icon: {
+              sources: [
+                'resources/android/icon.png',
+                'resources/android/icon.jpg',
+                'resources/android/icon.jpeg',
+                'resources/icon.png',
+                'resources/icon.jpg',
+                'resources/icon.jpeg',
+              ],
+            },
+            foreground: {
+              sources: [
+                'resources/android/icon-foreground.png',
+                'resources/android/icon-foreground.jpg',
+                'resources/android/icon-foreground.jpeg',
+              ],
+            },
+            background: {
+              sources: [
+                'resources/android/icon-background.png',
+                'resources/android/icon-background.jpg',
+                'resources/android/icon-background.jpeg',
+              ],
+            },
           },
-          icon: { sources: ['resources/android/icon.png', 'resources/android/icon.jpg', 'resources/android/icon.jpeg', 'resources/icon.png', 'resources/icon.jpg', 'resources/icon.jpeg'] },
-          splash: { sources: ['resources/android/splash.png', 'resources/android/splash.jpg', 'resources/android/splash.jpeg', 'resources/splash.png', 'resources/splash.jpg', 'resources/splash.jpeg'] },
+          icon: {
+            sources: [
+              'resources/android/icon.png',
+              'resources/android/icon.jpg',
+              'resources/android/icon.jpeg',
+              'resources/icon.png',
+              'resources/icon.jpg',
+              'resources/icon.jpeg',
+            ],
+          },
+          splash: {
+            sources: [
+              'resources/android/splash.png',
+              'resources/android/splash.jpg',
+              'resources/android/splash.jpeg',
+              'resources/splash.png',
+              'resources/splash.jpg',
+              'resources/splash.jpeg',
+            ],
+          },
         });
       });
 
       it('should override source image paths', async () => {
-        expect(generateRunOptions(Platform.IOS, 'resources', ['--icon-source', 'foo.png', '--splash-source', 'bar.png'])).toEqual({
+        expect(
+          generateRunOptions(Platform.IOS, 'resources', [
+            '--icon-source',
+            'foo.png',
+            '--splash-source',
+            'bar.png',
+          ]),
+        ).toEqual({
           icon: { sources: ['foo.png'] },
           splash: { sources: ['bar.png'] },
         });
       });
-
     });
 
     describe('resolveOptions', () => {
-
       it('should pull platforms from config.xml if none provided', async () => {
         const configXml: et.Element = et.Element('widget');
         configXml.append(et.Element('platform', { name: 'android' }));
         configXml.append(et.Element('platform', { name: 'ios' }));
 
-        const options = await resolveOptions([], new et.ElementTree(configXml));
+        const root = new et.ElementTree(configXml);
+        const options = await resolveOptions([], root);
 
         expect(options.platforms).toEqual({
           ...generatePlatformsConfig('resources'),
@@ -196,7 +249,9 @@ describe('cordova-res', () => {
         configXml.append(et.Element('platform', { name: 'android' }));
         configXml.append(et.Element('platform', { name: 'ios' }));
 
-        const options = await resolveOptions(['android'], new et.ElementTree(configXml));
+        const args = ['android'];
+        const root = new et.ElementTree(configXml);
+        const options = await resolveOptions(args, root);
 
         expect(options.platforms).toEqual({
           ...generatePlatformsConfig('resources'),
@@ -208,13 +263,11 @@ describe('cordova-res', () => {
       it('should generate for all platforms if no config.xml and no runtime platform', async () => {
         const configXml: et.Element = et.Element('widget');
 
-        const options = await resolveOptions([], new et.ElementTree(configXml));
+        const root = new et.ElementTree(configXml);
+        const options = await resolveOptions([], root);
 
         expect(options.platforms).toEqual(generatePlatformsConfig('resources'));
       });
-
     });
-
   });
-
 });

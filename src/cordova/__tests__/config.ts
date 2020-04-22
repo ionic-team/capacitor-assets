@@ -2,16 +2,20 @@ import * as et from 'elementtree';
 
 import { runResource } from '../config';
 import { GeneratedResource, Platform } from '../../platform';
-import { ResourceKey, ResourceNodeAttributeType, ResourceType } from '../../resources';
+import {
+  ResourceKey,
+  ResourceNodeAttributeType,
+  ResourceType,
+} from '../../resources';
 
-const SRC_ATTRIBUTE = { key: ResourceKey.SRC, type: ResourceNodeAttributeType.PATH };
+const SRC_ATTRIBUTE = {
+  key: ResourceKey.SRC,
+  type: ResourceNodeAttributeType.PATH,
+};
 
 describe('cordova-res', () => {
-
   describe('cordova/config', () => {
-
     describe('runResource', () => {
-
       const resource: GeneratedResource = {
         [ResourceKey.SRC]: 'resources/icon.png',
         type: ResourceType.ICON,
@@ -19,7 +23,10 @@ describe('cordova-res', () => {
         configXml: {
           nodeName: 'icon',
           nodeAttributes: [SRC_ATTRIBUTE],
-          xpaths: resource => [`icon[@src='${resource.src}']`, `icon[@src='${resource.src!.replace(/\//g, '\\')}']`],
+          xpaths: resource => [
+            `icon[@src='${resource.src}']`,
+            `icon[@src='${resource.src!.replace(/\//g, '\\')}']`,
+          ],
           included: () => true,
         },
       };
@@ -61,9 +68,6 @@ describe('cordova-res', () => {
         expect(children[0].tag).toEqual(resource.configXml.nodeName);
         expect(children[0].get('src')).toEqual(src);
       });
-
     });
-
   });
-
 });
