@@ -3,7 +3,11 @@ import Debug from 'debug';
 import sharp, { Metadata, Sharp } from 'sharp';
 import util from 'util';
 
-import { ResolveSourceImageError, ValidationError } from './error';
+import {
+  BadInputError,
+  ResolveSourceImageError,
+  ValidationError,
+} from './error';
 import { Platform } from './platform';
 import {
   Format,
@@ -89,11 +93,81 @@ export function debugSourceImage(
   }
 }
 
-export interface ImageSchema {
-  src: string;
-  format: Format;
-  width: number;
-  height: number;
+export type Fit = 'contain' | 'cover' | 'fill';
+export type Position =
+  | 'center'
+  | 'top'
+  | 'right top'
+  | 'right'
+  | 'right bottom'
+  | 'bottom'
+  | 'left bottom'
+  | 'left'
+  | 'left top';
+
+export const FITS: readonly Fit[] = ['contain', 'cover', 'fill'];
+
+export const FITS_WITH_POSITION: readonly Fit[] = ['contain', 'cover'];
+
+export const POSITIONS: readonly Position[] = [
+  'center',
+  'top',
+  'right top',
+  'right',
+  'right bottom',
+  'bottom',
+  'left bottom',
+  'left',
+  'left top',
+];
+
+export function validateFit(fit: any): Fit {
+  if (!FITS.includes(fit)) {
+    throw new BadInputError(
+      `Invalid fit: "${fit}" (valid: ${FITS.map(f => `"${f}"`).join(', ')})`,
+    );
+  }
+
+  return fit;
+}
+
+export function validatePosition(fit: Fit, position: any): Position {
+  if (!FITS_WITH_POSITION.includes(fit) && position !== 'center') {
+    throw new BadInputError(
+      `Cannot use position for fit: "${fit}" (only ${FITS_WITH_POSITION.map(
+        f => `"${f}"`,
+      ).join(', ')})`,
+    );
+  }
+
+  if (!POSITIONS.includes(position)) {
+    throw new BadInputError(
+      `Invalid position: "${position}" (valid: ${POSITIONS.map(
+        p => `"${p}"`,
+      ).join(', ')})`,
+    );
+  }
+
+  return position;
+}
+
+export interface ResizeOptions {
+  /**
+   * When resizing, use this fit algorithm.
+   */
+  readonly fit?: Fit;
+
+  /**
+   * When resizing using a {@link fit} of `cover` or `contain`, use this to position the image.
+   */
+  readonly position?: Position;
+}
+
+export interface ImageSchema extends ResizeOptions {
+  readonly src: string;
+  readonly format: Format;
+  readonly width: number;
+  readonly height: number;
 }
 
 export async function generateImage(
@@ -107,7 +181,14 @@ export async function generateImage(
     return;
   }
 
-  debug('Generating %o (%ox%o)', image.src, image.width, image.height);
+  debug(
+    'Generating %o (%ox%o) fit=%o position=%o',
+    image.src,
+    image.width,
+    image.height,
+    image.fit,
+    image.position,
+  );
 
   if (metadata.format !== image.format) {
     errstream?.write(
@@ -118,11 +199,10 @@ export async function generateImage(
     );
   }
 
-  const transformations = [
+  const pipeline = applyTransformations(src, [
     createImageResizer(image),
     createImageConverter(image.format),
-  ];
-  const pipeline = applyTransformations(src, transformations);
+  ]);
 
   await writeFile(image.src, await pipeline.toBuffer());
 }
@@ -138,7 +218,11 @@ export function applyTransformations(
 }
 
 export function createImageResizer(image: ImageSchema): SharpTransformation {
-  return src => src.resize(image.width, image.height);
+  return src =>
+    src.resize(image.width, image.height, {
+      fit: image.fit,
+      position: image.position,
+    });
 }
 
 export function createImageConverter(format: Format): SharpTransformation {

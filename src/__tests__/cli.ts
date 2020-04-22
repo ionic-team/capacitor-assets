@@ -117,6 +117,10 @@ describe('cordova-res', () => {
         },
         skipConfig: false,
         copy: false,
+        resizeOptions: {
+          fit: 'cover',
+          position: 'center',
+        },
       };
 
       it('should parse default options with no arguments', () => {

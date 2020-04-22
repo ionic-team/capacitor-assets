@@ -41,6 +41,7 @@ describe('cordova-res', () => {
           {
             [ResourceType.ICON]: { sources: ['icon.png'] },
           },
+          {},
           null,
         );
 
@@ -90,6 +91,7 @@ describe('cordova-res', () => {
           {
             [ResourceType.ICON]: { sources: ['icon.png'] },
           },
+          {},
           null,
         );
 

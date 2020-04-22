@@ -6,6 +6,7 @@ import { Sharp } from 'sharp';
 import { BadInputError, ResolveSourceImageError } from './error';
 import {
   ImageSchema,
+  ResizeOptions,
   debugSourceImage,
   generateImage,
   readSourceImage,
@@ -108,6 +109,7 @@ export async function run(
   platform: Platform,
   resourcesDirectory: string,
   options: Readonly<RunPlatformOptions>,
+  resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
 ): Promise<RunPlatformResult> {
   debug('Running %s platform with options: %O', platform, options);
@@ -118,6 +120,7 @@ export async function run(
     platform,
     resourcesDirectory,
     options[ResourceType.ADAPTIVE_ICON],
+    resizeOptions,
     errstream,
   );
 
@@ -130,6 +133,7 @@ export async function run(
       platform,
       resourcesDirectory,
       options[ResourceType.ICON],
+      resizeOptions,
       errstream,
     );
 
@@ -144,6 +148,7 @@ export async function run(
     platform,
     resourcesDirectory,
     options[ResourceType.SPLASH],
+    resizeOptions,
     errstream,
   );
 
@@ -169,6 +174,7 @@ export async function safelyGenerateSimpleResources(
   platform: Platform,
   resourcesDirectory: string,
   options: Readonly<SimpleResourceOptions> | undefined,
+  resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
 ): Promise<SimpleResourceResult | undefined> {
   if (!options) {
@@ -181,6 +187,7 @@ export async function safelyGenerateSimpleResources(
       platform,
       resourcesDirectory,
       options,
+      resizeOptions,
       errstream,
     );
   } catch (e) {
@@ -206,6 +213,7 @@ export async function generateSimpleResources(
   platform: Platform,
   resourcesDirectory: string,
   options: Readonly<SimpleResourceOptions> | undefined,
+  resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
 ): Promise<SimpleResourceResult | undefined> {
   if (!options) {
@@ -239,7 +247,7 @@ export async function generateSimpleResources(
           resourcesDirectory,
           config,
           source.image,
-          resource,
+          { ...resource, ...resizeOptions },
           getResourceTransformFunction(platform, type, options),
           errstream,
         )),
@@ -294,6 +302,7 @@ export async function safelyGenerateAdaptiveIconResources(
   platform: Platform,
   resourcesDirectory: string,
   options: Readonly<AdaptiveIconResourceOptions> | undefined,
+  resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
 ): Promise<RunPlatformResult | undefined> {
   if (!options || platform !== Platform.ANDROID) {
@@ -304,6 +313,7 @@ export async function safelyGenerateAdaptiveIconResources(
     return await generateAdaptiveIconResources(
       resourcesDirectory,
       options,
+      resizeOptions,
       errstream,
     );
   } catch (e) {
@@ -321,6 +331,7 @@ export async function safelyGenerateAdaptiveIconResources(
 export async function generateAdaptiveIconResources(
   resourcesDirectory: string,
   options: Readonly<AdaptiveIconResourceOptions>,
+  resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
 ): Promise<RunPlatformResult> {
   if (
@@ -342,6 +353,7 @@ export async function generateAdaptiveIconResources(
     Platform.ANDROID,
     resourcesDirectory,
     options.icon,
+    resizeOptions,
     errstream,
   )) || { source: undefined };
 
@@ -353,6 +365,7 @@ export async function generateAdaptiveIconResources(
     ResourceKey.FOREGROUND,
     options.foreground.sources,
     options.foreground.transform,
+    resizeOptions,
     errstream,
   );
 
@@ -371,6 +384,7 @@ export async function generateAdaptiveIconResources(
           ResourceKey.BACKGROUND,
           resolvedBackgroundSource,
           options.background.transform,
+          resizeOptions,
           errstream,
         )
       : foregroundResources.map(resource => ({
@@ -427,6 +441,7 @@ export async function generateAdaptiveIconResourcesPortion(
   type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND,
   sources: readonly (string | ImageSource)[],
   transform: TransformFunction = (image, pipeline) => pipeline,
+  resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
 ): Promise<SimpleResourceResult> {
   const source = await resolveSourceImage(
@@ -442,6 +457,7 @@ export async function generateAdaptiveIconResourcesPortion(
       type,
       source,
       transform,
+      resizeOptions,
       errstream,
     ),
     source,
@@ -453,6 +469,7 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(
   type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND,
   source: ResolvedImageSource,
   transform: TransformFunction = (image, pipeline) => pipeline,
+  resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
 ): Promise<GeneratedResource[]> {
   debug(
@@ -477,7 +494,7 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(
           resourcesDirectory,
           config,
           source.image,
-          { ...resource, src: resource[type] },
+          { ...resource, src: resource[type], ...resizeOptions },
           transform,
           errstream,
         )),
@@ -499,10 +516,17 @@ export async function generateImageResource(
   errstream: NodeJS.WritableStream | null,
 ): Promise<GeneratedResource> {
   const { pipeline, metadata } = image;
-  const { src, format, width, height } = schema;
+  const { src, format, width, height, fit, position } = schema;
 
   const dest = pathlib.join(resourcesDirectory, src);
-  const generatedImage: ImageSchema = { src: dest, format, width, height };
+  const generatedImage: ImageSchema = {
+    src: dest,
+    format,
+    width,
+    height,
+    fit,
+    position,
+  };
 
   await ensureDir(pathlib.dirname(dest));
 

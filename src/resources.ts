@@ -5,8 +5,6 @@ import util from 'util';
 import { BadInputError, ValidationError, ValidationErrorCode } from './error';
 import { Platform, prettyPlatform } from './platform';
 
-export const DEFAULT_RESOURCES_DIRECTORY = 'resources';
-
 export const enum ResourceType {
   ADAPTIVE_ICON = 'adaptive-icon',
   ICON = 'icon',

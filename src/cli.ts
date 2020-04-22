@@ -7,6 +7,7 @@ import type {
 } from '.';
 import { getPlatforms } from './cordova/config';
 import { BadInputError } from './error';
+import { ResizeOptions, validateFit, validatePosition } from './image';
 import { NativeProjectConfig } from './native';
 import {
   AdaptiveIconResourceOptions,
@@ -18,7 +19,6 @@ import {
   validatePlatforms,
 } from './platform';
 import {
-  DEFAULT_RESOURCES_DIRECTORY,
   RESOURCE_TYPES,
   ResourceKey,
   ResourceType,
@@ -27,6 +27,10 @@ import {
   validateResourceTypes,
 } from './resources';
 import { getOptionValue } from './utils/cli';
+
+export const DEFAULT_RESOURCES_DIRECTORY = 'resources';
+export const DEFAULT_FIT = 'cover';
+export const DEFAULT_POSITION = 'center';
 
 export function getDirectory(): string {
   return process.cwd();
@@ -62,13 +66,9 @@ export async function resolveOptions(
 
 export function parseOptions(args: readonly string[]): Required<Options> {
   const json = args.includes('--json');
-  const resourcesDirectory = getOptionValue(
-    args,
-    '--resources',
-    DEFAULT_RESOURCES_DIRECTORY,
-  );
   const platform = parsePlatformOption(args);
   const platformList = validatePlatforms(platform ? [platform] : PLATFORMS);
+  const resourcesDirectory = parseResourcesDirectoryOption(args);
 
   return {
     directory: getDirectory(),
@@ -79,7 +79,22 @@ export function parseOptions(args: readonly string[]): Required<Options> {
     projectConfig: generatePlatformProjectOptions(platformList, args),
     skipConfig: parseSkipConfigOption(args),
     copy: parseCopyOption(args),
+    resizeOptions: parseResizeOptions(args),
   };
+}
+
+export function parseResourcesDirectoryOption(args: readonly string[]): string {
+  return getOptionValue(args, '--resources', DEFAULT_RESOURCES_DIRECTORY);
+}
+
+export function parseResizeOptions(args: readonly string[]): ResizeOptions {
+  const fit = validateFit(getOptionValue(args, '--fit', DEFAULT_FIT));
+  const position = validatePosition(
+    fit,
+    getOptionValue(args, '--position', DEFAULT_POSITION),
+  );
+
+  return { fit, position };
 }
 
 export function parsePlatformOption(

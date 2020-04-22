@@ -12,6 +12,7 @@ import {
   write as writeConfig,
 } from './cordova/config';
 import { BaseError } from './error';
+import { ResizeOptions } from './image';
 import { NativeProjectConfig, copyToNativeProject } from './native';
 import {
   GeneratedResource,
@@ -64,6 +65,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     projectConfig,
     skipConfig,
     copy,
+    resizeOptions,
   } = { ...defaultOptions, ...options };
 
   const configPath = getConfigPath(directory);
@@ -98,6 +100,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
         platform,
         resourcesDirectory,
         platformOptions,
+        resizeOptions,
         errstream,
       );
 
@@ -258,6 +261,11 @@ namespace CordovaRes {
      * Copy generated resources to native project directories.
      */
     readonly copy?: boolean;
+
+    /**
+     * Specify the resize options for every image.
+     */
+    readonly resizeOptions?: ResizeOptions;
   }
 
   export async function runCommandLine(args: readonly string[]): Promise<void> {
