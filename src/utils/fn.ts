@@ -9,3 +9,7 @@ export async function tryFn<T>(fn: () => Promise<T>): Promise<T | undefined> {
     debug('Encountered error when trying function: %O', fn);
   }
 }
+
+export function identity<T>(t: T): T {
+  return t;
+}

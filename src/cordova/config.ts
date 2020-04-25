@@ -4,14 +4,19 @@ import et from 'elementtree';
 import pathlib from 'path';
 import util from 'util';
 
-import { GeneratedResource, Platform } from '../platform';
+import { Platform } from '../platform';
 import {
   ResolvedColorSource,
   ResolvedSource,
-  ResourceNodeAttribute,
-  ResourceNodeAttributeType,
+  ResourceConfig,
+  ResourceKey,
+  ResourceKeyValues,
+  ResourceType,
+  ResourceValue,
   SourceType,
 } from '../resources';
+import { combinationJoiner } from '../utils/array';
+import { identity } from '../utils/fn';
 
 const debug = Debug('cordova-res:cordova:config');
 
@@ -23,7 +28,7 @@ export async function run(
   resourcesDirectory: string,
   doc: et.ElementTree,
   sources: readonly ResolvedSource[],
-  resources: readonly GeneratedResource[],
+  resources: readonly ResourceConfig[],
   errstream: NodeJS.WritableStream | null,
 ): Promise<void> {
   const colors = sources.filter(
@@ -94,7 +99,7 @@ export async function runColorsConfig(
 
 export function runConfig(
   doc: et.ElementTree,
-  resources: readonly GeneratedResource[],
+  resources: readonly ResourceConfig[],
   errstream: NodeJS.WritableStream | null,
 ): void {
   const root = doc.getroot();
@@ -117,14 +122,12 @@ export function runConfig(
 
   for (const [platform, platformResources] of platforms) {
     const platformElement = resolvePlatformElement(root, platform);
-    const filteredResources = platformResources
-      .filter(
-        img =>
-          orientation === 'default' ||
-          typeof img.orientation === 'undefined' ||
-          img.orientation === orientation,
-      )
-      .filter(img => img.configXml.included(img));
+    const filteredResources = platformResources.filter(
+      (img: Partial<ResourceKeyValues>) =>
+        orientation === 'default' ||
+        typeof img.orientation === 'undefined' ||
+        img.orientation === orientation,
+    );
 
     for (const resource of filteredResources) {
       runResource(platformElement, resource);
@@ -134,17 +137,24 @@ export function runConfig(
 
 export function runResource(
   container: et.Element,
-  resource: GeneratedResource,
+  resource: ResourceConfig,
 ): void {
-  const { nodeName, nodeAttributes, xpaths } = resource.configXml;
+  const configXml = getConfigXmlRules(resource);
 
-  const imgElement = resolveElement(container, nodeName, xpaths(resource));
+  if (!configXml || !configXml.included(resource)) {
+    return;
+  }
+
+  const { nodeName, nodeAttributes } = configXml;
+
+  const xpaths = getResourceXPaths(configXml, resource);
+  const imgElement = resolveElement(container, nodeName, xpaths);
 
   for (const attr of nodeAttributes) {
     const v = resolveAttribute(resource, attr);
 
     if (v) {
-      imgElement.set(attr.key, v);
+      imgElement.set(attr, v);
     }
   }
 }
@@ -156,6 +166,7 @@ export function resolvePlatformElement(
   const platformElement = resolveElement(container, 'platform', [
     `platform[@name='${platform}']`,
   ]);
+
   platformElement.set('name', platform);
 
   return platformElement;
@@ -186,19 +197,19 @@ export function conformPath(value: string | number): string {
 }
 
 export function resolveAttributeValue(
-  attr: ResourceNodeAttribute,
+  attr: ResourceKey,
   value: string | number,
 ): string {
-  return attr.type === ResourceNodeAttributeType.PATH
-    ? conformPath(value)
-    : value.toString();
+  const type = getAttributeType(attr);
+
+  return type === ResourceKeyType.PATH ? conformPath(value) : value.toString();
 }
 
 export function resolveAttribute(
-  resource: GeneratedResource,
-  attr: ResourceNodeAttribute,
+  resource: Partial<ResourceKeyValues>,
+  attr: ResourceKey,
 ): string | undefined {
-  const v = resource[attr.key];
+  const v = resource[attr];
 
   if (v) {
     return resolveAttributeValue(attr, v);
@@ -206,9 +217,9 @@ export function resolveAttribute(
 }
 
 export function groupImages(
-  images: readonly GeneratedResource[],
-): Map<Platform, GeneratedResource[]> {
-  const platforms = new Map<Platform, GeneratedResource[]>();
+  images: readonly ResourceConfig[],
+): Map<Platform, ResourceConfig[]> {
+  const platforms = new Map<Platform, ResourceConfig[]>();
 
   for (const image of images) {
     let platformImages = platforms.get(image.platform);
@@ -262,4 +273,194 @@ export function getPreference(
   }
 
   return value;
+}
+
+export const enum ResourceKeyType {
+  PATH = 'path',
+}
+
+export function getAttributeType(
+  attr: ResourceKey,
+): ResourceKeyType | undefined {
+  if (
+    [ResourceKey.FOREGROUND, ResourceKey.BACKGROUND, ResourceKey.SRC].includes(
+      attr,
+    )
+  ) {
+    return ResourceKeyType.PATH;
+  }
+}
+
+export function getResourceXPaths(
+  configXml: ConfigXmlRules,
+  resource: Partial<ResourceKeyValues>,
+): string[] {
+  const { nodeName } = configXml;
+
+  const indexes = combinationJoiner(
+    configXml.indexAttributes
+      .map(indexAttribute =>
+        getIndexAttributeXPathParts(
+          configXml,
+          indexAttribute,
+          resource[indexAttribute.key],
+        ),
+      )
+      .filter(index => index.length > 0),
+    parts => parts.join(''),
+  );
+
+  return indexes.map(index => `${nodeName}${index}`);
+}
+
+export function getIndexAttributeXPathParts(
+  configXml: ConfigXmlRules,
+  indexAttribute: ConfigXmlIndex,
+  value: ResourceKeyValues[ResourceKey] | undefined,
+): string[] {
+  const { nodeAttributes } = configXml;
+  const { key, values } = indexAttribute;
+
+  // If we aren't aware of this key's existence in the XML, we don't want to
+  // generate any XPaths for it.
+  if (!nodeAttributes.includes(key)) {
+    return [];
+  }
+
+  if (values) {
+    if (typeof value === 'undefined') {
+      return [];
+    }
+
+    const result = values(value);
+
+    if (Array.isArray(result)) {
+      return result.map(v => `[@${key}='${v}']`);
+    } else {
+      return [`[@${key}='${result}']`];
+    }
+  }
+
+  return [`[@${key}]`];
+}
+
+export function pathValues(inputValue: ResourceValue): ResourceValue[] {
+  if (typeof inputValue !== 'string') {
+    return [];
+  }
+
+  return [inputValue, inputValue.replace(/\//g, '\\')];
+}
+
+export interface ConfigXmlIndex {
+  readonly key: ResourceKey;
+  readonly values?: (
+    inputValue: ResourceValue,
+  ) => ResourceValue | ResourceValue[];
+}
+
+export interface ConfigXmlRules {
+  /**
+   * XML node name of this resource (e.g. 'icon', 'splash')
+   */
+  readonly nodeName: string;
+
+  /**
+   * An array of resource keys to copy into the XML node as attributes
+   */
+  readonly nodeAttributes: readonly ResourceKey[];
+
+  /**
+   * An array of resource keys to use as an index when generating the XPath(s)
+   */
+  readonly indexAttributes: ConfigXmlIndex[];
+
+  /**
+   * Get whether a resource should be included in the XML or not
+   */
+  readonly included: (resource: Partial<ResourceKeyValues>) => boolean;
+}
+
+export function getConfigXmlRules(
+  resource: ResourceConfig,
+): ConfigXmlRules | undefined {
+  switch (resource.platform) {
+    case Platform.ANDROID:
+      switch (resource.type) {
+        case ResourceType.ADAPTIVE_ICON:
+          return {
+            nodeName: 'icon',
+            nodeAttributes: [
+              ResourceKey.FOREGROUND,
+              ResourceKey.DENSITY,
+              ResourceKey.BACKGROUND,
+            ],
+            indexAttributes: [
+              { key: ResourceKey.FOREGROUND },
+              { key: ResourceKey.BACKGROUND },
+              { key: ResourceKey.DENSITY, values: identity },
+            ],
+            included: () => true,
+          };
+        case ResourceType.ICON:
+          return {
+            nodeName: 'icon',
+            nodeAttributes: [ResourceKey.SRC, ResourceKey.DENSITY],
+            indexAttributes: [
+              { key: ResourceKey.SRC },
+              { key: ResourceKey.DENSITY, values: identity },
+            ],
+            included: () => true,
+          };
+        case ResourceType.SPLASH:
+          return {
+            nodeName: 'splash',
+            nodeAttributes: [ResourceKey.SRC, ResourceKey.DENSITY],
+            indexAttributes: [{ key: ResourceKey.DENSITY, values: identity }],
+            included: () => true,
+          };
+      }
+    case Platform.IOS:
+      switch (resource.type) {
+        case ResourceType.ICON:
+          return {
+            nodeName: 'icon',
+            nodeAttributes: [
+              ResourceKey.SRC,
+              ResourceKey.WIDTH,
+              ResourceKey.HEIGHT,
+            ],
+            indexAttributes: [{ key: ResourceKey.SRC, values: pathValues }],
+            included: () => true,
+          };
+        case ResourceType.SPLASH:
+          return {
+            nodeName: 'splash',
+            nodeAttributes: [
+              ResourceKey.SRC,
+              ResourceKey.WIDTH,
+              ResourceKey.HEIGHT,
+            ],
+            indexAttributes: [{ key: ResourceKey.SRC, values: pathValues }],
+            included: () => true,
+          };
+      }
+    case Platform.WINDOWS:
+      switch (resource.type) {
+        case ResourceType.ICON:
+          return {
+            nodeName: 'icon',
+            nodeAttributes: [ResourceKey.SRC, ResourceKey.TARGET],
+            indexAttributes: [{ key: ResourceKey.SRC, values: pathValues }],
+            included: resource => !!resource.target,
+          };
+        case ResourceType.SPLASH:
+          return {
+            nodeName: 'splash',
+            nodeAttributes: [ResourceKey.SRC, ResourceKey.TARGET],
+            indexAttributes: [{ key: ResourceKey.SRC, values: pathValues }],
+            included: resource => !!resource.target,
+          };
+      }
+  }
 }

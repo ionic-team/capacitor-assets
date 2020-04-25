@@ -13,19 +13,21 @@ import {
   resolveSourceImage,
 } from './image';
 import {
+  ANDROID_ADAPTIVE_ICON_RESOURCES,
+  AndroidAdaptiveIconResourceConfig,
   COLOR_REGEX,
   ColorSource,
+  Format,
   ImageSource,
   ImageSourceData,
   ResolvedImageSource,
   ResolvedSource,
+  ResourceConfig,
   ResourceKey,
-  ResourceKeyValues,
   ResourceType,
-  ResourcesTypeConfig,
-  ResourcesTypeConfigXml,
+  SimpleResourceConfig,
   SourceType,
-  getResourcesConfig,
+  getSimpleResources,
 } from './resources';
 
 const debug = Debug('cordova-res:platform');
@@ -42,10 +44,8 @@ export const PLATFORMS: readonly Platform[] = [
   Platform.WINDOWS,
 ];
 
-export interface GeneratedResource extends ResourceKeyValues {
-  readonly type: ResourceType;
-  readonly platform: Platform;
-  readonly configXml: ResourcesTypeConfigXml;
+export interface AndroidAdaptiveIconResourcePart {
+  readonly [ResourceKey.SRC]: string;
 }
 
 export type TransformFunction = (image: ImageSchema, pipeline: Sharp) => Sharp;
@@ -67,9 +67,14 @@ export interface ResourceOptions<S> {
 
 export type SimpleResourceOptions = ResourceOptions<string | ImageSource>;
 
-export interface SimpleResourceResult {
-  resources: GeneratedResource[];
-  source: ResolvedSource;
+export interface GenerateResourceResult<R> {
+  readonly resources: readonly R[];
+  readonly source: ResolvedSource;
+}
+
+export interface RunPlatformResult<R> {
+  readonly resources: readonly R[];
+  readonly sources: ResolvedSource[];
 }
 
 export interface AdaptiveIconResourceOptions {
@@ -97,10 +102,15 @@ export interface RunPlatformOptions {
   [ResourceType.SPLASH]?: SimpleResourceOptions;
 }
 
-export interface RunPlatformResult {
-  resources: GeneratedResource[];
-  sources: ResolvedSource[];
+export interface GeneratedImageResource {
+  readonly format: Format;
+  readonly width: number;
+  readonly height: number;
+  readonly src: string;
 }
+
+export type UnconsolidatedGeneratedAndroidAdaptiveIconResource = AndroidAdaptiveIconResourceConfig &
+  GeneratedImageResource;
 
 /**
  * Run resource generation for the given platform.
@@ -111,10 +121,10 @@ export async function run(
   options: Readonly<RunPlatformOptions>,
   resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
-): Promise<RunPlatformResult> {
+): Promise<RunPlatformResult<ResourceConfig>> {
   debug('Running %s platform with options: %O', platform, options);
 
-  const resources: GeneratedResource[] = [];
+  const resources: ResourceConfig[] = [];
   const sources: ResolvedSource[] = [];
   const adaptiveResult = await safelyGenerateAdaptiveIconResources(
     platform,
@@ -176,7 +186,7 @@ export async function safelyGenerateSimpleResources(
   options: Readonly<SimpleResourceOptions> | undefined,
   resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
-): Promise<SimpleResourceResult | undefined> {
+): Promise<GenerateResourceResult<SimpleResourceConfig> | undefined> {
   if (!options) {
     return;
   }
@@ -215,7 +225,7 @@ export async function generateSimpleResources(
   options: Readonly<SimpleResourceOptions> | undefined,
   resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
-): Promise<SimpleResourceResult | undefined> {
+): Promise<GenerateResourceResult<SimpleResourceConfig> | undefined> {
   if (!options) {
     return;
   }
@@ -236,16 +246,14 @@ export async function generateSimpleResources(
     platform,
   );
 
-  const config = getResourcesConfig(platform, type);
+  const result = getSimpleResources(platform, type);
+
   const resources = await Promise.all(
-    config.resources.map(
-      async (resource): Promise<GeneratedResource> => ({
+    result.map(
+      async (resource): Promise<SimpleResourceConfig> => ({
         ...resource,
         ...(await generateImageResource(
-          type,
-          platform,
           resourcesDirectory,
-          config,
           source.image,
           { ...resource, ...resizeOptions },
           getResourceTransformFunction(platform, type, options),
@@ -304,7 +312,7 @@ export async function safelyGenerateAdaptiveIconResources(
   options: Readonly<AdaptiveIconResourceOptions> | undefined,
   resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
-): Promise<RunPlatformResult | undefined> {
+): Promise<RunPlatformResult<ResourceConfig> | undefined> {
   if (!options || platform !== Platform.ANDROID) {
     return;
   }
@@ -333,7 +341,7 @@ export async function generateAdaptiveIconResources(
   options: Readonly<AdaptiveIconResourceOptions>,
   resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
-): Promise<RunPlatformResult> {
+): Promise<RunPlatformResult<ResourceConfig>> {
   if (
     options.foreground.sources.length === 0 ||
     options.background.sources.length === 0
@@ -408,9 +416,9 @@ export async function generateAdaptiveIconResources(
 }
 
 export async function consolidateAdaptiveIconResources(
-  foregrounds: readonly GeneratedResource[],
-  backgrounds: readonly GeneratedResource[],
-): Promise<GeneratedResource[]> {
+  foregrounds: readonly UnconsolidatedGeneratedAndroidAdaptiveIconResource[],
+  backgrounds: readonly UnconsolidatedGeneratedAndroidAdaptiveIconResource[],
+): Promise<AndroidAdaptiveIconResourceConfig[]> {
   return foregrounds.map(foreground => {
     const background = backgrounds.find(r => r.density === foreground.density);
 
@@ -421,14 +429,14 @@ export async function consolidateAdaptiveIconResources(
     }
 
     return {
-      platform: foreground.platform,
-      type: foreground.type,
+      platform: Platform.ANDROID,
+      type: ResourceType.ADAPTIVE_ICON,
+      format: foreground.format,
       foreground: foreground.src,
       background: background.src,
       density: foreground.density,
       width: foreground.width,
       height: foreground.height,
-      configXml: foreground.configXml,
     };
   });
 }
@@ -443,7 +451,9 @@ export async function generateAdaptiveIconResourcesPortion(
   transform: TransformFunction = (image, pipeline) => pipeline,
   resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
-): Promise<SimpleResourceResult> {
+): Promise<
+  GenerateResourceResult<UnconsolidatedGeneratedAndroidAdaptiveIconResource>
+> {
   const source = await resolveSourceImage(
     Platform.ANDROID,
     ResourceType.ADAPTIVE_ICON,
@@ -471,7 +481,7 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(
   transform: TransformFunction = (image, pipeline) => pipeline,
   resizeOptions: ResizeOptions,
   errstream: NodeJS.WritableStream | null,
-): Promise<GeneratedResource[]> {
+): Promise<UnconsolidatedGeneratedAndroidAdaptiveIconResource[]> {
   debug(
     'Using %O for %s source image for %s',
     source.image.src,
@@ -479,20 +489,14 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(
     Platform.ANDROID,
   );
 
-  const config = getResourcesConfig(
-    Platform.ANDROID,
-    ResourceType.ADAPTIVE_ICON,
-  );
-
-  const resources = await Promise.all(
-    config.resources.map(
-      async (resource): Promise<GeneratedResource> => ({
+  const parts = await Promise.all(
+    ANDROID_ADAPTIVE_ICON_RESOURCES.map(
+      async (
+        resource,
+      ): Promise<UnconsolidatedGeneratedAndroidAdaptiveIconResource> => ({
         ...resource,
         ...(await generateImageResource(
-          ResourceType.ADAPTIVE_ICON,
-          Platform.ANDROID,
           resourcesDirectory,
-          config,
           source.image,
           { ...resource, src: resource[type], ...resizeOptions },
           transform,
@@ -502,19 +506,16 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(
     ),
   );
 
-  return resources;
+  return parts;
 }
 
 export async function generateImageResource(
-  type: ResourceType,
-  platform: Platform,
   resourcesDirectory: string,
-  config: ResourcesTypeConfig<ResourceKeyValues>,
   image: ImageSourceData,
-  schema: ResourceKeyValues & ImageSchema,
+  schema: ImageSchema,
   transform: TransformFunction = (image, pipeline) => pipeline,
   errstream: NodeJS.WritableStream | null,
-): Promise<GeneratedResource> {
+): Promise<GeneratedImageResource> {
   const { pipeline, metadata } = image;
   const { src, format, width, height, fit, position } = schema;
 
@@ -538,13 +539,10 @@ export async function generateImageResource(
   );
 
   return {
-    type,
     format,
     width,
     height,
     src: dest,
-    platform,
-    configXml: config.configXml,
   };
 }
 

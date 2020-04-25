@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { Platform } from '../platform';
-import { ResourceType, getResourcesConfig } from '../resources';
+import { ResourceType, getSimpleResources } from '../resources';
 
 describe('cordova-res', () => {
   describe('platform', () => {
@@ -45,10 +45,10 @@ describe('cordova-res', () => {
           null,
         );
 
-        const generatedImages = getResourcesConfig(
+        const generatedImages = getSimpleResources(
           Platform.ANDROID,
           ResourceType.ICON,
-        ).resources;
+        );
 
         expect(imageMock.resolveSourceImage).toHaveBeenCalledTimes(1);
         expect(imageMock.resolveSourceImage).toHaveBeenCalledWith(
@@ -95,10 +95,10 @@ describe('cordova-res', () => {
           null,
         );
 
-        const generatedImages = getResourcesConfig(
+        const generatedImages = getSimpleResources(
           Platform.WINDOWS,
           ResourceType.ICON,
-        ).resources;
+        );
 
         expect(imageMock.resolveSourceImage).toHaveBeenCalledTimes(1);
         expect(imageMock.resolveSourceImage).toHaveBeenCalledWith(

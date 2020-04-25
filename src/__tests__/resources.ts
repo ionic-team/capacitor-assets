@@ -1,9 +1,11 @@
+import { Platform } from '../platform';
 import {
   Format,
-  ResourceKey,
+  Target,
+  ResourceConfig,
+  ResourceType,
   generateScaledWindowsResource,
   isSupportedResourceType,
-  xpathsForPathAttribute,
 } from '../resources';
 
 describe('cordova-res', () => {
@@ -24,41 +26,27 @@ describe('cordova-res', () => {
 
     describe('generateScaledWindowsResource', () => {
       it('should generate scaled resource with proper src and format', () => {
-        const resource = {
+        const resource: ResourceConfig = {
+          platform: Platform.WINDOWS,
+          type: ResourceType.ICON,
           src: 'dir/icon.png',
           width: 100,
           height: 100,
           format: Format.NONE,
-          target: 'target',
+          target: Target.STORE_LOGO,
         };
+
         const expected = {
+          platform: Platform.WINDOWS,
+          type: ResourceType.ICON,
           src: 'dir/icon.scale-150.png',
           width: 150,
           height: 150,
           format: Format.PNG,
+          target: undefined,
         };
 
         expect(generateScaledWindowsResource(resource, 1.5)).toEqual(expected);
-      });
-    });
-
-    describe('xpathsForPathAttribute', () => {
-      it('should not generate paths for non-strings', () => {
-        const xpaths = xpathsForPathAttribute('icon', ResourceKey.SRC);
-        const paths = xpaths({});
-
-        expect(paths).toEqual([]);
-      });
-
-      it('should generate xpaths for posix and win32', () => {
-        const xpaths = xpathsForPathAttribute('icon', ResourceKey.SRC);
-        const src = 'path/to/icon.png';
-        const paths = xpaths({ src });
-
-        expect(paths).toEqual([
-          `icon[@src='${src}']`,
-          `icon[@src='${src.replace(/\//g, '\\')}']`,
-        ]);
       });
     });
   });

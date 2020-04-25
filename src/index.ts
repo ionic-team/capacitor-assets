@@ -15,7 +15,6 @@ import { BaseError } from './error';
 import { ResizeOptions } from './image';
 import { NativeProjectConfig, copyToNativeProject } from './native';
 import {
-  GeneratedResource,
   PLATFORMS,
   Platform,
   RunPlatformOptions,
@@ -26,6 +25,7 @@ import {
   Density,
   Orientation,
   ResolvedSource,
+  ResourceConfig,
   ResourceType,
   SourceType,
 } from './resources';
@@ -77,7 +77,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
   );
 
   let config: et.ElementTree | undefined;
-  const resources: GeneratedResource[] = [];
+  const resources: ResourceConfig[] = [];
   const sources: ResolvedSource[] = [];
 
   if (!skipConfig) {
@@ -144,31 +144,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
   }
 
   return {
-    resources: resources.map(resource => {
-      const {
-        platform,
-        type,
-        src,
-        foreground,
-        background,
-        width,
-        height,
-        density,
-        orientation,
-      } = resource;
-
-      return {
-        platform,
-        type,
-        src,
-        foreground,
-        background,
-        width,
-        height,
-        density,
-        orientation,
-      };
-    }),
+    resources,
     sources: sources.map(source => {
       switch (source.type) {
         case SourceType.RASTER:
