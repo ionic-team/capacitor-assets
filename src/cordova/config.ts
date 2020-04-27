@@ -10,10 +10,10 @@ import {
   ResolvedSource,
   ResourceConfig,
   ResourceKey,
-  ResourceKeyValues,
   ResourceType,
   ResourceValue,
   SourceType,
+  UnknownResource,
 } from '../resources';
 import { combinationJoiner } from '../utils/array';
 import { identity } from '../utils/fn';
@@ -121,13 +121,16 @@ export function runConfig(
   const platforms = groupImages(resources);
 
   for (const [platform, platformResources] of platforms) {
+    const rules = getPlatformConfigXmlRules(platform);
     const platformElement = resolvePlatformElement(root, platform);
-    const filteredResources = platformResources.filter(
-      (img: Partial<ResourceKeyValues>) =>
-        orientation === 'default' ||
-        typeof img.orientation === 'undefined' ||
-        img.orientation === orientation,
-    );
+    const filteredResources = platformResources
+      .sort(rules.sort)
+      .filter(
+        (img: Partial<UnknownResource>) =>
+          orientation === 'default' ||
+          typeof img.orientation === 'undefined' ||
+          img.orientation === orientation,
+      );
 
     for (const resource of filteredResources) {
       runResource(platformElement, resource);
@@ -139,15 +142,15 @@ export function runResource(
   container: et.Element,
   resource: ResourceConfig,
 ): void {
-  const configXml = getConfigXmlRules(resource);
+  const rules = getResourceConfigXmlRules(resource);
 
-  if (!configXml || !configXml.included(resource)) {
+  if (!rules || !rules.included(resource)) {
     return;
   }
 
-  const { nodeName, nodeAttributes } = configXml;
+  const { nodeName, nodeAttributes } = rules;
 
-  const xpaths = getResourceXPaths(configXml, resource);
+  const xpaths = getResourceXPaths(rules, resource);
   const imgElement = resolveElement(container, nodeName, xpaths);
 
   for (const attr of nodeAttributes) {
@@ -206,7 +209,7 @@ export function resolveAttributeValue(
 }
 
 export function resolveAttribute(
-  resource: Partial<ResourceKeyValues>,
+  resource: Partial<UnknownResource>,
   attr: ResourceKey,
 ): string | undefined {
   const v = resource[attr];
@@ -292,16 +295,16 @@ export function getAttributeType(
 }
 
 export function getResourceXPaths(
-  configXml: ConfigXmlRules,
-  resource: Partial<ResourceKeyValues>,
+  rules: ResourceConfigXmlRules,
+  resource: Partial<UnknownResource>,
 ): string[] {
-  const { nodeName } = configXml;
+  const { nodeName } = rules;
 
   const indexes = combinationJoiner(
-    configXml.indexAttributes
+    rules.indexAttributes
       .map(indexAttribute =>
         getIndexAttributeXPathParts(
-          configXml,
+          rules,
           indexAttribute,
           resource[indexAttribute.key],
         ),
@@ -314,11 +317,11 @@ export function getResourceXPaths(
 }
 
 export function getIndexAttributeXPathParts(
-  configXml: ConfigXmlRules,
-  indexAttribute: ConfigXmlIndex,
-  value: ResourceKeyValues[ResourceKey] | undefined,
+  rules: ResourceConfigXmlRules,
+  indexAttribute: ResourceConfigXmlIndex,
+  value: UnknownResource[ResourceKey] | undefined,
 ): string[] {
-  const { nodeAttributes } = configXml;
+  const { nodeAttributes } = rules;
   const { key, values } = indexAttribute;
 
   // If we aren't aware of this key's existence in the XML, we don't want to
@@ -352,14 +355,51 @@ export function pathValues(inputValue: ResourceValue): ResourceValue[] {
   return [inputValue, inputValue.replace(/\//g, '\\')];
 }
 
-export interface ConfigXmlIndex {
+export interface PlatformConfigXmlRules {
+  /**
+   * Sort the resources as per config.xml requirements
+   */
+  readonly sort: (a: UnknownResource, b: UnknownResource) => -1 | 0 | 1;
+}
+
+export const RESOURCE_WEIGHTS: { [R in ResourceType]: number } = {
+  [ResourceType.ADAPTIVE_ICON]: 1,
+  [ResourceType.ICON]: 2,
+  [ResourceType.SPLASH]: 3,
+};
+
+export const sortResources = (
+  a: UnknownResource,
+  b: UnknownResource,
+): -1 | 0 | 1 => {
+  if (a.type === b.type) {
+    return 0;
+  }
+
+  return RESOURCE_WEIGHTS[a.type] > RESOURCE_WEIGHTS[b.type] ? 1 : -1;
+};
+
+export function getPlatformConfigXmlRules(
+  platform: Platform,
+): PlatformConfigXmlRules {
+  switch (platform) {
+    case Platform.ANDROID:
+      return { sort: sortResources };
+    case Platform.IOS:
+      return { sort: sortResources };
+    case Platform.WINDOWS:
+      return { sort: sortResources };
+  }
+}
+
+export interface ResourceConfigXmlIndex {
   readonly key: ResourceKey;
   readonly values?: (
     inputValue: ResourceValue,
   ) => ResourceValue | ResourceValue[];
 }
 
-export interface ConfigXmlRules {
+export interface ResourceConfigXmlRules {
   /**
    * XML node name of this resource (e.g. 'icon', 'splash')
    */
@@ -373,17 +413,17 @@ export interface ConfigXmlRules {
   /**
    * An array of resource keys to use as an index when generating the XPath(s)
    */
-  readonly indexAttributes: ConfigXmlIndex[];
+  readonly indexAttributes: ResourceConfigXmlIndex[];
 
   /**
    * Get whether a resource should be included in the XML or not
    */
-  readonly included: (resource: Partial<ResourceKeyValues>) => boolean;
+  readonly included: (resource: Partial<UnknownResource>) => boolean;
 }
 
-export function getConfigXmlRules(
+export function getResourceConfigXmlRules(
   resource: ResourceConfig,
-): ConfigXmlRules | undefined {
+): ResourceConfigXmlRules | undefined {
   switch (resource.platform) {
     case Platform.ANDROID:
       switch (resource.type) {

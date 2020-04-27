@@ -1,7 +1,7 @@
 import * as et from 'elementtree';
 
 import {
-  ConfigXmlRules,
+  ResourceConfigXmlRules,
   getIndexAttributeXPathParts,
   getResourceXPaths,
   pathValues,
@@ -31,7 +31,7 @@ describe('cordova-res', () => {
         typeof v === 'number' ? [v, v * 2, v * 3] : [],
     };
     const formatIndexAttribute = { key: ResourceKey.FORMAT };
-    const configXml: ConfigXmlRules = {
+    const configXml: ResourceConfigXmlRules = {
       nodeName: 'icon',
       nodeAttributes: [
         ResourceKey.SRC,

@@ -243,14 +243,19 @@ export interface ResourceKeyValues {
 
 export type ResourceValue = ResourceKeyValues[ResourceKey];
 
+export interface PlatformAndType<P extends Platform, T extends ResourceType> {
+  readonly platform: P;
+  readonly type: T;
+}
+
+export type UnknownResource = Partial<ResourceKeyValues> &
+  PlatformAndType<Platform, ResourceType>;
+
 export type BaseResourceConfig<
   P extends Platform,
   T extends ResourceType,
   R extends keyof ResourceKeyValues
-> = { [K in R]: ResourceKeyValues[K] } & {
-  readonly platform: P;
-  readonly type: T;
-};
+> = { [K in R]: ResourceKeyValues[K] } & PlatformAndType<P, T>;
 
 export type ImageResourceKey =
   | ResourceKey.FORMAT
