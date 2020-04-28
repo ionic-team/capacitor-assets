@@ -881,7 +881,7 @@ export const ANDROID_SPLASH_RESOURCES: readonly AndroidSplashResourceConfig[] = 
  * - iPhone Notification (iOS 7+)
  * - iPad Notification (iOS 7+)
  */
-const IOS_ICON_20_PT: IOSIconResourceConfig = {
+const IOS_20_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-20.png',
@@ -890,7 +890,7 @@ const IOS_ICON_20_PT: IOSIconResourceConfig = {
   height: 20,
 };
 
-const IOS_ICON_20_PT_2X: IOSIconResourceConfig = {
+const IOS_20_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-20@2x.png',
@@ -899,7 +899,7 @@ const IOS_ICON_20_PT_2X: IOSIconResourceConfig = {
   height: 40,
 };
 
-const IOS_ICON_20_PT_3X: IOSIconResourceConfig = {
+const IOS_20_PT_3X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-20@3x.png',
@@ -916,7 +916,7 @@ const IOS_ICON_20_PT_3X: IOSIconResourceConfig = {
  * - Apple Watch Companion Settings
  * - Apple Watch Notification Center
  */
-const IOS_ICON_29_PT: IOSIconResourceConfig = {
+const IOS_29_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-29.png',
@@ -925,7 +925,7 @@ const IOS_ICON_29_PT: IOSIconResourceConfig = {
   height: 29,
 };
 
-const IOS_ICON_29_PT_2X: IOSIconResourceConfig = {
+const IOS_29_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-29@2x.png',
@@ -934,7 +934,7 @@ const IOS_ICON_29_PT_2X: IOSIconResourceConfig = {
   height: 58,
 };
 
-const IOS_ICON_29_PT_3X: IOSIconResourceConfig = {
+const IOS_29_PT_3X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-29@3x.png',
@@ -950,7 +950,7 @@ const IOS_ICON_29_PT_3X: IOSIconResourceConfig = {
  * - iPad Spotlight (iOS 7+)
  * - Apple Watch Home Screen
  */
-const IOS_ICON_40_PT: IOSIconResourceConfig = {
+const IOS_40_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-40.png',
@@ -959,7 +959,7 @@ const IOS_ICON_40_PT: IOSIconResourceConfig = {
   height: 40,
 };
 
-const IOS_ICON_40_PT_2X: IOSIconResourceConfig = {
+const IOS_40_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-40@2x.png',
@@ -968,7 +968,7 @@ const IOS_ICON_40_PT_2X: IOSIconResourceConfig = {
   height: 80,
 };
 
-const IOS_ICON_40_PT_3X: IOSIconResourceConfig = {
+const IOS_40_PT_3X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-40@3x.png',
@@ -983,7 +983,7 @@ const IOS_ICON_40_PT_3X: IOSIconResourceConfig = {
  * - iPad Spotlight (iOS 5,6)
  * - Apple Watch Home Screen
  */
-const IOS_ICON_50_PT: IOSIconResourceConfig = {
+const IOS_50_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-50.png',
@@ -992,7 +992,7 @@ const IOS_ICON_50_PT: IOSIconResourceConfig = {
   height: 50,
 };
 
-const IOS_ICON_50_PT_2X: IOSIconResourceConfig = {
+const IOS_50_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-50@2x.png',
@@ -1006,7 +1006,7 @@ const IOS_ICON_50_PT_2X: IOSIconResourceConfig = {
  *
  * - iPhone App (iOS 5,6)
  */
-const IOS_ICON_57_PT: IOSIconResourceConfig = {
+const IOS_57_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon.png',
@@ -1015,7 +1015,7 @@ const IOS_ICON_57_PT: IOSIconResourceConfig = {
   height: 57,
 };
 
-const IOS_ICON_57_PT_2X: IOSIconResourceConfig = {
+const IOS_57_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon@2x.png',
@@ -1029,7 +1029,7 @@ const IOS_ICON_57_PT_2X: IOSIconResourceConfig = {
  *
  * - iPhone App (iOS 7+)
  */
-const IOS_ICON_60_PT: IOSIconResourceConfig = {
+const IOS_60_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-60.png',
@@ -1038,7 +1038,7 @@ const IOS_ICON_60_PT: IOSIconResourceConfig = {
   height: 60,
 };
 
-const IOS_ICON_60_PT_2X: IOSIconResourceConfig = {
+const IOS_60_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-60@2x.png',
@@ -1047,7 +1047,7 @@ const IOS_ICON_60_PT_2X: IOSIconResourceConfig = {
   height: 120,
 };
 
-const IOS_ICON_60_PT_3X: IOSIconResourceConfig = {
+const IOS_60_PT_3X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-60@3x.png',
@@ -1061,7 +1061,7 @@ const IOS_ICON_60_PT_3X: IOSIconResourceConfig = {
  *
  * - iPad App (iOS 5,6)
  */
-const IOS_ICON_72_PT: IOSIconResourceConfig = {
+const IOS_72_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-72.png',
@@ -1070,7 +1070,7 @@ const IOS_ICON_72_PT: IOSIconResourceConfig = {
   height: 72,
 };
 
-const IOS_ICON_72_PT_2X: IOSIconResourceConfig = {
+const IOS_72_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-72@2x.png',
@@ -1084,7 +1084,7 @@ const IOS_ICON_72_PT_2X: IOSIconResourceConfig = {
  *
  * - iPad App (iOS 7+)
  */
-const IOS_ICON_76_PT: IOSIconResourceConfig = {
+const IOS_76_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-76.png',
@@ -1093,7 +1093,7 @@ const IOS_ICON_76_PT: IOSIconResourceConfig = {
   height: 76,
 };
 
-const IOS_ICON_76_PT_2X: IOSIconResourceConfig = {
+const IOS_76_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-76@2x.png',
@@ -1107,7 +1107,7 @@ const IOS_ICON_76_PT_2X: IOSIconResourceConfig = {
  *
  * iPad Pro (12.9-inch)
  */
-const IOS_ICON_83_5_PT_2X: IOSIconResourceConfig = {
+const IOS_83_5_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-83.5@2x.png',
@@ -1121,7 +1121,7 @@ const IOS_ICON_83_5_PT_2X: IOSIconResourceConfig = {
  *
  * - App Store
  */
-const IOS_ICON_1024: IOSIconResourceConfig = {
+const IOS_1024_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-1024.png',
@@ -1135,7 +1135,7 @@ const IOS_ICON_1024: IOSIconResourceConfig = {
  *
  * - Apple Watch Notification Center
  */
-const IOS_ICON_24_PT: IOSIconResourceConfig = {
+const IOS_24_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-24@2x.png',
@@ -1149,7 +1149,7 @@ const IOS_ICON_24_PT: IOSIconResourceConfig = {
  *
  * - Apple Watch Notification Center
  */
-const IOS_ICON_27_5_PT: IOSIconResourceConfig = {
+const IOS_27_5_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-27.5@2x.png',
@@ -1163,7 +1163,7 @@ const IOS_ICON_27_5_PT: IOSIconResourceConfig = {
  *
  * - Apple Watch Home Screen
  */
-const IOS_ICON_44_PT_2X: IOSIconResourceConfig = {
+const IOS_44_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-44@2x.png',
@@ -1177,7 +1177,7 @@ const IOS_ICON_44_PT_2X: IOSIconResourceConfig = {
  *
  * - Apple Watch Short Look
  */
-const IOS_ICON_86_PT_2X: IOSIconResourceConfig = {
+const IOS_86_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-86@2x.png',
@@ -1191,7 +1191,7 @@ const IOS_ICON_86_PT_2X: IOSIconResourceConfig = {
  *
  * - Apple Watch Short Look
  */
-const IOS_ICON_98_PT_2X: IOSIconResourceConfig = {
+const IOS_98_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-98@2x.png',
@@ -1205,7 +1205,7 @@ const IOS_ICON_98_PT_2X: IOSIconResourceConfig = {
  *
  * - Apple Watch Short Look
  */
-const IOS_ICON_108_PT_2X: IOSIconResourceConfig = {
+const IOS_108_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'ios/icon/icon-108@2x.png',
@@ -1215,37 +1215,37 @@ const IOS_ICON_108_PT_2X: IOSIconResourceConfig = {
 };
 
 export const IOS_ICON_RESOURCES: readonly IOSIconResourceConfig[] = [
-  IOS_ICON_57_PT,
-  IOS_ICON_57_PT_2X,
-  IOS_ICON_20_PT,
-  IOS_ICON_20_PT_2X,
-  IOS_ICON_20_PT_3X,
-  IOS_ICON_29_PT,
-  IOS_ICON_29_PT_2X,
-  IOS_ICON_29_PT_3X,
-  IOS_ICON_24_PT,
-  IOS_ICON_27_5_PT,
-  IOS_ICON_44_PT_2X,
-  IOS_ICON_86_PT_2X,
-  IOS_ICON_98_PT_2X,
-  IOS_ICON_108_PT_2X,
-  IOS_ICON_40_PT,
-  IOS_ICON_40_PT_2X,
-  IOS_ICON_40_PT_3X,
-  IOS_ICON_50_PT,
-  IOS_ICON_50_PT_2X,
-  IOS_ICON_60_PT,
-  IOS_ICON_60_PT_2X,
-  IOS_ICON_60_PT_3X,
-  IOS_ICON_72_PT,
-  IOS_ICON_72_PT_2X,
-  IOS_ICON_76_PT,
-  IOS_ICON_76_PT_2X,
-  IOS_ICON_83_5_PT_2X,
-  IOS_ICON_1024,
+  IOS_57_PT_ICON,
+  IOS_57_PT_2X_ICON,
+  IOS_20_PT_ICON,
+  IOS_20_PT_2X_ICON,
+  IOS_20_PT_3X_ICON,
+  IOS_29_PT_ICON,
+  IOS_29_PT_2X_ICON,
+  IOS_29_PT_3X_ICON,
+  IOS_24_PT_ICON,
+  IOS_27_5_PT_ICON,
+  IOS_44_PT_2X_ICON,
+  IOS_86_PT_2X_ICON,
+  IOS_98_PT_2X_ICON,
+  IOS_108_PT_2X_ICON,
+  IOS_40_PT_ICON,
+  IOS_40_PT_2X_ICON,
+  IOS_40_PT_3X_ICON,
+  IOS_50_PT_ICON,
+  IOS_50_PT_2X_ICON,
+  IOS_60_PT_ICON,
+  IOS_60_PT_2X_ICON,
+  IOS_60_PT_3X_ICON,
+  IOS_72_PT_ICON,
+  IOS_72_PT_2X_ICON,
+  IOS_76_PT_ICON,
+  IOS_76_PT_2X_ICON,
+  IOS_83_5_PT_2X_ICON,
+  IOS_1024_ICON,
 ];
 
-const IOS_SPLASH_568H_2X_IPHONE: IOSSplashResourceConfig = {
+const IOS_568H_2X_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-568h@2x~iphone.png',
@@ -1255,7 +1255,7 @@ const IOS_SPLASH_568H_2X_IPHONE: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_667H: IOSSplashResourceConfig = {
+const IOS_667H_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-667h.png',
@@ -1265,7 +1265,7 @@ const IOS_SPLASH_667H: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_2688H_IPHONE: IOSSplashResourceConfig = {
+const IOS_2688H_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-2688h~iphone.png',
@@ -1275,7 +1275,7 @@ const IOS_SPLASH_2688H_IPHONE: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_2688H_LANDSCAPE_IPHONE: IOSSplashResourceConfig = {
+const IOS_2688H_LANDSCAPE_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Landscape-2688h~iphone.png',
@@ -1285,7 +1285,7 @@ const IOS_SPLASH_2688H_LANDSCAPE_IPHONE: IOSSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const IOS_SPLASH_1792H_IPHONE: IOSSplashResourceConfig = {
+const IOS_1792H_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-1792h~iphone.png',
@@ -1295,7 +1295,7 @@ const IOS_SPLASH_1792H_IPHONE: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_1792H_LANDSCAPE_IPHONE: IOSSplashResourceConfig = {
+const IOS_1792H_LANDSCAPE_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Landscape-1792h~iphone.png',
@@ -1305,7 +1305,7 @@ const IOS_SPLASH_1792H_LANDSCAPE_IPHONE: IOSSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const IOS_SPLASH_2436H: IOSSplashResourceConfig = {
+const IOS_2436H_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-2436h.png',
@@ -1315,7 +1315,7 @@ const IOS_SPLASH_2436H: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_2436H_LANDSCAPE: IOSSplashResourceConfig = {
+const IOS_2436H_LANDSCAPE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Landscape-2436h.png',
@@ -1325,7 +1325,7 @@ const IOS_SPLASH_2436H_LANDSCAPE: IOSSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const IOS_SPLASH_736H: IOSSplashResourceConfig = {
+const IOS_736H_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-736h.png',
@@ -1335,7 +1335,7 @@ const IOS_SPLASH_736H: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_736H_LANDSCAPE: IOSSplashResourceConfig = {
+const IOS_736H_LANDSCAPE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Landscape-736h.png',
@@ -1345,7 +1345,7 @@ const IOS_SPLASH_736H_LANDSCAPE: IOSSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const IOS_SPLASH_LANDSCAPE_2X_IPAD: IOSSplashResourceConfig = {
+const IOS_LANDSCAPE_2X_IPAD_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Landscape@2x~ipad.png',
@@ -1355,7 +1355,7 @@ const IOS_SPLASH_LANDSCAPE_2X_IPAD: IOSSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const IOS_SPLASH_LANDSCAPE_IPADPRO: IOSSplashResourceConfig = {
+const IOS_LANDSCAPE_IPADPRO_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Landscape@~ipadpro.png',
@@ -1365,7 +1365,7 @@ const IOS_SPLASH_LANDSCAPE_IPADPRO: IOSSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const IOS_SPLASH_LANDSCAPE_IPAD: IOSSplashResourceConfig = {
+const IOS_LANDSCAPE_IPAD_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Landscape~ipad.png',
@@ -1375,7 +1375,7 @@ const IOS_SPLASH_LANDSCAPE_IPAD: IOSSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const IOS_SPLASH_PORTRAIT_2X_IPAD: IOSSplashResourceConfig = {
+const IOS_PORTRAIT_2X_IPAD_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Portrait@2x~ipad.png',
@@ -1385,7 +1385,7 @@ const IOS_SPLASH_PORTRAIT_2X_IPAD: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_PORTRAIT_IPADPRO: IOSSplashResourceConfig = {
+const IOS_PORTRAIT_IPADPRO_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Portrait@~ipadpro.png',
@@ -1395,7 +1395,7 @@ const IOS_SPLASH_PORTRAIT_IPADPRO: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_PORTRAIT_IPAD: IOSSplashResourceConfig = {
+const IOS_PORTRAIT_IPAD_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default-Portrait~ipad.png',
@@ -1405,7 +1405,7 @@ const IOS_SPLASH_PORTRAIT_IPAD: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_2X_IPHONE: IOSSplashResourceConfig = {
+const IOS_2X_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default@2x~iphone.png',
@@ -1415,7 +1415,7 @@ const IOS_SPLASH_2X_IPHONE: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_IPHONE: IOSSplashResourceConfig = {
+const IOS_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default~iphone.png',
@@ -1425,7 +1425,7 @@ const IOS_SPLASH_IPHONE: IOSSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const IOS_SPLASH_2X_UNIVERSAL_ANYANY: IOSSplashResourceConfig = {
+const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'ios/splash/Default@2x~universal~anyany.png',
@@ -1436,23 +1436,23 @@ const IOS_SPLASH_2X_UNIVERSAL_ANYANY: IOSSplashResourceConfig = {
 };
 
 export const IOS_SPLASH_RESOURCES: readonly IOSSplashResourceConfig[] = [
-  IOS_SPLASH_568H_2X_IPHONE,
-  IOS_SPLASH_667H,
-  IOS_SPLASH_2688H_IPHONE,
-  IOS_SPLASH_2688H_LANDSCAPE_IPHONE,
-  IOS_SPLASH_1792H_IPHONE,
-  IOS_SPLASH_1792H_LANDSCAPE_IPHONE,
-  IOS_SPLASH_2436H,
-  IOS_SPLASH_2436H_LANDSCAPE,
-  IOS_SPLASH_736H,
-  IOS_SPLASH_736H_LANDSCAPE,
-  IOS_SPLASH_LANDSCAPE_2X_IPAD,
-  IOS_SPLASH_LANDSCAPE_IPADPRO,
-  IOS_SPLASH_LANDSCAPE_IPAD,
-  IOS_SPLASH_PORTRAIT_2X_IPAD,
-  IOS_SPLASH_PORTRAIT_IPADPRO,
-  IOS_SPLASH_PORTRAIT_IPAD,
-  IOS_SPLASH_2X_IPHONE,
-  IOS_SPLASH_IPHONE,
-  IOS_SPLASH_2X_UNIVERSAL_ANYANY,
+  IOS_568H_2X_IPHONE_SPLASH,
+  IOS_667H_SPLASH,
+  IOS_2688H_IPHONE_SPLASH,
+  IOS_2688H_LANDSCAPE_IPHONE_SPLASH,
+  IOS_1792H_IPHONE_SPLASH,
+  IOS_1792H_LANDSCAPE_IPHONE_SPLASH,
+  IOS_2436H_SPLASH,
+  IOS_2436H_LANDSCAPE_SPLASH,
+  IOS_736H_SPLASH,
+  IOS_736H_LANDSCAPE_SPLASH,
+  IOS_LANDSCAPE_2X_IPAD_SPLASH,
+  IOS_LANDSCAPE_IPADPRO_SPLASH,
+  IOS_LANDSCAPE_IPAD_SPLASH,
+  IOS_PORTRAIT_2X_IPAD_SPLASH,
+  IOS_PORTRAIT_IPADPRO_SPLASH,
+  IOS_PORTRAIT_IPAD_SPLASH,
+  IOS_2X_IPHONE_SPLASH,
+  IOS_IPHONE_SPLASH,
+  IOS_2X_UNIVERSAL_ANYANY_SPLASH,
 ];
