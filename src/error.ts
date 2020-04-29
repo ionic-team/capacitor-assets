@@ -38,7 +38,10 @@ export abstract class BaseError extends Error {
   }
 
   toString() {
-    return this.message;
+    return (
+      `${this.code}: ${this.message}\n` +
+      (this.stack ? `\n${this.stack}\n` : '')
+    );
   }
 
   toJSON(): { [key: string]: any } {

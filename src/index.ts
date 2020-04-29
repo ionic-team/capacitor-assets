@@ -2,6 +2,7 @@ import { pathWritable } from '@ionic/utils-fs';
 import Debug from 'debug';
 import et from 'elementtree';
 import path from 'path';
+import { Sharp } from 'sharp';
 import util from 'util';
 
 import { getDirectory, parseOptions, resolveOptions } from './cli';
@@ -12,7 +13,7 @@ import {
   write as writeConfig,
 } from './cordova/config';
 import { BaseError } from './error';
-import { ResizeOptions } from './image';
+import { ResizeOptions, ImageSchema } from './image';
 import { NativeProjectConfig, copyToNativeProject } from './native';
 import {
   PLATFORMS,
@@ -65,7 +66,11 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
     projectConfig,
     skipConfig,
     copy,
-    resizeOptions,
+    operations: {
+      fit = 'cover',
+      position = 'center',
+      transform = (image: ImageSchema, pipeline: Sharp) => pipeline,
+    },
   } = { ...defaultOptions, ...options };
 
   const configPath = getConfigPath(directory);
@@ -100,7 +105,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
         platform,
         resourcesDirectory,
         platformOptions,
-        resizeOptions,
+        { fit, position, transform },
         errstream,
       );
 
@@ -178,6 +183,23 @@ namespace CordovaRes {
     [P in Platform]?: Readonly<NativeProjectConfig>;
   };
 
+  export type Operations = ResizeOptions & {
+    /**
+     * Custom Sharp transform function.
+     *
+     * This function is called for every resource to allow for advanced image
+     * manipulation via the Sharp API.
+     *
+     * @see https://sharp.pixelplumbing.com
+     *
+     * @param image The schema that describes the current image.
+     * @param pipeline The Sharp object for the current image.
+     *
+     * @returns Sharp object
+     */
+    readonly transform?: (image: ImageSchema, pipeline: Sharp) => Sharp;
+  };
+
   /**
    * Options for `cordova-res`.
    *
@@ -239,9 +261,9 @@ namespace CordovaRes {
     readonly copy?: boolean;
 
     /**
-     * Specify the resize options for every image.
+     * Image manipulation operations.
      */
-    readonly resizeOptions?: ResizeOptions;
+    readonly operations?: Operations;
   }
 
   export async function runCommandLine(args: readonly string[]): Promise<void> {

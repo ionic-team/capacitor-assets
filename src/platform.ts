@@ -6,7 +6,6 @@ import { Sharp } from 'sharp';
 import { BadInputError, ResolveSourceImageError } from './error';
 import {
   ImageSchema,
-  ResizeOptions,
   debugSourceImage,
   generateImage,
   readSourceImage,
@@ -28,7 +27,9 @@ import {
   SimpleResourceConfig,
   SourceType,
   getSimpleResources,
+  getRasterResourceSchema,
 } from './resources';
+import type { Operations } from '.';
 
 const debug = Debug('cordova-res:platform');
 
@@ -58,11 +59,6 @@ export interface ResourceOptions<S> {
    * Android Adaptive Icons, this may be a {@link ColorSource}.
    */
   readonly sources: readonly S[];
-
-  /**
-   * Additional image transformations to apply.
-   */
-  readonly transform?: TransformFunction;
 }
 
 export type SimpleResourceOptions = ResourceOptions<string | ImageSource>;
@@ -119,7 +115,7 @@ export async function run(
   platform: Platform,
   resourcesDirectory: string,
   options: Readonly<RunPlatformOptions>,
-  resizeOptions: ResizeOptions,
+  operations: Required<Operations>,
   errstream: NodeJS.WritableStream | null,
 ): Promise<RunPlatformResult<ResourceConfig>> {
   debug('Running %s platform with options: %O', platform, options);
@@ -130,7 +126,7 @@ export async function run(
     platform,
     resourcesDirectory,
     options[ResourceType.ADAPTIVE_ICON],
-    resizeOptions,
+    operations,
     errstream,
   );
 
@@ -143,7 +139,7 @@ export async function run(
       platform,
       resourcesDirectory,
       options[ResourceType.ICON],
-      resizeOptions,
+      operations,
       errstream,
     );
 
@@ -158,7 +154,7 @@ export async function run(
     platform,
     resourcesDirectory,
     options[ResourceType.SPLASH],
-    resizeOptions,
+    operations,
     errstream,
   );
 
@@ -184,7 +180,7 @@ export async function safelyGenerateSimpleResources(
   platform: Platform,
   resourcesDirectory: string,
   options: Readonly<SimpleResourceOptions> | undefined,
-  resizeOptions: ResizeOptions,
+  operations: Required<Operations>,
   errstream: NodeJS.WritableStream | null,
 ): Promise<GenerateResourceResult<SimpleResourceConfig> | undefined> {
   if (!options) {
@@ -197,7 +193,7 @@ export async function safelyGenerateSimpleResources(
       platform,
       resourcesDirectory,
       options,
-      resizeOptions,
+      operations,
       errstream,
     );
   } catch (e) {
@@ -223,7 +219,7 @@ export async function generateSimpleResources(
   platform: Platform,
   resourcesDirectory: string,
   options: Readonly<SimpleResourceOptions> | undefined,
-  resizeOptions: ResizeOptions,
+  operations: Required<Operations>,
   errstream: NodeJS.WritableStream | null,
 ): Promise<GenerateResourceResult<SimpleResourceConfig> | undefined> {
   if (!options) {
@@ -255,8 +251,8 @@ export async function generateSimpleResources(
         ...(await generateImageResource(
           resourcesDirectory,
           source.image,
-          { ...resource, ...resizeOptions },
-          getResourceTransformFunction(platform, type, options),
+          { ...resource, fit: operations.fit, position: operations.position },
+          getResourceTransformFunction(platform, type, operations),
           errstream,
         )),
       }),
@@ -272,18 +268,18 @@ export async function generateSimpleResources(
 export function getResourceTransformFunction(
   platform: Platform,
   type: ResourceType,
-  {
-    transform = (image, pipeline) => pipeline,
-  }: Readonly<SimpleResourceOptions>,
+  operations: Required<Operations>,
 ): TransformFunction {
-  const transforms = [transform];
+  if (typeof operations.transform !== 'function') {
+    throw new BadInputError(
+      `Transform function must be a function or undefined, not "${operations.transform}".`,
+    );
+  }
 
-  if (platform === Platform.IOS && type === ResourceType.ICON) {
-    // Automatically remove the alpha channel for iOS icons. If alpha channels
-    // exist in iOS icons when uploaded to the App Store, the app may be
-    // rejected referencing ITMS-90717.
-    //
-    // @see https://github.com/ionic-team/cordova-res/issues/94
+  const transforms = [operations.transform];
+  const schema = getRasterResourceSchema(platform, type);
+
+  if (!schema.alpha) {
     transforms.push((image, pipeline) =>
       pipeline.flatten({ background: { r: 255, g: 255, b: 255 } }),
     );
@@ -295,9 +291,17 @@ export function getResourceTransformFunction(
 export function combineTransformFunctions(
   transformations: readonly TransformFunction[],
 ): TransformFunction {
-  return transformations.reduce((acc, transformation) => (image, pipeline) =>
-    transformation(image, acc(image, pipeline)),
-  );
+  return transformations.reduce((acc, transformation) => (image, pipeline) => {
+    const result = acc(image, pipeline);
+
+    if (!result || typeof result !== 'object') {
+      throw new BadInputError(
+        `Invalid Sharp pipeline returned while performing transforms: ${result}`,
+      );
+    }
+
+    return transformation(image, result);
+  });
 }
 
 /**
@@ -310,7 +314,7 @@ export async function safelyGenerateAdaptiveIconResources(
   platform: Platform,
   resourcesDirectory: string,
   options: Readonly<AdaptiveIconResourceOptions> | undefined,
-  resizeOptions: ResizeOptions,
+  operations: Required<Operations>,
   errstream: NodeJS.WritableStream | null,
 ): Promise<RunPlatformResult<ResourceConfig> | undefined> {
   if (!options || platform !== Platform.ANDROID) {
@@ -321,7 +325,7 @@ export async function safelyGenerateAdaptiveIconResources(
     return await generateAdaptiveIconResources(
       resourcesDirectory,
       options,
-      resizeOptions,
+      operations,
       errstream,
     );
   } catch (e) {
@@ -339,7 +343,7 @@ export async function safelyGenerateAdaptiveIconResources(
 export async function generateAdaptiveIconResources(
   resourcesDirectory: string,
   options: Readonly<AdaptiveIconResourceOptions>,
-  resizeOptions: ResizeOptions,
+  operations: Required<Operations>,
   errstream: NodeJS.WritableStream | null,
 ): Promise<RunPlatformResult<ResourceConfig>> {
   if (
@@ -361,7 +365,7 @@ export async function generateAdaptiveIconResources(
     Platform.ANDROID,
     resourcesDirectory,
     options.icon,
-    resizeOptions,
+    operations,
     errstream,
   )) || { source: undefined };
 
@@ -372,8 +376,7 @@ export async function generateAdaptiveIconResources(
     resourcesDirectory,
     ResourceKey.FOREGROUND,
     options.foreground.sources,
-    options.foreground.transform,
-    resizeOptions,
+    operations,
     errstream,
   );
 
@@ -391,8 +394,7 @@ export async function generateAdaptiveIconResources(
           resourcesDirectory,
           ResourceKey.BACKGROUND,
           resolvedBackgroundSource,
-          options.background.transform,
-          resizeOptions,
+          operations,
           errstream,
         )
       : foregroundResources.map(resource => ({
@@ -448,8 +450,7 @@ export async function generateAdaptiveIconResourcesPortion(
   resourcesDirectory: string,
   type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND,
   sources: readonly (string | ImageSource)[],
-  transform: TransformFunction = (image, pipeline) => pipeline,
-  resizeOptions: ResizeOptions,
+  operations: Required<Operations>,
   errstream: NodeJS.WritableStream | null,
 ): Promise<
   GenerateResourceResult<UnconsolidatedGeneratedAndroidAdaptiveIconResource>
@@ -466,8 +467,7 @@ export async function generateAdaptiveIconResourcesPortion(
       resourcesDirectory,
       type,
       source,
-      transform,
-      resizeOptions,
+      operations,
       errstream,
     ),
     source,
@@ -478,8 +478,7 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(
   resourcesDirectory: string,
   type: ResourceKey.FOREGROUND | ResourceKey.BACKGROUND,
   source: ResolvedImageSource,
-  transform: TransformFunction = (image, pipeline) => pipeline,
-  resizeOptions: ResizeOptions,
+  operations: Required<Operations>,
   errstream: NodeJS.WritableStream | null,
 ): Promise<UnconsolidatedGeneratedAndroidAdaptiveIconResource[]> {
   debug(
@@ -498,8 +497,17 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(
         ...(await generateImageResource(
           resourcesDirectory,
           source.image,
-          { ...resource, src: resource[type], ...resizeOptions },
-          transform,
+          {
+            ...resource,
+            src: resource[type],
+            fit: operations.fit,
+            position: operations.position,
+          },
+          getResourceTransformFunction(
+            Platform.ANDROID,
+            ResourceType.ADAPTIVE_ICON,
+            operations,
+          ),
           errstream,
         )),
       }),
@@ -531,12 +539,9 @@ export async function generateImageResource(
 
   await ensureDir(pathlib.dirname(dest));
 
-  await generateImage(
-    generatedImage,
-    transform(generatedImage, pipeline.clone()),
-    metadata,
-    errstream,
-  );
+  const img = transform(generatedImage, pipeline.clone());
+
+  await generateImage(generatedImage, img, metadata, errstream);
 
   return {
     format,

@@ -79,7 +79,7 @@ export function parseOptions(args: readonly string[]): Required<Options> {
     projectConfig: generatePlatformProjectOptions(platformList, args),
     skipConfig: parseSkipConfigOption(args),
     copy: parseCopyOption(args),
-    resizeOptions: parseResizeOptions(args),
+    operations: parseResizeOptions(args),
   };
 }
 

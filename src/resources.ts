@@ -94,8 +94,20 @@ export function isRasterResourceFormat(format: any): format is Format {
 }
 
 export interface RasterResourceSchema {
+  /**
+   * The expected width.
+   */
   width: number;
+
+  /**
+   * The expected height.
+   */
   height: number;
+
+  /**
+   * Whether transparency is allowed or not.
+   */
+  alpha: boolean;
 }
 
 export async function validateRasterResource(
@@ -104,6 +116,7 @@ export async function validateRasterResource(
   source: string,
   metadata: Metadata,
   schema: RasterResourceSchema,
+  errstream: NodeJS.WritableStream | null,
 ): Promise<void> {
   const { format, width, height } = metadata;
   const { width: requiredWidth, height: requiredHeight } = schema;
@@ -137,6 +150,27 @@ export async function validateRasterResource(
       },
     );
   }
+
+  if (!schema.alpha && metadata.hasAlpha) {
+    const platformSpecificMessage =
+      platform === Platform.IOS && type === ResourceType.ICON
+        ? '\n' +
+          '\tApple recommends avoiding transparency. See the App Icon Human Interface Guidelines[1] for details. Any transparency in your icon will be filled in with white.\n\n' +
+          '\t[1]: https://developer.apple.com/design/human-interface-guidelines/ios/icons-and-images/app-icon/\n'
+        : '';
+
+    // @see https://github.com/ionic-team/cordova-res/issues/94
+    errstream?.write(
+      util.format(
+        'WARN:\tSource %s "%s" contains alpha channel, generated %s for %s will not.\n' +
+          platformSpecificMessage,
+        prettyResourceType(type),
+        source,
+        prettyResourceType(type, { pluralize: true }),
+        prettyPlatform(platform),
+      ) + '\n',
+    );
+  }
 }
 
 export const COLOR_REGEX = /^\#[A-F0-9]{6}$/;
@@ -147,11 +181,27 @@ export function getRasterResourceSchema(
 ): RasterResourceSchema {
   switch (type) {
     case ResourceType.ADAPTIVE_ICON:
-      return { width: 432, height: 432 };
+      return {
+        width: 432,
+        height: 432,
+        alpha: false,
+      };
     case ResourceType.ICON:
-      return { width: 1024, height: 1024 };
+      return {
+        width: 1024,
+        height: 1024,
+        // If alpha channels exist in iOS icons when uploaded to the App Store,
+        // the app may be rejected referencing ITMS-90717.
+        //
+        // @see https://github.com/ionic-team/cordova-res/issues/94
+        alpha: platform !== Platform.IOS,
+      };
     case ResourceType.SPLASH:
-      return { width: 2732, height: 2732 };
+      return {
+        width: 2732,
+        height: 2732,
+        alpha: true,
+      };
   }
 }
 
@@ -163,26 +213,36 @@ export async function validateResource(
   errstream: NodeJS.WritableStream | null,
 ): Promise<Metadata> {
   const metadata = await pipeline.metadata();
-
   const schema = getRasterResourceSchema(platform, type);
-  await validateRasterResource(platform, type, source, metadata, schema);
 
-  if (platform === Platform.IOS && type === ResourceType.ICON) {
-    if (metadata.hasAlpha) {
-      // @see https://github.com/ionic-team/cordova-res/issues/94
-      errstream?.write(
-        util.format(
-          'WARN:\tSource icon %s contains alpha channel, generated icons for %s will not.\n\n' +
-            '\tApple recommends avoiding transparency. See the App Icon Human Interface Guidelines[1] for details. Any transparency in your icon will be filled in with white.\n\n' +
-            '\t[1]: https://developer.apple.com/design/human-interface-guidelines/ios/icons-and-images/app-icon/\n',
-          source,
-          prettyPlatform(platform),
-        ) + '\n',
-      );
-    }
-  }
+  await validateRasterResource(
+    platform,
+    type,
+    source,
+    metadata,
+    schema,
+    errstream,
+  );
 
   return metadata;
+}
+
+export interface PrettyResourceTypeOptions {
+  pluralize?: boolean;
+}
+
+export function prettyResourceType(
+  type: ResourceType,
+  { pluralize = false }: PrettyResourceTypeOptions = {},
+): string {
+  switch (type) {
+    case ResourceType.ADAPTIVE_ICON:
+      return 'adaptive icon' + (pluralize ? 's' : '');
+    case ResourceType.ICON:
+      return 'icon' + (pluralize ? 's' : '');
+    case ResourceType.SPLASH:
+      return 'splash screen' + (pluralize ? 's' : '');
+  }
 }
 
 export const enum Format {

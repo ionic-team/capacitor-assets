@@ -41,7 +41,11 @@ describe('cordova-res', () => {
           {
             [ResourceType.ICON]: { sources: ['icon.png'] },
           },
-          {},
+          {
+            fit: 'cover',
+            position: 'center',
+            transform: (image, pipeline) => pipeline,
+          },
           null,
         );
 
@@ -68,6 +72,8 @@ describe('cordova-res', () => {
               format: generatedImage.format,
               width: generatedImage.width,
               height: generatedImage.height,
+              fit: 'cover',
+              position: 'center',
             },
             expect.anything(),
             expect.anything(),
@@ -91,7 +97,11 @@ describe('cordova-res', () => {
           {
             [ResourceType.ICON]: { sources: ['icon.png'] },
           },
-          {},
+          {
+            fit: 'cover',
+            position: 'center',
+            transform: (image, pipeline) => pipeline,
+          },
           null,
         );
 
@@ -118,6 +128,8 @@ describe('cordova-res', () => {
               format: generatedImage.format,
               width: generatedImage.width,
               height: generatedImage.height,
+              fit: 'cover',
+              position: 'center',
             },
             expect.anything(),
             expect.anything(),
