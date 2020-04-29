@@ -8,13 +8,14 @@ import {
   ResolveSourceImageError,
   ValidationError,
 } from './error';
-import { Platform } from './platform';
+import { Platform, prettyPlatform } from './platform';
 import {
   Format,
   ResolvedImageSource,
   ResourceType,
   SourceType,
   validateResource,
+  prettyResourceType,
 } from './resources';
 
 const debug = Debug('cordova-res:image');
@@ -44,8 +45,15 @@ export async function resolveSourceImage(
     debugSourceImage(source, error, errstream);
   }
 
+  const msg = util.format(
+    `Missing valid source image for %s %s (sources: %s)`,
+    prettyPlatform(platform),
+    prettyResourceType(type, { pluralize: true }),
+    sources.join(', '),
+  );
+
   throw new ResolveSourceImageError(
-    `Missing source image for "${type}" (sources: ${sources.join(', ')})`,
+    msg,
     errors
       .map(([, error]) => error)
       .filter((e): e is ValidationError => e instanceof ValidationError),

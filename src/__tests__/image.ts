@@ -1,12 +1,17 @@
 import { Platform } from '../platform';
 import { ResourceType } from '../resources';
+import { identity } from '../utils/fn';
 
 describe('cordova-res', () => {
   describe('image', () => {
     describe('resolveSourceImage', () => {
       let image: typeof import('../image');
       let fsMock: { [key: string]: jest.Mock };
-      let resourcesMock: { validateResource: jest.Mock };
+      let resourcesMock: {
+        validateResource: jest.Mock;
+        prettyPlatform: Function;
+        prettyResourceType: Function;
+      };
 
       beforeEach(async () => {
         jest.resetModules();
@@ -16,7 +21,11 @@ describe('cordova-res', () => {
           writeFile: jest.fn(),
         };
 
-        resourcesMock = { validateResource: jest.fn() };
+        resourcesMock = {
+          validateResource: jest.fn(),
+          prettyPlatform: identity,
+          prettyResourceType: identity,
+        };
 
         jest.mock('@ionic/utils-fs', () => fsMock);
         jest.mock('../resources', () => resourcesMock);
@@ -32,7 +41,7 @@ describe('cordova-res', () => {
             [],
             null,
           ),
-        ).rejects.toThrow('Missing source image');
+        ).rejects.toThrow('Missing valid source image');
         expect(fsMock.readFile).not.toHaveBeenCalled();
       });
 
@@ -47,7 +56,7 @@ describe('cordova-res', () => {
             ['blah.png'],
             null,
           ),
-        ).rejects.toThrow('Missing source image');
+        ).rejects.toThrow('Missing valid source image');
         expect(fsMock.readFile).toHaveBeenCalledTimes(1);
       });
 

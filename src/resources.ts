@@ -123,9 +123,13 @@ export async function validateRasterResource(
 
   if (!format || !isRasterResourceFormat(format)) {
     throw new ValidationError(
-      `The format for source image of type "${type}" must be one of: (${RESOURCE_RASTER_FORMATS.join(
-        ', ',
-      )}) (image format is "${format}").`,
+      util.format(
+        `The format of source images for %s %s must be one of: (%s) (image format is "%s").`,
+        prettyPlatform(platform),
+        prettyResourceType(type, { pluralize: true }),
+        RESOURCE_RASTER_FORMATS.join(', '),
+        format,
+      ),
       {
         source,
         type,
@@ -138,7 +142,15 @@ export async function validateRasterResource(
 
   if (!width || !height || width < requiredWidth || height < requiredHeight) {
     throw new ValidationError(
-      `The dimensions for source image of type "${type}" do not meet minimum size requirements: ${requiredWidth}x${requiredHeight} (image is ${width}x${height}).`,
+      util.format(
+        `The dimensions of source images for %s %s do not meet minimum size requirements: %dx%d (image is %dx%d).`,
+        prettyPlatform(platform),
+        prettyResourceType(type, { pluralize: true }),
+        requiredWidth,
+        requiredHeight,
+        width,
+        height,
+      ),
       {
         source,
         type,
@@ -179,30 +191,100 @@ export function getRasterResourceSchema(
   platform: Platform,
   type: ResourceType,
 ): RasterResourceSchema {
-  switch (type) {
-    case ResourceType.ADAPTIVE_ICON:
-      return {
-        width: 432,
-        height: 432,
-        alpha: true,
-      };
-    case ResourceType.ICON:
-      return {
-        width: 1024,
-        height: 1024,
-        // If alpha channels exist in iOS icons when uploaded to the App Store,
-        // the app may be rejected referencing ITMS-90717.
-        //
-        // @see https://github.com/ionic-team/cordova-res/issues/94
-        alpha: platform !== Platform.IOS,
-      };
-    case ResourceType.SPLASH:
-      return {
-        width: 2732,
-        height: 2732,
-        alpha: true,
-      };
+  switch (platform) {
+    case Platform.ANDROID:
+      switch (type) {
+        case ResourceType.ADAPTIVE_ICON:
+          return {
+            width: 432,
+            height: 432,
+            alpha: true,
+          };
+        case ResourceType.ICON:
+          /**
+           * The Play Store icon is not generated as a resource, but we keep
+           * the requirement 512x512 so it can be used for the Play Store icon.
+           *
+           * @see https://developer.android.com/google-play/resources/icon-design-specifications#attributes
+           */
+          return {
+            width: 512,
+            height: 512,
+            alpha: true,
+          };
+        case ResourceType.SPLASH:
+          /**
+           * The landscape and portrait splash screens for Android have a
+           * maximum respective width and height of 1920, so we require
+           * a source image of 1920x1920.
+           */
+          return {
+            width: 1920,
+            height: 1920,
+            alpha: true,
+          };
+      }
+    case Platform.IOS:
+      switch (type) {
+        case ResourceType.ICON:
+          /**
+           * The App Store icon is generated as a resource. Apple requires App
+           * Store icons to be 1024x1024.
+           *
+           * If alpha channels exist in iOS icons when uploaded to the App
+           * Store, the app may be rejected referencing ITMS-90717.
+           *
+           * @see https://github.com/ionic-team/cordova-res/issues/94
+           */
+          return {
+            width: 1024,
+            height: 1024,
+            alpha: false,
+          };
+        case ResourceType.SPLASH:
+          /**
+           * The 2x universal splash screen is 2732x2732.
+           */
+          return {
+            width: 2732,
+            height: 2732,
+            alpha: true,
+          };
+      }
+      break;
+    case Platform.WINDOWS:
+      switch (type) {
+        case ResourceType.ICON:
+          /**
+           * The largest icon for Windows is 310x310. At a maximum scale factor
+           * of 400%, the requirement is 1240x1240.
+           *
+           * @see https://docs.microsoft.com/en-us/windows/uwp/design/style/app-icons-and-logos
+           */
+          return {
+            width: 1240,
+            height: 1240,
+            alpha: true,
+          };
+        case ResourceType.SPLASH:
+          /**
+           * There is only one generated splash screen resource for Windows,
+           * and it is 620x300. At a maximum scale factor of 400%, the
+           * requirement is 2480x1200.
+           *
+           * @see https://msdn.microsoft.com/en-us/windows/desktop/hh465338
+           */
+          return {
+            width: 2480,
+            height: 1200,
+            alpha: true,
+          };
+      }
   }
+
+  throw new BadInputError(
+    `Unsupported platform/resource type combination: ${platform}/${type}`,
+  );
 }
 
 export async function validateResource(

@@ -304,7 +304,7 @@ namespace CordovaRes {
         process.stderr.write(
           `${
             e instanceof BaseError
-              ? `ERROR: ${e.toString()}`
+              ? `ERROR:\t${e.toString()}`
               : e.stack
               ? e.stack
               : String(e)
