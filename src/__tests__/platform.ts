@@ -1,6 +1,10 @@
 import * as path from 'path';
 
-import { Platform } from '../platform';
+import {
+  Platform,
+  isSupportedPlatform,
+  getResourceDestination,
+} from '../platform';
 import { ResourceType, getSimpleResources } from '../resources';
 
 describe('cordova-res', () => {
@@ -68,7 +72,12 @@ describe('cordova-res', () => {
         for (const generatedImage of generatedImages) {
           expect(imageMock.generateImage).toHaveBeenCalledWith(
             {
-              src: path.join('resources', generatedImage.src),
+              src: path.join(
+                'resources',
+                generatedImage.platform,
+                generatedImage.type,
+                generatedImage.src,
+              ),
               format: generatedImage.format,
               width: generatedImage.width,
               height: generatedImage.height,
@@ -124,7 +133,12 @@ describe('cordova-res', () => {
         for (const generatedImage of generatedImages) {
           expect(imageMock.generateImage).toHaveBeenCalledWith(
             {
-              src: path.join('resources', generatedImage.src),
+              src: path.join(
+                'resources',
+                generatedImage.platform,
+                generatedImage.type,
+                generatedImage.src,
+              ),
               format: generatedImage.format,
               width: generatedImage.width,
               height: generatedImage.height,
@@ -142,12 +156,6 @@ describe('cordova-res', () => {
     });
 
     describe('isSupportedPlatform', () => {
-      let isSupportedPlatform: typeof import('../platform').isSupportedPlatform;
-
-      beforeEach(async () => {
-        ({ isSupportedPlatform } = await import('../platform'));
-      });
-
       it('should support android', async () => {
         expect(isSupportedPlatform('android')).toEqual(true);
       });
@@ -158,6 +166,34 @@ describe('cordova-res', () => {
 
       it('should not support garbage', async () => {
         expect(isSupportedPlatform('garbage')).toEqual(false);
+      });
+    });
+
+    describe('getResourceDestination', () => {
+      it('should generate dest for android icon', () => {
+        const expected = 'resources/android/icon/drawable-mdpi-icon.png';
+
+        expect(
+          getResourceDestination(
+            'resources',
+            Platform.ANDROID,
+            ResourceType.ICON,
+            'drawable-mdpi-icon.png',
+          ),
+        ).toEqual(expected);
+      });
+
+      it('should generate dest for android adaptive icon', () => {
+        const expected = 'resources/android/icon/mdpi-foreground.png';
+
+        expect(
+          getResourceDestination(
+            'resources',
+            Platform.ANDROID,
+            ResourceType.ADAPTIVE_ICON,
+            'mdpi-foreground.png',
+          ),
+        ).toEqual(expected);
       });
     });
   });

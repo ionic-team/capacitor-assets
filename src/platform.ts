@@ -517,17 +517,31 @@ export async function generateAdaptiveIconResourcesPortionFromImageSource(
   return parts;
 }
 
+export function getResourceDestination(
+  resourcesDirectory: string,
+  platform: Platform,
+  type: ResourceType,
+  src: string,
+): string {
+  return pathlib.join(
+    resourcesDirectory,
+    platform,
+    type === ResourceType.ADAPTIVE_ICON ? ResourceType.ICON : type,
+    src,
+  );
+}
+
 export async function generateImageResource(
   resourcesDirectory: string,
   image: ImageSourceData,
-  schema: ImageSchema,
+  schema: ResourceConfig & ImageSchema,
   transform: TransformFunction = (image, pipeline) => pipeline,
   errstream: NodeJS.WritableStream | null,
 ): Promise<GeneratedImageResource> {
   const { pipeline, metadata } = image;
-  const { src, format, width, height, fit, position } = schema;
+  const { platform, type, src, format, width, height, fit, position } = schema;
 
-  const dest = pathlib.join(resourcesDirectory, src);
+  const dest = getResourceDestination(resourcesDirectory, platform, type, src);
   const generatedImage: ImageSchema = {
     src: dest,
     format,
