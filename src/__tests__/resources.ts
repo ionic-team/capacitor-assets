@@ -25,17 +25,18 @@ describe('cordova-res', () => {
     });
 
     describe('generateScaledWindowsResource', () => {
-      it('should generate scaled resource with proper src and format', () => {
-        const resource: ResourceConfig = {
-          platform: Platform.WINDOWS,
-          type: ResourceType.ICON,
-          src: 'dir/icon.png',
-          width: 100,
-          height: 100,
-          format: Format.NONE,
-          target: Target.STORE_LOGO,
-        };
+      const resource: ResourceConfig = {
+        platform: Platform.WINDOWS,
+        type: ResourceType.ICON,
+        src: 'dir/icon.png',
+        width: 100,
+        height: 100,
+        format: Format.NONE,
+        target: Target.STORE_LOGO,
+        scale: 1,
+      };
 
+      it('should generate scaled resource with proper src and format', () => {
         const expected = {
           platform: Platform.WINDOWS,
           type: ResourceType.ICON,
@@ -44,9 +45,16 @@ describe('cordova-res', () => {
           height: 150,
           format: Format.PNG,
           target: undefined,
+          scale: 1.5,
         };
 
         expect(generateScaledWindowsResource(resource, 1.5)).toEqual(expected);
+      });
+
+      it('should not allow scaled resource', () => {
+        expect(() =>
+          generateScaledWindowsResource({ ...resource, scale: 2 }, 1.5),
+        ).toThrowError('from scaled resource');
       });
     });
   });

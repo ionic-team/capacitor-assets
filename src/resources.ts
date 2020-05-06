@@ -24,21 +24,6 @@ export const enum SourceType {
   // TODO: support vectors via Android XML
 }
 
-/**
- * @see https://cordova.apache.org/docs/en/latest/config_ref/images.html#windows
- */
-export const enum Target {
-  STORE_LOGO = 'StoreLogo',
-  SQUARE_30_X_30_LOGO = 'Square30x30Logo',
-  SQUARE_44_X_44_LOGO = 'Square44x44Logo',
-  SQUARE_70_X_70_LOGO = 'Square70x70Logo',
-  SQUARE_71_X_71_LOGO = 'Square71x71Logo',
-  SQUARE_150_X_150_LOGO = 'Square150x150Logo',
-  SQUARE_310_X_310_LOGO = 'Square310x310Logo',
-  WIDE_310_X_150_LOGO = 'Wide310x150Logo',
-  SPLASH_SCREEN = 'SplashScreen',
-}
-
 export interface ImageSource {
   type: SourceType.RASTER;
 
@@ -359,6 +344,21 @@ export const enum Density {
   PORT_XXXHDPI = 'port-xxxhdpi',
 }
 
+/**
+ * @see https://cordova.apache.org/docs/en/latest/config_ref/images.html#windows
+ */
+export const enum Target {
+  STORE_LOGO = 'StoreLogo',
+  SQUARE_30_X_30_LOGO = 'Square30x30Logo',
+  SQUARE_44_X_44_LOGO = 'Square44x44Logo',
+  SQUARE_70_X_70_LOGO = 'Square70x70Logo',
+  SQUARE_71_X_71_LOGO = 'Square71x71Logo',
+  SQUARE_150_X_150_LOGO = 'Square150x150Logo',
+  SQUARE_310_X_310_LOGO = 'Square310x310Logo',
+  WIDE_310_X_150_LOGO = 'Wide310x150Logo',
+  SPLASH_SCREEN = 'SplashScreen',
+}
+
 export const enum ResourceKey {
   SRC = 'src',
   FOREGROUND = 'foreground',
@@ -367,6 +367,7 @@ export const enum ResourceKey {
   WIDTH = 'width',
   HEIGHT = 'height',
   DENSITY = 'density',
+  SCALE = 'scale',
   ORIENTATION = 'orientation',
   TARGET = 'target',
 }
@@ -379,6 +380,7 @@ export interface ResourceKeyValues {
   readonly [ResourceKey.WIDTH]: number;
   readonly [ResourceKey.HEIGHT]: number;
   readonly [ResourceKey.DENSITY]: Density;
+  readonly [ResourceKey.SCALE]: number;
   readonly [ResourceKey.ORIENTATION]: Orientation;
   readonly [ResourceKey.TARGET]: Target;
 }
@@ -431,19 +433,22 @@ export type AndroidSplashResourceConfig = BaseResourceConfig<
 export type IOSIconResourceConfig = BaseResourceConfig<
   Platform.IOS,
   ResourceType.ICON,
-  ImageResourceKey | ResourceKey.SRC
+  ImageResourceKey | ResourceKey.SRC | ResourceKey.SCALE
 >;
 
 export type IOSSplashResourceConfig = BaseResourceConfig<
   Platform.IOS,
   ResourceType.SPLASH,
-  ImageResourceKey | ResourceKey.SRC | ResourceKey.ORIENTATION
+  | ImageResourceKey
+  | ResourceKey.SRC
+  | ResourceKey.ORIENTATION
+  | ResourceKey.SCALE
 >;
 
 export type WindowsIconResourceConfig = BaseResourceConfig<
   Platform.WINDOWS,
   ResourceType.ICON,
-  ImageResourceKey | ResourceKey.SRC | ResourceKey.TARGET
+  ImageResourceKey | ResourceKey.SRC | ResourceKey.TARGET | ResourceKey.SCALE
 >;
 
 export type WindowsSplashResourceConfig = BaseResourceConfig<
@@ -453,6 +458,7 @@ export type WindowsSplashResourceConfig = BaseResourceConfig<
   | ResourceKey.SRC
   | ResourceKey.ORIENTATION
   | ResourceKey.TARGET
+  | ResourceKey.SCALE
 >;
 
 export type SimpleResourceConfig =
@@ -535,6 +541,10 @@ export function generateScaledWindowsResourceSrc(
 export function generateScaledWindowsResource<
   T extends WindowsIconResourceConfig | WindowsSplashResourceConfig
 >(resource: T, factor: number): T {
+  if (resource.scale !== 1) {
+    throw new Error('Cannot generate scaled resource from scaled resource.');
+  }
+
   return {
     ...resource,
     src: generateScaledWindowsResourceSrc(resource.src, factor),
@@ -542,6 +552,7 @@ export function generateScaledWindowsResource<
     target: undefined,
     width: Math.round(resource.width * factor),
     height: Math.round(resource.height * factor),
+    scale: factor,
   };
 }
 
@@ -554,7 +565,7 @@ export function generateScaledWindowsResources<
 /**
  * App Icon: App list in start menu, task bar, task manager
  */
-const WINDOWS_SQUARE_44_X_44_ICON: WindowsIconResourceConfig = {
+export const WINDOWS_SQUARE_44_X_44_ICON: WindowsIconResourceConfig = {
   platform: Platform.WINDOWS,
   type: ResourceType.ICON,
   src: 'Square44x44Logo.png',
@@ -562,12 +573,13 @@ const WINDOWS_SQUARE_44_X_44_ICON: WindowsIconResourceConfig = {
   width: 44,
   height: 44,
   target: Target.SQUARE_44_X_44_LOGO,
+  scale: 1,
 };
 
 /**
  * Small tile: Start menu
  */
-const WINDOWS_SQUARE_71_X_71_ICON: WindowsIconResourceConfig = {
+export const WINDOWS_SQUARE_71_X_71_ICON: WindowsIconResourceConfig = {
   platform: Platform.WINDOWS,
   type: ResourceType.ICON,
   src: 'SmallTile.png',
@@ -575,12 +587,13 @@ const WINDOWS_SQUARE_71_X_71_ICON: WindowsIconResourceConfig = {
   width: 71,
   height: 71,
   target: Target.SQUARE_71_X_71_LOGO,
+  scale: 1,
 };
 
 /**
  * Medium Tile: For Start menu, Microsoft Store listing
  */
-const WINDOWS_SQUARE_150_X_150_ICON: WindowsIconResourceConfig = {
+export const WINDOWS_SQUARE_150_X_150_ICON: WindowsIconResourceConfig = {
   platform: Platform.WINDOWS,
   type: ResourceType.ICON,
   src: 'Square150x150Logo.png',
@@ -588,12 +601,13 @@ const WINDOWS_SQUARE_150_X_150_ICON: WindowsIconResourceConfig = {
   width: 150,
   height: 150,
   target: Target.SQUARE_150_X_150_LOGO,
+  scale: 1,
 };
 
 /**
  * Large Tile: Start Menu
  */
-const WINDOWS_SQUARE_310_X_310_ICON: WindowsIconResourceConfig = {
+export const WINDOWS_SQUARE_310_X_310_ICON: WindowsIconResourceConfig = {
   platform: Platform.WINDOWS,
   type: ResourceType.ICON,
   src: 'Square310x310Logo.png',
@@ -601,12 +615,13 @@ const WINDOWS_SQUARE_310_X_310_ICON: WindowsIconResourceConfig = {
   width: 310,
   height: 310,
   target: Target.SQUARE_310_X_310_LOGO,
+  scale: 1,
 };
 
 /**
  * Wide Tile: Start Menu
  */
-const WINDOWS_WIDE_310_X_150_LOGO: WindowsIconResourceConfig = {
+export const WINDOWS_WIDE_310_X_150_LOGO: WindowsIconResourceConfig = {
   platform: Platform.WINDOWS,
   type: ResourceType.ICON,
   src: 'Wide310x150Logo.png',
@@ -614,12 +629,13 @@ const WINDOWS_WIDE_310_X_150_LOGO: WindowsIconResourceConfig = {
   width: 310,
   height: 150,
   target: Target.WIDE_310_X_150_LOGO,
+  scale: 1,
 };
 
 /**
  * Store Logo: App installer, Partner Center, the "Report an app" option in the Store, the "Write a review" option in the Store
  */
-const WINDOWS_STORE_LOGO: WindowsIconResourceConfig = {
+export const WINDOWS_STORE_LOGO: WindowsIconResourceConfig = {
   platform: Platform.WINDOWS,
   type: ResourceType.ICON,
   src: 'StoreLogo.png',
@@ -627,6 +643,7 @@ const WINDOWS_STORE_LOGO: WindowsIconResourceConfig = {
   width: 50,
   height: 50,
   target: Target.STORE_LOGO,
+  scale: 1,
 };
 
 /**
@@ -700,7 +717,7 @@ export const WINDOWS_ICON_RESOURCES: readonly WindowsIconResourceConfig[] = [
   ]),
 ];
 
-const WINDOWS_SPLASH_SCREEN: WindowsSplashResourceConfig = {
+export const WINDOWS_SPLASH_SCREEN: WindowsSplashResourceConfig = {
   platform: Platform.WINDOWS,
   type: ResourceType.SPLASH,
   src: 'Splash.png',
@@ -709,6 +726,7 @@ const WINDOWS_SPLASH_SCREEN: WindowsSplashResourceConfig = {
   height: 300,
   orientation: Orientation.LANDSCAPE,
   target: Target.SPLASH_SCREEN,
+  scale: 1,
 };
 
 /**
@@ -726,7 +744,7 @@ export const WINDOWS_SPLASH_RESOURCES: readonly WindowsSplashResourceConfig[] = 
   ]),
 ];
 
-const ANDROID_LDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
+export const ANDROID_LDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ADAPTIVE_ICON,
   foreground: 'ldpi-foreground.png',
@@ -737,7 +755,7 @@ const ANDROID_LDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   density: Density.LDPI,
 };
 
-const ANDROID_MDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
+export const ANDROID_MDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ADAPTIVE_ICON,
   foreground: 'mdpi-foreground.png',
@@ -748,7 +766,7 @@ const ANDROID_MDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   density: Density.MDPI,
 };
 
-const ANDROID_HDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
+export const ANDROID_HDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   foreground: 'hdpi-foreground.png',
   platform: Platform.ANDROID,
   type: ResourceType.ADAPTIVE_ICON,
@@ -759,7 +777,7 @@ const ANDROID_HDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   density: Density.HDPI,
 };
 
-const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
+export const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ADAPTIVE_ICON,
   foreground: 'xhdpi-foreground.png',
@@ -770,7 +788,7 @@ const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   density: Density.XHDPI,
 };
 
-const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
+export const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ADAPTIVE_ICON,
   foreground: 'xxhdpi-foreground.png',
@@ -781,7 +799,7 @@ const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   density: Density.XXHDPI,
 };
 
-const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
+export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ADAPTIVE_ICON,
   foreground: 'xxxhdpi-foreground.png',
@@ -801,7 +819,7 @@ export const ANDROID_ADAPTIVE_ICON_RESOURCES: readonly AndroidAdaptiveIconResour
   ANDROID_XXXHDPI_ADAPTIVE_ICON,
 ];
 
-const ANDROID_LDPI_ICON: AndroidIconResourceConfig = {
+export const ANDROID_LDPI_ICON: AndroidIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ICON,
   src: 'drawable-ldpi-icon.png',
@@ -811,7 +829,7 @@ const ANDROID_LDPI_ICON: AndroidIconResourceConfig = {
   density: Density.LDPI,
 };
 
-const ANDROID_MDPI_ICON: AndroidIconResourceConfig = {
+export const ANDROID_MDPI_ICON: AndroidIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ICON,
   src: 'drawable-mdpi-icon.png',
@@ -821,7 +839,7 @@ const ANDROID_MDPI_ICON: AndroidIconResourceConfig = {
   density: Density.MDPI,
 };
 
-const ANDROID_HDPI_ICON: AndroidIconResourceConfig = {
+export const ANDROID_HDPI_ICON: AndroidIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ICON,
   src: 'drawable-hdpi-icon.png',
@@ -831,7 +849,7 @@ const ANDROID_HDPI_ICON: AndroidIconResourceConfig = {
   density: Density.HDPI,
 };
 
-const ANDROID_XHDPI_ICON: AndroidIconResourceConfig = {
+export const ANDROID_XHDPI_ICON: AndroidIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ICON,
   src: 'drawable-xhdpi-icon.png',
@@ -841,7 +859,7 @@ const ANDROID_XHDPI_ICON: AndroidIconResourceConfig = {
   density: Density.XHDPI,
 };
 
-const ANDROID_XXHDPI_ICON: AndroidIconResourceConfig = {
+export const ANDROID_XXHDPI_ICON: AndroidIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ICON,
   src: 'drawable-xxhdpi-icon.png',
@@ -851,7 +869,7 @@ const ANDROID_XXHDPI_ICON: AndroidIconResourceConfig = {
   density: Density.XXHDPI,
 };
 
-const ANDROID_XXXHDPI_ICON: AndroidIconResourceConfig = {
+export const ANDROID_XXXHDPI_ICON: AndroidIconResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.ICON,
   src: 'drawable-xxxhdpi-icon.png',
@@ -870,7 +888,7 @@ export const ANDROID_ICON_RESOURCES: readonly AndroidIconResourceConfig[] = [
   ANDROID_XXXHDPI_ICON,
 ];
 
-const ANDROID_LAND_LDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_LAND_LDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-land-ldpi-screen.png',
@@ -881,7 +899,7 @@ const ANDROID_LAND_LDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const ANDROID_LAND_MDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_LAND_MDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-land-mdpi-screen.png',
@@ -892,7 +910,7 @@ const ANDROID_LAND_MDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const ANDROID_LAND_HDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_LAND_HDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-land-hdpi-screen.png',
@@ -903,7 +921,7 @@ const ANDROID_LAND_HDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const ANDROID_LAND_XHDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_LAND_XHDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-land-xhdpi-screen.png',
@@ -914,7 +932,7 @@ const ANDROID_LAND_XHDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const ANDROID_LAND_XXHDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_LAND_XXHDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-land-xxhdpi-screen.png',
@@ -925,7 +943,7 @@ const ANDROID_LAND_XXHDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const ANDROID_LAND_XXXHDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_LAND_XXXHDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-land-xxxhdpi-screen.png',
@@ -936,7 +954,7 @@ const ANDROID_LAND_XXXHDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.LANDSCAPE,
 };
 
-const ANDROID_PORT_LDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_PORT_LDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-port-ldpi-screen.png',
@@ -947,7 +965,7 @@ const ANDROID_PORT_LDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const ANDROID_PORT_MDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_PORT_MDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-port-mdpi-screen.png',
@@ -958,7 +976,7 @@ const ANDROID_PORT_MDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const ANDROID_PORT_HDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_PORT_HDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-port-hdpi-screen.png',
@@ -969,7 +987,7 @@ const ANDROID_PORT_HDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const ANDROID_PORT_XHDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_PORT_XHDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-port-xhdpi-screen.png',
@@ -980,7 +998,7 @@ const ANDROID_PORT_XHDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const ANDROID_PORT_XXHDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_PORT_XXHDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-port-xxhdpi-screen.png',
@@ -991,7 +1009,7 @@ const ANDROID_PORT_XXHDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-const ANDROID_PORT_XXXHDPI_SCREEN: AndroidSplashResourceConfig = {
+export const ANDROID_PORT_XXXHDPI_SCREEN: AndroidSplashResourceConfig = {
   platform: Platform.ANDROID,
   type: ResourceType.SPLASH,
   src: 'drawable-port-xxxhdpi-screen.png',
@@ -1023,31 +1041,34 @@ export const ANDROID_SPLASH_RESOURCES: readonly AndroidSplashResourceConfig[] = 
  * - iPhone Notification (iOS 7+)
  * - iPad Notification (iOS 7+)
  */
-const IOS_20_PT_ICON: IOSIconResourceConfig = {
+export const IOS_20_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-20.png',
   format: Format.PNG,
   width: 20,
   height: 20,
+  scale: 1,
 };
 
-const IOS_20_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_20_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-20@2x.png',
   format: Format.PNG,
   width: 40,
   height: 40,
+  scale: 2,
 };
 
-const IOS_20_PT_3X_ICON: IOSIconResourceConfig = {
+export const IOS_20_PT_3X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-20@3x.png',
   format: Format.PNG,
   width: 60,
   height: 60,
+  scale: 3,
 };
 
 /**
@@ -1058,31 +1079,34 @@ const IOS_20_PT_3X_ICON: IOSIconResourceConfig = {
  * - Apple Watch Companion Settings
  * - Apple Watch Notification Center
  */
-const IOS_29_PT_ICON: IOSIconResourceConfig = {
+export const IOS_29_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-29.png',
   format: Format.PNG,
   width: 29,
   height: 29,
+  scale: 1,
 };
 
-const IOS_29_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_29_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-29@2x.png',
   format: Format.PNG,
   width: 58,
   height: 58,
+  scale: 2,
 };
 
-const IOS_29_PT_3X_ICON: IOSIconResourceConfig = {
+export const IOS_29_PT_3X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-29@3x.png',
   format: Format.PNG,
   width: 87,
   height: 87,
+  scale: 3,
 };
 
 /**
@@ -1092,31 +1116,34 @@ const IOS_29_PT_3X_ICON: IOSIconResourceConfig = {
  * - iPad Spotlight (iOS 7+)
  * - Apple Watch Home Screen
  */
-const IOS_40_PT_ICON: IOSIconResourceConfig = {
+export const IOS_40_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-40.png',
   format: Format.PNG,
   width: 40,
   height: 40,
+  scale: 1,
 };
 
-const IOS_40_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_40_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-40@2x.png',
   format: Format.PNG,
   width: 80,
   height: 80,
+  scale: 2,
 };
 
-const IOS_40_PT_3X_ICON: IOSIconResourceConfig = {
+export const IOS_40_PT_3X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-40@3x.png',
   format: Format.PNG,
   width: 120,
   height: 120,
+  scale: 3,
 };
 
 /**
@@ -1125,22 +1152,24 @@ const IOS_40_PT_3X_ICON: IOSIconResourceConfig = {
  * - iPad Spotlight (iOS 5,6)
  * - Apple Watch Home Screen
  */
-const IOS_50_PT_ICON: IOSIconResourceConfig = {
+export const IOS_50_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-50.png',
   format: Format.PNG,
   width: 50,
   height: 50,
+  scale: 1,
 };
 
-const IOS_50_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_50_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-50@2x.png',
   format: Format.PNG,
   width: 100,
   height: 100,
+  scale: 2,
 };
 
 /**
@@ -1148,22 +1177,24 @@ const IOS_50_PT_2X_ICON: IOSIconResourceConfig = {
  *
  * - iPhone App (iOS 5,6)
  */
-const IOS_57_PT_ICON: IOSIconResourceConfig = {
+export const IOS_57_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon.png',
   format: Format.PNG,
   width: 57,
   height: 57,
+  scale: 1,
 };
 
-const IOS_57_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_57_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon@2x.png',
   format: Format.PNG,
   width: 114,
   height: 114,
+  scale: 2,
 };
 
 /**
@@ -1171,31 +1202,34 @@ const IOS_57_PT_2X_ICON: IOSIconResourceConfig = {
  *
  * - iPhone App (iOS 7+)
  */
-const IOS_60_PT_ICON: IOSIconResourceConfig = {
+export const IOS_60_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-60.png',
   format: Format.PNG,
   width: 60,
   height: 60,
+  scale: 1,
 };
 
-const IOS_60_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_60_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-60@2x.png',
   format: Format.PNG,
   width: 120,
   height: 120,
+  scale: 2,
 };
 
-const IOS_60_PT_3X_ICON: IOSIconResourceConfig = {
+export const IOS_60_PT_3X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-60@3x.png',
   format: Format.PNG,
   width: 180,
   height: 180,
+  scale: 3,
 };
 
 /**
@@ -1203,22 +1237,24 @@ const IOS_60_PT_3X_ICON: IOSIconResourceConfig = {
  *
  * - iPad App (iOS 5,6)
  */
-const IOS_72_PT_ICON: IOSIconResourceConfig = {
+export const IOS_72_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-72.png',
   format: Format.PNG,
   width: 72,
   height: 72,
+  scale: 1,
 };
 
-const IOS_72_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_72_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-72@2x.png',
   format: Format.PNG,
   width: 144,
   height: 144,
+  scale: 2,
 };
 
 /**
@@ -1226,22 +1262,24 @@ const IOS_72_PT_2X_ICON: IOSIconResourceConfig = {
  *
  * - iPad App (iOS 7+)
  */
-const IOS_76_PT_ICON: IOSIconResourceConfig = {
+export const IOS_76_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-76.png',
   format: Format.PNG,
   width: 76,
   height: 76,
+  scale: 1,
 };
 
-const IOS_76_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_76_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-76@2x.png',
   format: Format.PNG,
   width: 152,
   height: 152,
+  scale: 2,
 };
 
 /**
@@ -1249,13 +1287,14 @@ const IOS_76_PT_2X_ICON: IOSIconResourceConfig = {
  *
  * iPad Pro (12.9-inch)
  */
-const IOS_83_5_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_83_5_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-83.5@2x.png',
   format: Format.PNG,
   width: 167,
   height: 167,
+  scale: 2,
 };
 
 /**
@@ -1263,13 +1302,14 @@ const IOS_83_5_PT_2X_ICON: IOSIconResourceConfig = {
  *
  * - App Store
  */
-const IOS_1024_ICON: IOSIconResourceConfig = {
+export const IOS_1024_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-1024.png',
   format: Format.PNG,
   width: 1024,
   height: 1024,
+  scale: 1,
 };
 
 /**
@@ -1277,13 +1317,14 @@ const IOS_1024_ICON: IOSIconResourceConfig = {
  *
  * - Apple Watch Notification Center
  */
-const IOS_24_PT_ICON: IOSIconResourceConfig = {
+export const IOS_24_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-24@2x.png',
   format: Format.PNG,
   width: 48,
   height: 48,
+  scale: 2,
 };
 
 /**
@@ -1291,13 +1332,14 @@ const IOS_24_PT_ICON: IOSIconResourceConfig = {
  *
  * - Apple Watch Notification Center
  */
-const IOS_27_5_PT_ICON: IOSIconResourceConfig = {
+export const IOS_27_5_PT_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-27.5@2x.png',
   format: Format.PNG,
   width: 55,
   height: 55,
+  scale: 2,
 };
 
 /**
@@ -1305,13 +1347,14 @@ const IOS_27_5_PT_ICON: IOSIconResourceConfig = {
  *
  * - Apple Watch Home Screen
  */
-const IOS_44_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_44_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-44@2x.png',
   format: Format.PNG,
   width: 88,
   height: 88,
+  scale: 2,
 };
 
 /**
@@ -1319,13 +1362,14 @@ const IOS_44_PT_2X_ICON: IOSIconResourceConfig = {
  *
  * - Apple Watch Short Look
  */
-const IOS_86_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_86_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-86@2x.png',
   format: Format.PNG,
   width: 172,
   height: 172,
+  scale: 2,
 };
 
 /**
@@ -1333,13 +1377,14 @@ const IOS_86_PT_2X_ICON: IOSIconResourceConfig = {
  *
  * - Apple Watch Short Look
  */
-const IOS_98_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_98_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-98@2x.png',
   format: Format.PNG,
   width: 196,
   height: 196,
+  scale: 2,
 };
 
 /**
@@ -1347,13 +1392,14 @@ const IOS_98_PT_2X_ICON: IOSIconResourceConfig = {
  *
  * - Apple Watch Short Look
  */
-const IOS_108_PT_2X_ICON: IOSIconResourceConfig = {
+export const IOS_108_PT_2X_ICON: IOSIconResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.ICON,
   src: 'icon-108@2x.png',
   format: Format.PNG,
   width: 216,
   height: 216,
+  scale: 2,
 };
 
 export const IOS_ICON_RESOURCES: readonly IOSIconResourceConfig[] = [
@@ -1387,7 +1433,7 @@ export const IOS_ICON_RESOURCES: readonly IOSIconResourceConfig[] = [
   IOS_1024_ICON,
 ];
 
-const IOS_568H_2X_IPHONE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_568H_2X_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-568h@2x~iphone.png',
@@ -1395,9 +1441,10 @@ const IOS_568H_2X_IPHONE_SPLASH: IOSSplashResourceConfig = {
   width: 640,
   height: 1136,
   orientation: Orientation.PORTRAIT,
+  scale: 2,
 };
 
-const IOS_667H_SPLASH: IOSSplashResourceConfig = {
+export const IOS_667H_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-667h.png',
@@ -1405,9 +1452,10 @@ const IOS_667H_SPLASH: IOSSplashResourceConfig = {
   width: 750,
   height: 1334,
   orientation: Orientation.PORTRAIT,
+  scale: 1,
 };
 
-const IOS_2688H_IPHONE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_2688H_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-2688h~iphone.png',
@@ -1415,9 +1463,10 @@ const IOS_2688H_IPHONE_SPLASH: IOSSplashResourceConfig = {
   width: 1242,
   height: 2688,
   orientation: Orientation.PORTRAIT,
+  scale: 1,
 };
 
-const IOS_2688H_LANDSCAPE_IPHONE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_2688H_LANDSCAPE_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Landscape-2688h~iphone.png',
@@ -1425,9 +1474,10 @@ const IOS_2688H_LANDSCAPE_IPHONE_SPLASH: IOSSplashResourceConfig = {
   width: 2688,
   height: 1242,
   orientation: Orientation.LANDSCAPE,
+  scale: 1,
 };
 
-const IOS_1792H_IPHONE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_1792H_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-1792h~iphone.png',
@@ -1435,9 +1485,10 @@ const IOS_1792H_IPHONE_SPLASH: IOSSplashResourceConfig = {
   width: 828,
   height: 1792,
   orientation: Orientation.PORTRAIT,
+  scale: 1,
 };
 
-const IOS_1792H_LANDSCAPE_IPHONE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_1792H_LANDSCAPE_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Landscape-1792h~iphone.png',
@@ -1445,9 +1496,10 @@ const IOS_1792H_LANDSCAPE_IPHONE_SPLASH: IOSSplashResourceConfig = {
   width: 1792,
   height: 828,
   orientation: Orientation.LANDSCAPE,
+  scale: 1,
 };
 
-const IOS_2436H_SPLASH: IOSSplashResourceConfig = {
+export const IOS_2436H_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-2436h.png',
@@ -1455,9 +1507,10 @@ const IOS_2436H_SPLASH: IOSSplashResourceConfig = {
   width: 1125,
   height: 2436,
   orientation: Orientation.PORTRAIT,
+  scale: 1,
 };
 
-const IOS_2436H_LANDSCAPE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_2436H_LANDSCAPE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Landscape-2436h.png',
@@ -1465,9 +1518,10 @@ const IOS_2436H_LANDSCAPE_SPLASH: IOSSplashResourceConfig = {
   width: 2436,
   height: 1125,
   orientation: Orientation.LANDSCAPE,
+  scale: 1,
 };
 
-const IOS_736H_SPLASH: IOSSplashResourceConfig = {
+export const IOS_736H_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-736h.png',
@@ -1475,9 +1529,10 @@ const IOS_736H_SPLASH: IOSSplashResourceConfig = {
   width: 1242,
   height: 2208,
   orientation: Orientation.PORTRAIT,
+  scale: 1,
 };
 
-const IOS_736H_LANDSCAPE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_736H_LANDSCAPE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Landscape-736h.png',
@@ -1485,9 +1540,10 @@ const IOS_736H_LANDSCAPE_SPLASH: IOSSplashResourceConfig = {
   width: 2208,
   height: 1242,
   orientation: Orientation.LANDSCAPE,
+  scale: 1,
 };
 
-const IOS_LANDSCAPE_2X_IPAD_SPLASH: IOSSplashResourceConfig = {
+export const IOS_LANDSCAPE_2X_IPAD_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Landscape@2x~ipad.png',
@@ -1495,9 +1551,10 @@ const IOS_LANDSCAPE_2X_IPAD_SPLASH: IOSSplashResourceConfig = {
   width: 2048,
   height: 1536,
   orientation: Orientation.LANDSCAPE,
+  scale: 2,
 };
 
-const IOS_LANDSCAPE_IPADPRO_SPLASH: IOSSplashResourceConfig = {
+export const IOS_LANDSCAPE_IPADPRO_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Landscape@~ipadpro.png',
@@ -1505,9 +1562,10 @@ const IOS_LANDSCAPE_IPADPRO_SPLASH: IOSSplashResourceConfig = {
   width: 2732,
   height: 2048,
   orientation: Orientation.LANDSCAPE,
+  scale: 1,
 };
 
-const IOS_LANDSCAPE_IPAD_SPLASH: IOSSplashResourceConfig = {
+export const IOS_LANDSCAPE_IPAD_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Landscape~ipad.png',
@@ -1515,9 +1573,10 @@ const IOS_LANDSCAPE_IPAD_SPLASH: IOSSplashResourceConfig = {
   width: 1024,
   height: 768,
   orientation: Orientation.LANDSCAPE,
+  scale: 1,
 };
 
-const IOS_PORTRAIT_2X_IPAD_SPLASH: IOSSplashResourceConfig = {
+export const IOS_PORTRAIT_2X_IPAD_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Portrait@2x~ipad.png',
@@ -1525,9 +1584,10 @@ const IOS_PORTRAIT_2X_IPAD_SPLASH: IOSSplashResourceConfig = {
   width: 1536,
   height: 2048,
   orientation: Orientation.PORTRAIT,
+  scale: 2,
 };
 
-const IOS_PORTRAIT_IPADPRO_SPLASH: IOSSplashResourceConfig = {
+export const IOS_PORTRAIT_IPADPRO_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Portrait@~ipadpro.png',
@@ -1535,9 +1595,10 @@ const IOS_PORTRAIT_IPADPRO_SPLASH: IOSSplashResourceConfig = {
   width: 2048,
   height: 2732,
   orientation: Orientation.PORTRAIT,
+  scale: 1,
 };
 
-const IOS_PORTRAIT_IPAD_SPLASH: IOSSplashResourceConfig = {
+export const IOS_PORTRAIT_IPAD_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default-Portrait~ipad.png',
@@ -1545,9 +1606,10 @@ const IOS_PORTRAIT_IPAD_SPLASH: IOSSplashResourceConfig = {
   width: 768,
   height: 1024,
   orientation: Orientation.PORTRAIT,
+  scale: 1,
 };
 
-const IOS_2X_IPHONE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_2X_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default@2x~iphone.png',
@@ -1555,9 +1617,10 @@ const IOS_2X_IPHONE_SPLASH: IOSSplashResourceConfig = {
   width: 640,
   height: 960,
   orientation: Orientation.PORTRAIT,
+  scale: 2,
 };
 
-const IOS_IPHONE_SPLASH: IOSSplashResourceConfig = {
+export const IOS_IPHONE_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default~iphone.png',
@@ -1565,9 +1628,10 @@ const IOS_IPHONE_SPLASH: IOSSplashResourceConfig = {
   width: 320,
   height: 480,
   orientation: Orientation.PORTRAIT,
+  scale: 1,
 };
 
-const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IOSSplashResourceConfig = {
+export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IOSSplashResourceConfig = {
   platform: Platform.IOS,
   type: ResourceType.SPLASH,
   src: 'Default@2x~universal~anyany.png',
@@ -1575,6 +1639,7 @@ const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IOSSplashResourceConfig = {
   width: 2732,
   height: 2732,
   orientation: Orientation.PORTRAIT,
+  scale: 2,
 };
 
 export const IOS_SPLASH_RESOURCES: readonly IOSSplashResourceConfig[] = [

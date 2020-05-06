@@ -93,9 +93,9 @@ export interface AdaptiveIconResourceOptions {
 }
 
 export interface RunPlatformOptions {
-  [ResourceType.ADAPTIVE_ICON]?: AdaptiveIconResourceOptions;
-  [ResourceType.ICON]?: SimpleResourceOptions;
-  [ResourceType.SPLASH]?: SimpleResourceOptions;
+  readonly [ResourceType.ADAPTIVE_ICON]?: AdaptiveIconResourceOptions;
+  readonly [ResourceType.ICON]?: SimpleResourceOptions;
+  readonly [ResourceType.SPLASH]?: SimpleResourceOptions;
 }
 
 export interface GeneratedImageResource {

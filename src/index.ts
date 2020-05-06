@@ -176,11 +176,11 @@ namespace CordovaRes {
   export const run = CordovaRes;
 
   export type PlatformOptions = {
-    [P in Platform]?: Readonly<RunPlatformOptions>;
+    [P in Platform]?: RunPlatformOptions;
   };
 
   export type NativeProjectConfigByPlatform = {
-    [P in Platform]?: Readonly<NativeProjectConfig>;
+    [P in Platform]?: NativeProjectConfig;
   };
 
   export type Operations = ResizeOptions & {
