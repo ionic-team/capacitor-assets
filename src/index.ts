@@ -19,6 +19,7 @@ import {
   PLATFORMS,
   Platform,
   RunPlatformOptions,
+  TransformFunction,
   prettyPlatform,
   run as runPlatform,
 } from './platform';
@@ -197,7 +198,7 @@ namespace CordovaRes {
      *
      * @returns Sharp object
      */
-    readonly transform?: (image: ImageSchema, pipeline: Sharp) => Sharp;
+    readonly transform?: TransformFunction;
   };
 
   /**

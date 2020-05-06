@@ -1,3 +1,4 @@
+import { reduce } from '@ionic/utils-array';
 import { readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
 import sharp, { Metadata, Sharp } from 'sharp';
@@ -20,7 +21,7 @@ import {
 
 const debug = Debug('cordova-res:image');
 
-export type SharpTransformation = (pipeline: Sharp) => Sharp;
+export type SharpTransformation = (pipeline: Sharp) => Promise<Sharp> | Sharp;
 
 /**
  * Check an array of source files, returning the first viable image.
@@ -207,7 +208,7 @@ export async function generateImage(
     );
   }
 
-  const pipeline = applyTransformations(src, [
+  const pipeline = await applyTransformations(src, [
     createImageResizer(image),
     createImageConverter(image.format),
   ]);
@@ -215,12 +216,13 @@ export async function generateImage(
   await writeFile(image.src, await pipeline.toBuffer());
 }
 
-export function applyTransformations(
+export async function applyTransformations(
   src: Sharp,
   transformations: readonly SharpTransformation[],
-): Sharp {
-  return transformations.reduce(
-    (pipeline, transformation) => transformation(pipeline),
+): Promise<Sharp> {
+  return reduce(
+    transformations,
+    async (pipeline, transformation) => transformation(pipeline),
     src,
   );
 }

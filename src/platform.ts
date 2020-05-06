@@ -49,7 +49,10 @@ export interface AndroidAdaptiveIconResourcePart {
   readonly [ResourceKey.SRC]: string;
 }
 
-export type TransformFunction = (image: ImageSchema, pipeline: Sharp) => Sharp;
+export type TransformFunction = (
+  image: ImageSchema,
+  pipeline: Sharp,
+) => Promise<Sharp> | Sharp;
 
 export interface ResourceOptions<S> {
   /**
@@ -291,17 +294,19 @@ export function getResourceTransformFunction(
 export function combineTransformFunctions(
   transformations: readonly TransformFunction[],
 ): TransformFunction {
-  return transformations.reduce((acc, transformation) => (image, pipeline) => {
-    const result = acc(image, pipeline);
+  return transformations.reduce(
+    (acc, transformation) => async (image, pipeline) => {
+      const result = await acc(image, pipeline);
 
-    if (!result || typeof result !== 'object') {
-      throw new BadInputError(
-        `Invalid Sharp pipeline returned while performing transforms: ${result}`,
-      );
-    }
+      if (!result || typeof result !== 'object') {
+        throw new BadInputError(
+          `Invalid Sharp pipeline returned while performing transforms: ${result}`,
+        );
+      }
 
-    return transformation(image, result);
-  });
+      return transformation(image, result);
+    },
+  );
 }
 
 /**
@@ -553,7 +558,7 @@ export async function generateImageResource(
 
   await ensureDir(pathlib.dirname(dest));
 
-  const img = transform(generatedImage, pipeline.clone());
+  const img = await transform(generatedImage, pipeline.clone());
 
   await generateImage(generatedImage, img, metadata, errstream);
 
