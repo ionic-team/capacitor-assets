@@ -72,7 +72,7 @@ const ANDROID_ICONS: readonly ProcessItem[] = [
     target: 'mipmap-mdpi/ic_launcher_round.png',
   },
   {
-    source: 'drawable-mdpi-icon.png',
+    source: 'mdpi-foreground.png',
     target: 'mipmap-mdpi/ic_launcher_foreground.png',
   },
   {
@@ -84,7 +84,7 @@ const ANDROID_ICONS: readonly ProcessItem[] = [
     target: 'mipmap-hdpi/ic_launcher_round.png',
   },
   {
-    source: 'drawable-hdpi-icon.png',
+    source: 'hdpi-foreground.png',
     target: 'mipmap-hdpi/ic_launcher_foreground.png',
   },
   {
@@ -96,7 +96,7 @@ const ANDROID_ICONS: readonly ProcessItem[] = [
     target: 'mipmap-xhdpi/ic_launcher_round.png',
   },
   {
-    source: 'drawable-xhdpi-icon.png',
+    source: 'xhdpi-foreground.png',
     target: 'mipmap-xhdpi/ic_launcher_foreground.png',
   },
   {
@@ -108,7 +108,7 @@ const ANDROID_ICONS: readonly ProcessItem[] = [
     target: 'mipmap-xxhdpi/ic_launcher_round.png',
   },
   {
-    source: 'drawable-xxhdpi-icon.png',
+    source: 'xxhdpi-foreground.png',
     target: 'mipmap-xxhdpi/ic_launcher_foreground.png',
   },
   {
@@ -120,7 +120,7 @@ const ANDROID_ICONS: readonly ProcessItem[] = [
     target: 'mipmap-xxxhdpi/ic_launcher_round.png',
   },
   {
-    source: 'drawable-xxxhdpi-icon.png',
+    source: 'xxxhdpi-foreground.png',
     target: 'mipmap-xxxhdpi/ic_launcher_foreground.png',
   },
 ];
