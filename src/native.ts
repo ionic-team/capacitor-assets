@@ -328,6 +328,7 @@ async function copyImages(
   sourcePath: string,
   targetPath: string,
   images: readonly NativeResource[],
+  errstream: NodeJS.WritableStream | null,
 ): Promise<number> {
   await Promise.all(
     images.map(async item => {
@@ -336,7 +337,12 @@ async function copyImages(
 
       debug('Copying generated resource from %O to %O', source, target);
 
-      await copy(source, target);
+      try {
+        await copy(source, target);
+      } catch (e) {
+        debug(e);
+        errstream?.write(`WARN:\tError occurred while copying ${source}\n`);
+      }
     }),
   );
 
@@ -360,6 +366,7 @@ export async function copyToNativeProject(
         SOURCE_IOS_ICON,
         path.join(iosProjectDirectory, IOS_APP_ICON_SET_PATH),
         IOS_ICONS,
+        errstream,
       );
     }
     if (shouldCopySplash) {
@@ -367,6 +374,7 @@ export async function copyToNativeProject(
         SOURCE_IOS_SPLASH,
         path.join(iosProjectDirectory, IOS_SPLASH_IMAGE_SET_PATH),
         IOS_SPLASHES,
+        errstream,
       );
     }
   } else if (platform === Platform.ANDROID) {
@@ -376,6 +384,7 @@ export async function copyToNativeProject(
         SOURCE_ANDROID_ICON,
         path.join(androidProjectDirectory, ANDROID_RES_PATH),
         ANDROID_ICONS,
+        errstream,
       );
     }
     if (shouldCopySplash) {
@@ -383,6 +392,7 @@ export async function copyToNativeProject(
         SOURCE_ANDROID_SPLASH,
         path.join(androidProjectDirectory, ANDROID_RES_PATH),
         ANDROID_SPLASHES,
+        errstream,
       );
     }
   } else {
