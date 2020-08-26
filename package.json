@@ -52,7 +52,7 @@
     "@ionic/utils-fs": "^3.0.0",
     "debug": "^4.1.1",
     "elementtree": "^0.1.7",
-    "sharp": "^0.25.1",
+    "sharp": "^0.26.0",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
