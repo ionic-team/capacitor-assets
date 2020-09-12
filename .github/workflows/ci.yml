@@ -25,6 +25,6 @@ jobs:
           CI: true
         run: |
           npm install
-          npm run prettier -- --check
+          npm run lint
           npm run build
           npm test

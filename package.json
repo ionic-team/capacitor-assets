@@ -17,8 +17,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest --maxWorkers=4",
-    "prettier": "prettier 'src/**/*.ts'",
+    "lint": "npm run prettier -- --check",
     "fmt": "npm run prettier -- --write",
+    "prettier": "prettier 'src/**/*.ts'",
     "prepublishOnly": "npm run build"
   },
   "husky": {
@@ -26,6 +27,7 @@
       "pre-commit": "npm run prettier -- --check"
     }
   },
+  "prettier": "@ionic/prettier-config",
   "files": [
     "bin",
     "dist"
@@ -56,6 +58,7 @@
     "tslib": "^1.9.3"
   },
   "devDependencies": {
+    "@ionic/prettier-config": "^1.0.0",
     "@types/debug": "^4.1.5",
     "@types/elementtree": "^0.1.0",
     "@types/fs-extra": "^8.0.0",
