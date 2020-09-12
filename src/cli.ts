@@ -1,4 +1,4 @@
-import et from 'elementtree';
+import type et from 'elementtree';
 
 import type {
   NativeProjectConfigByPlatform,
@@ -7,22 +7,25 @@ import type {
 } from '.';
 import { getPlatforms } from './cordova/config';
 import { BadInputError } from './error';
-import { ResizeOptions, validateFit, validatePosition } from './image';
-import { NativeProjectConfig } from './native';
-import {
+import type { ResizeOptions } from './image';
+import { validateFit, validatePosition } from './image';
+import type { NativeProjectConfig } from './native';
+import type {
   AdaptiveIconResourceOptions,
-  PLATFORMS,
-  Platform,
   RunPlatformOptions,
   SimpleResourceOptions,
+} from './platform';
+import {
+  PLATFORMS,
+  Platform,
   filterSupportedPlatforms,
   validatePlatforms,
 } from './platform';
+import type { Source } from './resources';
 import {
   RESOURCE_TYPES,
   ResourceKey,
   ResourceType,
-  Source,
   SourceType,
   validateResourceTypes,
 } from './resources';

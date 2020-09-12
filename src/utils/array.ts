@@ -1,5 +1,5 @@
 export function flatten<T>(t: readonly T[][]): T[] {
-  return [].concat.apply([], t as any);
+  return [].concat(...(t as any));
 }
 
 export function combinationJoiner<T>(ary: T[][], joiner: (t: T[]) => T): T[] {

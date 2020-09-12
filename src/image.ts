@@ -1,7 +1,8 @@
 import { reduce } from '@ionic/utils-array';
 import { readFile, writeFile } from '@ionic/utils-fs';
 import Debug from 'debug';
-import sharp, { Metadata, Sharp } from 'sharp';
+import type { Metadata, Sharp } from 'sharp';
+import sharp from 'sharp';
 import util from 'util';
 
 import {
@@ -9,11 +10,11 @@ import {
   ResolveSourceImageError,
   ValidationError,
 } from './error';
-import { Platform, prettyPlatform } from './platform';
+import type { Platform } from './platform';
+import { prettyPlatform } from './platform';
+import type { ResolvedImageSource, ResourceType } from './resources';
 import {
   Format,
-  ResolvedImageSource,
-  ResourceType,
   SourceType,
   validateResource,
   prettyResourceType,

@@ -1,8 +1,8 @@
 import { Platform } from '../platform';
+import type { ResourceConfig } from '../resources';
 import {
   Format,
   Target,
-  ResourceConfig,
   ResourceType,
   generateScaledWindowsResource,
   isSupportedResourceType,

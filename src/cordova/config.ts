@@ -5,16 +5,14 @@ import pathlib from 'path';
 import util from 'util';
 
 import { Platform } from '../platform';
-import {
+import type {
   ResolvedColorSource,
   ResolvedSource,
   ResourceConfig,
-  ResourceKey,
-  ResourceType,
   ResourceValue,
-  SourceType,
   UnknownResource,
 } from '../resources';
+import { ResourceKey, ResourceType, SourceType } from '../resources';
 import { combinationJoiner } from '../utils/array';
 import { identity } from '../utils/fn';
 

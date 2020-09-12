@@ -356,7 +356,7 @@ export async function copyToNativeProject(
   shouldCopySplash: boolean,
   logstream: NodeJS.WritableStream | null,
   errstream: NodeJS.WritableStream | null,
-) {
+): Promise<void> {
   let count = 0;
 
   if (platform === Platform.IOS) {

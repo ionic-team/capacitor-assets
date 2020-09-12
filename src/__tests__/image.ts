@@ -1,3 +1,4 @@
+import type * as image from '../image';
 import { Platform } from '../platform';
 import { ResourceType } from '../resources';
 import { identity } from '../utils/fn';
@@ -5,12 +6,12 @@ import { identity } from '../utils/fn';
 describe('cordova-res', () => {
   describe('image', () => {
     describe('resolveSourceImage', () => {
-      let image: typeof import('../image');
+      let im: typeof image;
       let fsMock: { [key: string]: jest.Mock };
       let resourcesMock: {
         validateResource: jest.Mock;
-        prettyPlatform: Function;
-        prettyResourceType: Function;
+        prettyPlatform: (...args: any[]) => any;
+        prettyResourceType: (...args: any[]) => any;
       };
 
       beforeEach(async () => {
@@ -30,17 +31,12 @@ describe('cordova-res', () => {
         jest.mock('@ionic/utils-fs', () => fsMock);
         jest.mock('../resources', () => resourcesMock);
 
-        image = await import('../image');
+        im = await import('../image');
       });
 
       it('should throw with empty array of source images', async () => {
         await expect(
-          image.resolveSourceImage(
-            Platform.ANDROID,
-            ResourceType.ICON,
-            [],
-            null,
-          ),
+          im.resolveSourceImage(Platform.ANDROID, ResourceType.ICON, [], null),
         ).rejects.toThrow('Missing valid source image');
         expect(fsMock.readFile).not.toHaveBeenCalled();
       });
@@ -50,7 +46,7 @@ describe('cordova-res', () => {
           throw new Error('err');
         });
         await expect(
-          image.resolveSourceImage(
+          im.resolveSourceImage(
             Platform.ANDROID,
             ResourceType.ICON,
             ['blah.png'],
@@ -65,7 +61,7 @@ describe('cordova-res', () => {
           throw new Error('err');
         });
         fsMock.readFile.mockImplementationOnce(async () => Buffer.from([]));
-        const { src } = await image.resolveSourceImage(
+        const { src } = await im.resolveSourceImage(
           Platform.ANDROID,
           ResourceType.ICON,
           ['foo.png', 'bar.png'],

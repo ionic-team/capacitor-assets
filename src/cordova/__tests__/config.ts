@@ -1,22 +1,16 @@
 import * as et from 'elementtree';
 
+import { Platform } from '../../platform';
+import type { ResourceConfig, ResourceValue } from '../../resources';
+import { Density, Format, ResourceType, ResourceKey } from '../../resources';
+import { identity } from '../../utils/fn';
 import {
-  ResourceConfigXmlRules,
   getIndexAttributeXPathParts,
   getResourceXPaths,
   pathValues,
   runResource,
 } from '../config';
-import { Platform } from '../../platform';
-import {
-  Density,
-  Format,
-  ResourceConfig,
-  ResourceType,
-  ResourceKey,
-  ResourceValue,
-} from '../../resources';
-import { identity } from '../../utils/fn';
+import type { ResourceConfigXmlRules } from '../config';
 
 describe('cordova-res', () => {
   describe('cordova/config', () => {

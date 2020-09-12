@@ -1,6 +1,6 @@
 import * as et from 'elementtree';
 
-import { Options } from '..';
+import type { Options } from '..';
 import { generateRunOptions, parseOptions, resolveOptions } from '../cli';
 import { Platform } from '../platform';
 

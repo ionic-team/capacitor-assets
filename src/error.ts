@@ -1,4 +1,4 @@
-import { ResourceType } from './resources';
+import type { ResourceType } from './resources';
 
 export const enum ValidationErrorCode {
   BAD_IMAGE_FORMAT = 'BAD_IMAGE_FORMAT',
@@ -37,7 +37,7 @@ export abstract class BaseError extends Error {
     this.message = message;
   }
 
-  toString() {
+  toString(): string {
     return this.message;
   }
 
@@ -65,7 +65,7 @@ export class ValidationError extends BaseError {
     super(message);
   }
 
-  toJSON() {
+  toJSON(): { [key: string]: any } {
     return { ...super.toJSON(), details: this.details };
   }
 }
@@ -81,7 +81,7 @@ export class ResolveSourceImageError extends BaseError {
     super(message);
   }
 
-  toJSON() {
+  toJSON(): { [key: string]: any } {
     return { ...super.toJSON(), sourceErrors: this.errors };
   }
 }

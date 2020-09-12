@@ -1,20 +1,19 @@
 import { ensureDir } from '@ionic/utils-fs';
 import Debug from 'debug';
 import pathlib from 'path';
-import { Sharp } from 'sharp';
+import type { Sharp } from 'sharp';
 
+import type { Operations } from '.';
 import { BadInputError, ResolveSourceImageError } from './error';
+import type { ImageSchema } from './image';
 import {
-  ImageSchema,
   debugSourceImage,
   generateImage,
   readSourceImage,
   resolveSourceImage,
 } from './image';
-import {
-  ANDROID_ADAPTIVE_ICON_RESOURCES,
+import type {
   AndroidAdaptiveIconResourceConfig,
-  COLOR_REGEX,
   ColorSource,
   Format,
   ImageSource,
@@ -22,14 +21,17 @@ import {
   ResolvedImageSource,
   ResolvedSource,
   ResourceConfig,
+  SimpleResourceConfig,
+} from './resources';
+import {
+  ANDROID_ADAPTIVE_ICON_RESOURCES,
+  COLOR_REGEX,
   ResourceKey,
   ResourceType,
-  SimpleResourceConfig,
   SourceType,
   getSimpleResources,
   getRasterResourceSchema,
 } from './resources';
-import type { Operations } from '.';
 
 const debug = Debug('cordova-res:platform');
 

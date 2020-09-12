@@ -55,6 +55,6 @@ const help = `
     --verbose ............................ Print verbose output to stderr
 `;
 
-export async function run() {
+export async function run(): Promise<void> {
   process.stdout.write(`${help}\n`);
 }

@@ -1,8 +1,8 @@
 import { pathWritable } from '@ionic/utils-fs';
 import Debug from 'debug';
-import et from 'elementtree';
+import type et from 'elementtree';
 import path from 'path';
-import { Sharp } from 'sharp';
+import type { Sharp } from 'sharp';
 import util from 'util';
 
 import { getDirectory, parseOptions, resolveOptions } from './cli';
@@ -13,24 +13,22 @@ import {
   write as writeConfig,
 } from './cordova/config';
 import { BaseError } from './error';
-import { ResizeOptions, ImageSchema } from './image';
-import { NativeProjectConfig, copyToNativeProject } from './native';
-import {
-  PLATFORMS,
+import type { ResizeOptions, ImageSchema } from './image';
+import type { NativeProjectConfig } from './native';
+import { copyToNativeProject } from './native';
+import type {
   Platform,
   RunPlatformOptions,
   TransformFunction,
-  prettyPlatform,
-  run as runPlatform,
 } from './platform';
-import {
+import { PLATFORMS, prettyPlatform, run as runPlatform } from './platform';
+import type {
   Density,
   Orientation,
   ResolvedSource,
   ResourceConfig,
-  ResourceType,
-  SourceType,
 } from './resources';
+import { ResourceType, SourceType } from './resources';
 import { tryFn } from './utils/fn';
 
 const debug = Debug('cordova-res');
@@ -173,6 +171,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 namespace CordovaRes {
   export const run = CordovaRes;
 

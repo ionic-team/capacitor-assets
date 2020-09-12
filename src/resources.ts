@@ -1,5 +1,5 @@
 import pathlib from 'path';
-import { Metadata, Sharp } from 'sharp';
+import type { Metadata, Sharp } from 'sharp';
 import util from 'util';
 
 import { BadInputError, ValidationError, ValidationErrorCode } from './error';
@@ -170,7 +170,7 @@ export async function validateRasterResource(
   }
 }
 
-export const COLOR_REGEX = /^\#[A-F0-9]{6}$/;
+export const COLOR_REGEX = /^#[A-F0-9]{6}$/;
 
 export function getRasterResourceSchema(
   platform: Platform,

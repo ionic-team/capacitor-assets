@@ -1,5 +1,6 @@
 import * as path from 'path';
 
+import type * as platform from '../platform';
 import {
   Platform,
   isSupportedPlatform,
@@ -10,7 +11,7 @@ import { ResourceType, getSimpleResources } from '../resources';
 describe('cordova-res', () => {
   describe('platform', () => {
     describe('run', () => {
-      let platform: typeof import('../platform');
+      let pl: typeof platform;
       let fsMock: { [key: string]: jest.Mock };
       let imageMock: { [key: string]: jest.Mock };
 
@@ -29,7 +30,7 @@ describe('cordova-res', () => {
         jest.mock('@ionic/utils-fs', () => fsMock);
         jest.mock('../image', () => imageMock);
 
-        platform = await import('../platform');
+        pl = await import('../platform');
       });
 
       it('should run through android icons with successful result', async () => {
@@ -39,7 +40,7 @@ describe('cordova-res', () => {
           image: { src: 'test.png', pipeline, metadata: {} },
         }));
 
-        const result = await platform.run(
+        const result = await pl.run(
           Platform.ANDROID,
           'resources',
           {
@@ -100,7 +101,7 @@ describe('cordova-res', () => {
           image: { src: 'test.png', pipeline, metadata: {} },
         }));
 
-        const result = await platform.run(
+        const result = await pl.run(
           Platform.WINDOWS,
           'resources',
           {
