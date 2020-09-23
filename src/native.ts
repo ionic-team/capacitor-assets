@@ -398,7 +398,7 @@ export async function copyToNativeProject(
   } else {
     errstream?.write(
       util.format(
-        'WARN:\tCopying to native projects is not supported for %s',
+        'WARN:\tCopying to native projects is not supported for the %s platform',
         prettyPlatform(platform),
       ) + '\n',
     );
