@@ -33,7 +33,7 @@ function generatePlatformsConfig(resourcesDirectory: string) {
           ],
         },
       },
-      icon: {
+      'icon': {
         sources: [
           `${resourcesDirectory}/android/icon.png`,
           `${resourcesDirectory}/android/icon.jpg`,
@@ -43,7 +43,7 @@ function generatePlatformsConfig(resourcesDirectory: string) {
           `${resourcesDirectory}/icon.jpeg`,
         ],
       },
-      splash: {
+      'splash': {
         sources: [
           `${resourcesDirectory}/android/splash.png`,
           `${resourcesDirectory}/android/splash.jpg`,
@@ -195,7 +195,7 @@ describe('cordova-res', () => {
               ],
             },
           },
-          icon: {
+          'icon': {
             sources: [
               'resources/android/icon.png',
               'resources/android/icon.jpg',
@@ -205,7 +205,7 @@ describe('cordova-res', () => {
               'resources/icon.jpeg',
             ],
           },
-          splash: {
+          'splash': {
             sources: [
               'resources/android/splash.png',
               'resources/android/splash.jpg',
