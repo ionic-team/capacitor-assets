@@ -130,6 +130,7 @@ async function CordovaRes(options: CordovaRes.Options = {}): Promise<Result> {
           resources.findIndex(res => res.type === ResourceType.SPLASH) !== -1;
         await copyToNativeProject(
           platform,
+          resourcesDirectory,
           nativeProject,
           shouldCopyIcons,
           shouldCopySplash,
