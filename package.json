@@ -21,6 +21,7 @@
     "fmt": "npm run eslint -- --fix && npm run prettier -- --write",
     "eslint": "eslint . --ext ts",
     "prettier": "prettier 'src/**/*.ts'",
+    "release": "np",
     "prepublishOnly": "npm run build"
   },
   "husky": {
@@ -73,6 +74,7 @@
     "eslint": "^7.11.0",
     "husky": "^4.3.0",
     "jest": "~25.5.0",
+    "np": "^7.0.0",
     "prettier": "^2.1.2",
     "ts-jest": "~25.5.0",
     "typescript": "~3.9.7"
