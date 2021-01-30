@@ -205,6 +205,11 @@ const ANDROID_ICONS: readonly NativeResource[] = [
     target: 'mipmap-mdpi/ic_launcher_foreground.png',
   },
   {
+    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
+    source: ANDROID_MDPI_ADAPTIVE_ICON.background,
+    target: 'mipmap-mdpi/ic_launcher_background.png',
+  },
+  {
     type: NativeResourceType.ANDROID_LEGACY,
     source: ANDROID_HDPI_ICON.src,
     target: 'mipmap-hdpi/ic_launcher.png',
@@ -218,6 +223,11 @@ const ANDROID_ICONS: readonly NativeResource[] = [
     type: NativeResourceType.ANDROID_ADAPTIVE_FOREGROUND,
     source: ANDROID_HDPI_ADAPTIVE_ICON.foreground,
     target: 'mipmap-hdpi/ic_launcher_foreground.png',
+  },
+  {
+    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
+    source: ANDROID_HDPI_ADAPTIVE_ICON.background,
+    target: 'mipmap-hdpi/ic_launcher_background.png',
   },
   {
     type: NativeResourceType.ANDROID_LEGACY,
@@ -235,6 +245,11 @@ const ANDROID_ICONS: readonly NativeResource[] = [
     target: 'mipmap-xhdpi/ic_launcher_foreground.png',
   },
   {
+    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
+    source: ANDROID_XHDPI_ADAPTIVE_ICON.background,
+    target: 'mipmap-xhdpi/ic_launcher_background.png',
+  },
+  {
     type: NativeResourceType.ANDROID_LEGACY,
     source: ANDROID_XXHDPI_ICON.src,
     target: 'mipmap-xxhdpi/ic_launcher.png',
@@ -250,6 +265,11 @@ const ANDROID_ICONS: readonly NativeResource[] = [
     target: 'mipmap-xxhdpi/ic_launcher_foreground.png',
   },
   {
+    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
+    source: ANDROID_XXHDPI_ADAPTIVE_ICON.background,
+    target: 'mipmap-xxhdpi/ic_launcher_background.png',
+  },
+  {
     type: NativeResourceType.ANDROID_LEGACY,
     source: ANDROID_XXXHDPI_ICON.src,
     target: 'mipmap-xxxhdpi/ic_launcher.png',
@@ -263,6 +283,11 @@ const ANDROID_ICONS: readonly NativeResource[] = [
     type: NativeResourceType.ANDROID_ADAPTIVE_FOREGROUND,
     source: ANDROID_XXXHDPI_ADAPTIVE_ICON.foreground,
     target: 'mipmap-xxxhdpi/ic_launcher_foreground.png',
+  },
+  {
+    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
+    source: ANDROID_XXXHDPI_ADAPTIVE_ICON.background,
+    target: 'mipmap-xxxhdpi/ic_launcher_background.png',
   },
 ];
 
