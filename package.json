@@ -59,7 +59,7 @@
     "@ionic/utils-fs": "^3.1.5",
     "debug": "^4.2.0",
     "elementtree": "^0.1.7",
-    "sharp": "^0.27.1",
+    "sharp": "^0.28.3",
     "tslib": "^2.0.3"
   },
   "devDependencies": {
@@ -70,7 +70,7 @@
     "@types/fs-extra": "^8.0.0",
     "@types/jest": "^26.0.14",
     "@types/node": "~10.17.13",
-    "@types/sharp": "^0.27.1",
+    "@types/sharp": "^0.28.1",
     "eslint": "^7.11.0",
     "husky": "^4.3.0",
     "jest": "~25.5.0",
