@@ -14,6 +14,9 @@ $ npm install -g cordova-res
 
 ```
 resources/
+├── android
+|   ├── icon-background.png
+|   └── icon-foreground.png
 ├── icon.png
 └── splash.png
 config.xml
