@@ -1,0 +1,84 @@
+{
+  "name": "@capacitor/assets",
+  "version": "1.0.0-next.0",
+  "description": "Generate icon and splash screen images for Capacitor apps",
+  "homepage": "https://ionicframework.com",
+  "author": "Ionic Team <hi@ionicframework.com>",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=10.3.0"
+  },
+  "bin": {
+    "capacitor-assets": "./bin/capacitor-assets"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest --maxWorkers=4",
+    "lint": "npm run eslint && npm run prettier -- --check",
+    "fmt": "npm run prettier -- --write",
+    "eslint": "eslint . --ext ts",
+    "prettier": "prettier 'src/**/*.ts'",
+    "release": "np",
+    "prepublishOnly": "npm run build"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run prettier -- --check"
+    }
+  },
+  "prettier": "@ionic/prettier-config",
+  "eslintConfig": {
+    "extends": "@ionic/eslint-config/recommended"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ionic-team/capacitor-assets.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ionic-team/capacitor-assets/issues"
+  },
+  "keywords": [
+    "ionic",
+    "capacitor",
+    "resources",
+    "mobile",
+    "native",
+    "icon",
+    "splash screen"
+  ],
+  "dependencies": {
+    "@capacitor/cli": "^3.2.5",
+    "@capacitor/project": "^1.0.8",
+    "@ionic/utils-array": "^2.1.5",
+    "@ionic/utils-fs": "^3.1.5",
+    "@types/yargs": "^17.0.5",
+    "commander": "^8.3.0",
+    "debug": "^4.2.0",
+    "sharp": "^0.29.2",
+    "tslib": "^2.0.3",
+    "yargs": "^17.2.1"
+  },
+  "devDependencies": {
+    "@ionic/eslint-config": "^0.3.0",
+    "@ionic/prettier-config": "^1.0.1",
+    "@types/debug": "^4.1.5",
+    "@types/fs-extra": "^8.0.0",
+    "@types/jest": "^26.0.14",
+    "@types/node": "~10.17.13",
+    "@types/sharp": "^0.29.2",
+    "eslint": "^7.11.0",
+    "husky": "^4.3.0",
+    "jest": "~25.5.0",
+    "np": "^7.0.0",
+    "prettier": "^2.1.2",
+    "ts-jest": "~25.5.0",
+    "typescript": "~3.9.7"
+  }
+}

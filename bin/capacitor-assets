@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+'use strict';
+
+process.title = 'capacitor-res';
+
+if (process.argv.includes('--verbose')) {
+  process.env.DEBUG = '*';
+}
+
+require('../').runCommandLine(process.argv.slice(2));

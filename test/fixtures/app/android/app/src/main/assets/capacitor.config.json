@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "capacitor-resources-test",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}
