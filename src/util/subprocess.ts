@@ -2,7 +2,7 @@ import { Subprocess, SubprocessError } from '@ionic/utils-subprocess';
 
 import c from '../colors';
 
-export async function runCommand(command, args, options = {}) {
+export async function runCommand(command: string, args: string[], options = {}) {
   console.log(c.strong(`> ${command} ${args.join(' ')}`));
 
   const p = new Subprocess(command, args, options);

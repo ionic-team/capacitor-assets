@@ -9,8 +9,18 @@ import { error } from './util/log';
 export class Project extends CapacitorProject {
   assets: Assets | null = null;
 
+  assetDir: string;
+
   constructor(config: CapacitorConfig) {
     super(config);
+
+    const projectRoot = join((config.android ?? config.ios)?.path ?? '', '../');
+    // TODO: Make this configurable
+    this.assetDir = join(projectRoot, 'assets');
+  }
+
+  assetDirectory() {
+    return this.assetDir;
   }
 
   async loadAssets(): Promise<Assets> {
@@ -23,8 +33,7 @@ export class Project extends CapacitorProject {
   }
 
   private async loadSourceAsset(filename: string, kind: AssetKind) {
-    const projectRoot = join((this.config.android ?? this.config.ios)?.path ?? '', '../');
-    const imagePath = join(projectRoot, 'resources', filename);
+    const imagePath = join(this.assetDir, filename);
     if (!(await pathExists(imagePath))) {
       return null;
     }

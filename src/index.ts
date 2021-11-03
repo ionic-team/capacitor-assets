@@ -7,9 +7,9 @@ export async function run() {
   try {
     const ctx = await loadContext();
     runProgram(ctx);
-  } catch (e: any) {
+  } catch (e) {
     process.exitCode = 1;
-    logger.error(e.message ? e.message : String(e));
+    logger.error((e as any).message ? (e as any).message : String(e));
     throw e;
   }
 }

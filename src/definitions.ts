@@ -11,3 +11,39 @@ export const enum AssetKind {
   Splash = 'splash',
   SplashDark = 'splash-dark'
 };
+
+export const enum Platform {
+  Ios = 'ios',
+  Android = 'android',
+  Pwa = 'pwa',
+  // Windows = 'windows'
+};
+
+export const enum Format {
+  Png = 'png',
+  Jpeg = 'jpeg',
+  Svg = 'svg'
+}
+
+export const enum Orientation {
+  Portrait = 'portrait',
+  Landscape = 'landscape'
+}
+
+export const enum Theme {
+  Any = 'any',
+  Light = 'light',
+  Dark = 'dark'
+}
+
+export interface AssetMeta {
+  platform: Platform;
+  kind: AssetKind;
+  name: string;
+  format: Format;
+  width: number;
+  height: number;
+  orientation?: Orientation;
+  scale?: number;
+  theme?: Theme;
+}
