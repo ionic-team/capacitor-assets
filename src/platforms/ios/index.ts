@@ -4,7 +4,7 @@ import { AssetKind } from "../../definitions";
 import { BadPipelineError, BadProjectError } from "../../error";
 import { GeneratedAsset } from "../../generated-asset";
 import { Project } from "../../project";
-import { AssetGenerationStrategy } from "../../strategy";
+import { AssetGenerator } from "../../asset-generator";
 import { IOS_2X_UNIVERSAL_ANYANY_SPLASH, IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK } from "./assets";
 import * as IosAssets from './assets';
 
@@ -13,7 +13,7 @@ export const IOS_APP_ICON_SET_PATH = `App/App/Assets.xcassets/${IOS_APP_ICON_SET
 export const IOS_SPLASH_IMAGE_SET_NAME = 'Splash';
 export const IOS_SPLASH_IMAGE_SET_PATH = `App/App/Assets.xcassets/${IOS_SPLASH_IMAGE_SET_NAME}.imageset`;
 
-export class IosAssetGenerationStrategy extends AssetGenerationStrategy {
+export class IosAssetGenerator extends AssetGenerator {
   constructor() {
     super();
   }
@@ -28,6 +28,8 @@ export class IosAssetGenerationStrategy extends AssetGenerationStrategy {
     switch (asset.kind) {
       case AssetKind.Icon:
         return this.generateIcons(asset, project);
+      case AssetKind.AdaptiveIcon:
+        return [];
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);

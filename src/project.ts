@@ -8,6 +8,7 @@ import { error } from './util/log';
 
 export class Project extends CapacitorProject {
   assets: Assets | null = null;
+  directory: string | null = null;
 
   assetDir: string;
 
@@ -15,6 +16,7 @@ export class Project extends CapacitorProject {
     super(config);
 
     const projectRoot = join((config.android ?? config.ios)?.path ?? '', '../');
+    this.directory = projectRoot;
     // TODO: Make this configurable
     this.assetDir = join(projectRoot, 'assets');
   }

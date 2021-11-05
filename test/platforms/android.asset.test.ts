@@ -2,12 +2,8 @@ import { copy, pathExists, rm } from '@ionic/utils-fs';
 import tempy from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';
-import { IosAssetGenerationStrategy } from '../../src/platforms/ios';
-import { AssetKind, Format } from '../../src/definitions';
-import * as IosAssets from '../../src/platforms/ios/assets';
-import sharp from 'sharp';
 
-describe('Android asset test', () => {
+describe.skip('Android asset test', () => {
   let ctx: Context;
   const fixtureDir = tempy.directory();
 

@@ -8,6 +8,7 @@ export interface Assets {
 
 export const enum AssetKind {
   Icon = 'icon',
+  AdaptiveIcon = 'adaptive-icon',
   Splash = 'splash',
   SplashDark = 'splash-dark'
 };
@@ -23,6 +24,7 @@ export const enum Format {
   Png = 'png',
   Jpeg = 'jpeg',
   Svg = 'svg',
+  WebP = 'webp',
   Unknown = 'unknown'
 }
 

@@ -2,12 +2,13 @@ import { copy, pathExists, rm } from '@ionic/utils-fs';
 import tempy from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';
-import { IosAssetGenerator } from '../../src/platforms/ios';
-import { AssetKind, Format } from '../../src/definitions';
-import * as IosAssets from '../../src/platforms/ios/assets';
+import { PwaAssetGenerator } from '../../src/platforms/pwa';
+import { AssetKind } from '../../src/definitions';
+import * as PwaAssets from '../../src/platforms/pwa/assets';
 import sharp from 'sharp';
+import { parse } from 'path';
 
-describe('iOS Asset Test', () => {
+describe('PWA Asset Test', () => {
   let ctx: Context;
   const fixtureDir = tempy.directory();
 
@@ -23,27 +24,12 @@ describe('iOS Asset Test', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
-  it('Should generate ios splashes', async () => {
+  it('Should generate PWA icons', async () => {
     const assets = await ctx.project.loadAssets();
 
-    const strategy = new IosAssetGenerator();
-    let generatedAssets = await assets.splash?.generate(strategy, ctx.project) ?? [];
+    const exportedIcons = Object.values(PwaAssets).filter(a => a.kind === AssetKind.Icon);
 
-    expect(generatedAssets.length).toBe(1);
-    expect(await pathExists(generatedAssets[0]?.meta.dest ?? '')).toBe(true);
-
-    generatedAssets = await assets.splashDark?.generate(strategy, ctx.project) ?? [];
-
-    expect(generatedAssets.length).toBe(1);
-    expect(await pathExists(generatedAssets[0]?.meta.dest ?? '')).toBe(true);
-  });
-
-  it('Should generate ios icons', async () => {
-    const assets = await ctx.project.loadAssets();
-
-    const exportedIcons = Object.values(IosAssets).filter(a => a.kind === AssetKind.Icon);
-
-    const strategy = new IosAssetGenerator();
+    const strategy = new PwaAssetGenerator();
     let generatedAssets = await assets.icon?.generate(strategy, ctx.project) ?? [];
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
@@ -56,5 +42,19 @@ describe('iOS Asset Test', () => {
       return metadata.width === asset.meta.width && metadata.height === asset.meta.height;
     }));
     expect(sizedSet.every(e => !!e)).toBe(true);
+
+    const manifest = await strategy.getManifestJson(ctx.project);
+    expect(manifest.icons.length).toBe(6);
+
+    expect(manifest.icons.map((icon: any) => {
+      const fname = parse(icon.src).name;
+      const num = fname.split('-')[1];
+      return icon.sizes === `${num}x${num}`;
+    }).every((i: any) => !!i)).toBe(true);
+
+    expect(manifest.icons.map((icon: any) => {
+      const ext = parse(icon.src).ext
+      return ext === '.webp';
+    }).every((i: any) => !!i)).toBe(true);
   });
 });

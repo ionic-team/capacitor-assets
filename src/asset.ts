@@ -3,7 +3,7 @@ import sharp from "sharp";
 import { AssetKind, Format } from "./definitions";
 import { GeneratedAsset } from "./generated-asset";
 import { Project } from "./project";
-import { AssetGenerationStrategy } from "./strategy";
+import { AssetGenerator } from "./asset-generator";
 
 export class Asset {
   private filename: string;
@@ -44,7 +44,7 @@ export class Asset {
     this.height = metadata.height;
   }
 
-  async generate(strategy: AssetGenerationStrategy, project: Project): Promise<GeneratedAsset[]> {
+  async generate(strategy: AssetGenerator, project: Project): Promise<GeneratedAsset[]> {
     return strategy.generate(this, project);
   }
 }
