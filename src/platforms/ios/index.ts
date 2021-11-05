@@ -44,12 +44,14 @@ export class IosAssetGenerationStrategy extends AssetGenerationStrategy {
     const iosDir = project.config.ios!.path!;
     const icons = Object.values(IosAssets).filter(a => a.kind === AssetKind.Icon);
 
-    return Promise.all(icons.map(icon => {
+    return Promise.all(icons.map(async icon => {
       const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
       icon.dest = dest;
 
-      pipe.png();
-      pipe.toFile(dest);
+      await pipe.resize(icon.width, icon.height)
+        .png()
+        .toFile(dest);
+
       return new GeneratedAsset(icon, asset, project);
     }));
   }
@@ -67,8 +69,9 @@ export class IosAssetGenerationStrategy extends AssetGenerationStrategy {
     const dest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, assetMeta.name);
     assetMeta.dest = dest;
 
-    pipe.png();
-    pipe.toFile(dest);
+    await pipe.resize(assetMeta.width, assetMeta.height)
+      .png()
+      .toFile(dest);
 
     return [new GeneratedAsset(assetMeta, asset, project)];
   }
