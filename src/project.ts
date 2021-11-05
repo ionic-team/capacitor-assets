@@ -27,16 +27,27 @@ export class Project extends CapacitorProject {
 
   async loadAssets(): Promise<Assets> {
     this.assets = {
-      icon: await this.loadSourceAsset('icon.png', AssetKind.Icon),
-      splash: await this.loadSourceAsset('splash.png', AssetKind.Splash),
-      splashDark: await this.loadSourceAsset('splash-dark.png', AssetKind.SplashDark),
+      icon: await this.loadSourceAsset('icon', AssetKind.Icon),
+      splash: await this.loadSourceAsset('splash', AssetKind.Splash),
+      splashDark: await this.loadSourceAsset('splash-dark', AssetKind.SplashDark),
     }
     return this.assets;
   }
 
-  private async loadSourceAsset(filename: string, kind: AssetKind) {
-    const imagePath = join(this.assetDir, filename);
-    if (!(await pathExists(imagePath))) {
+  private async loadSourceAsset(name: string, kind: AssetKind) {
+    let imagePath: string | null = null;
+
+    const extensions = ['.png', '.webp', '.jpg', '.jpeg', '.svg'];
+    let filename: string | null = null;
+    for (let ext of extensions) {
+      filename = `${name}${ext}`;
+      if (await pathExists(join(this.assetDir, filename))) {
+        imagePath = join(this.assetDir, filename);
+        break;
+      }
+    }
+
+    if (!imagePath) {
       return null;
     }
 
