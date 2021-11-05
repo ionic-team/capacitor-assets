@@ -5,5 +5,5 @@ import { Project } from "./project";
 export abstract class AssetGenerationStrategy {
   constructor() { }
 
-  abstract generate(asset: Asset, project: Project): Promise<GeneratedAsset | null>;
+  abstract generate(asset: Asset, project: Project): Promise<GeneratedAsset[]>;
 }

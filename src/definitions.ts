@@ -22,7 +22,8 @@ export const enum Platform {
 export const enum Format {
   Png = 'png',
   Jpeg = 'jpeg',
-  Svg = 'svg'
+  Svg = 'svg',
+  Unknown = 'unknown'
 }
 
 export const enum Orientation {
@@ -39,7 +40,10 @@ export const enum Theme {
 export interface AssetMeta {
   platform: Platform;
   kind: AssetKind;
+  // The filename (no path) for the asset
   name: string;
+  // The destination file
+  dest?: string;
   format: Format;
   width: number;
   height: number;

@@ -1,6 +1,7 @@
-import { basename, join } from "path";
+import { basename, extname, join } from "path";
 import sharp from "sharp";
-import { AssetKind } from "./definitions";
+import { AssetKind, Format } from "./definitions";
+import { GeneratedAsset } from "./generated-asset";
 import { Project } from "./project";
 import { AssetGenerationStrategy } from "./strategy";
 
@@ -19,6 +20,22 @@ export class Asset {
     return this._sharp;
   }
 
+  format() {
+    const ext = extname(this.filename);
+
+    switch (ext) {
+      case '.png':
+        return Format.Png;
+      case '.jpg':
+      case '.jpeg':
+        return Format.Jpeg;
+      case '.svg':
+        return Format.Svg;
+    }
+
+    return Format.Unknown;
+  }
+
   async load(): Promise<void> {
     this._sharp = await sharp(this.path);
 
@@ -27,7 +44,7 @@ export class Asset {
     this.height = metadata.height;
   }
 
-  async generate(strategy: AssetGenerationStrategy, project: Project) {
+  async generate(strategy: AssetGenerationStrategy, project: Project): Promise<GeneratedAsset[]> {
     return strategy.generate(this, project);
   }
 }
