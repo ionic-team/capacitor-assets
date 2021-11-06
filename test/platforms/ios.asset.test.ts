@@ -1,11 +1,12 @@
-import { copy, pathExists, rm } from '@ionic/utils-fs';
+import { copy, pathExists, readFile, rm } from '@ionic/utils-fs';
 import tempy from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';
-import { IosAssetGenerator } from '../../src/platforms/ios';
-import { AssetKind, Format } from '../../src/definitions';
+import { IosAssetGenerator, IOS_SPLASH_IMAGE_SET_PATH } from '../../src/platforms/ios';
+import { AssetKind, Format, IosContents } from '../../src/definitions';
 import * as IosAssets from '../../src/platforms/ios/assets';
 import sharp from 'sharp';
+import { join } from 'path';
 
 describe('iOS Asset Test', () => {
   let ctx: Context;
@@ -36,6 +37,9 @@ describe('iOS Asset Test', () => {
 
     expect(generatedAssets.length).toBe(1);
     expect(await pathExists(generatedAssets[0]?.meta.dest ?? '')).toBe(true);
+
+    const contentsJson = JSON.parse(await readFile(join(ctx.project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json'), { encoding: 'utf-8' })) as IosContents;
+    expect(contentsJson.images.find(i => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name));
   });
 
   it('Should generate ios icons', async () => {

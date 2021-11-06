@@ -53,3 +53,17 @@ export interface AssetMeta {
   scale?: number;
   theme?: Theme;
 }
+
+// Shape of the Contents.json file inside of ios app appiconset and imageset folders
+export interface IosContents {
+  images: {
+    filename: string;
+    size: string;
+    scale: string;
+    idiom: string;
+  }[];
+  info?: {
+    version: number;
+    author: string;
+  }
+}

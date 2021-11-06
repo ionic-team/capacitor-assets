@@ -1,4 +1,6 @@
 import { join } from "path";
+import { readFile, writeFile } from '@ionic/utils-fs';
+
 import { Asset } from "../../asset";
 import { AssetKind } from "../../definitions";
 import { BadPipelineError, BadProjectError } from "../../error";
@@ -75,6 +77,35 @@ export class IosAssetGenerator extends AssetGenerator {
       .png()
       .toFile(dest);
 
-    return [new GeneratedAsset(assetMeta, asset, project)];
+    const generated = new GeneratedAsset(assetMeta, asset, project);
+
+    if (asset.kind === AssetKind.SplashDark) {
+      // Need to register this as a dark-mode splash
+      await this.updateContentsJsonDark(generated, project);
+    }
+
+    return [generated];
+  }
+
+  private async updateContentsJsonDark(generated: GeneratedAsset, project: Project) {
+    const contentsJsonPath = join(project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
+    const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
+
+    const parsed = JSON.parse(json);
+
+    const withoutMissing = parsed.images.filter((i: any) => !!i.filename);
+    withoutMissing.push({
+      appearances: [{
+        appearance: 'luminosity',
+        value: 'dark'
+      }],
+      idiom: 'universal',
+      scale: `${generated.meta.scale ?? 1}x`,
+      filename: generated.meta.name
+    });
+
+    parsed.images = withoutMissing;
+
+    await writeFile(contentsJsonPath, JSON.stringify(parsed, null, 2));
   }
 }
