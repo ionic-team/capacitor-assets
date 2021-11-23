@@ -110,8 +110,8 @@ export interface GeneratedImageResource {
   readonly src: string;
 }
 
-export type UnconsolidatedGeneratedAndroidAdaptiveIconResource = AndroidAdaptiveIconResourceConfig &
-  GeneratedImageResource;
+export type UnconsolidatedGeneratedAndroidAdaptiveIconResource =
+  AndroidAdaptiveIconResourceConfig & GeneratedImageResource;
 
 /**
  * Run resource generation for the given platform.
@@ -364,28 +364,24 @@ export async function generateAdaptiveIconResources(
 
   debug('Building %s resources', ResourceType.ADAPTIVE_ICON);
 
-  const {
-    resources: iconResources = [],
-    source: iconSource,
-  } = (await safelyGenerateSimpleResources(
-    ResourceType.ICON,
-    Platform.ANDROID,
-    resourcesDirectory,
-    options.icon,
-    operations,
-    errstream,
-  )) || { source: undefined };
+  const { resources: iconResources = [], source: iconSource } =
+    (await safelyGenerateSimpleResources(
+      ResourceType.ICON,
+      Platform.ANDROID,
+      resourcesDirectory,
+      options.icon,
+      operations,
+      errstream,
+    )) || { source: undefined };
 
-  const {
-    resources: foregroundResources,
-    source: foregroundSource,
-  } = await generateAdaptiveIconResourcesPortion(
-    resourcesDirectory,
-    ResourceKey.FOREGROUND,
-    options.foreground.sources,
-    operations,
-    errstream,
-  );
+  const { resources: foregroundResources, source: foregroundSource } =
+    await generateAdaptiveIconResourcesPortion(
+      resourcesDirectory,
+      ResourceKey.FOREGROUND,
+      options.foreground.sources,
+      operations,
+      errstream,
+    );
 
   const resolvedBackgroundSource = await resolveSource(
     Platform.ANDROID,

@@ -398,7 +398,7 @@ export type UnknownResource = Partial<ResourceKeyValues> &
 export type BaseResourceConfig<
   P extends Platform,
   T extends ResourceType,
-  R extends keyof ResourceKeyValues
+  R extends keyof ResourceKeyValues,
 > = { [K in R]: ResourceKeyValues[K] } & PlatformAndType<P, T>;
 
 export type ImageResourceKey =
@@ -539,7 +539,7 @@ export function generateScaledWindowsResourceSrc(
 }
 
 export function generateScaledWindowsResource<
-  T extends WindowsIconResourceConfig | WindowsSplashResourceConfig
+  T extends WindowsIconResourceConfig | WindowsSplashResourceConfig,
 >(resource: T, factor: number): T {
   if (resource.scale !== 1) {
     throw new Error('Cannot generate scaled resource from scaled resource.');
@@ -557,7 +557,7 @@ export function generateScaledWindowsResource<
 }
 
 export function generateScaledWindowsResources<
-  T extends WindowsIconResourceConfig | WindowsSplashResourceConfig
+  T extends WindowsIconResourceConfig | WindowsSplashResourceConfig,
 >(resource: T, factors: readonly number[]): T[] {
   return factors.map(factor => generateScaledWindowsResource(resource, factor));
 }
@@ -653,68 +653,35 @@ export const WINDOWS_STORE_LOGO: WindowsIconResourceConfig = {
  */
 export const WINDOWS_ICON_RESOURCES: readonly WindowsIconResourceConfig[] = [
   WINDOWS_SQUARE_44_X_44_ICON,
-  ...generateScaledWindowsResources(WINDOWS_SQUARE_44_X_44_ICON, [
-    1,
-    1.25,
-    1.4,
-    1.5,
-    2,
-    2.4,
-    4,
-  ]),
+  ...generateScaledWindowsResources(
+    WINDOWS_SQUARE_44_X_44_ICON,
+    [1, 1.25, 1.4, 1.5, 2, 2.4, 4],
+  ),
   WINDOWS_SQUARE_71_X_71_ICON,
-  ...generateScaledWindowsResources(WINDOWS_SQUARE_71_X_71_ICON, [
-    1,
-    1.25,
-    1.4,
-    1.5,
-    2,
-    2.4,
-    4,
-  ]),
+  ...generateScaledWindowsResources(
+    WINDOWS_SQUARE_71_X_71_ICON,
+    [1, 1.25, 1.4, 1.5, 2, 2.4, 4],
+  ),
   WINDOWS_SQUARE_150_X_150_ICON,
-  ...generateScaledWindowsResources(WINDOWS_SQUARE_150_X_150_ICON, [
-    1,
-    1.25,
-    1.4,
-    1.5,
-    2,
-    2.4,
-    4,
-  ]),
+  ...generateScaledWindowsResources(
+    WINDOWS_SQUARE_150_X_150_ICON,
+    [1, 1.25, 1.4, 1.5, 2, 2.4, 4],
+  ),
   WINDOWS_SQUARE_310_X_310_ICON,
-  ...generateScaledWindowsResources(WINDOWS_SQUARE_310_X_310_ICON, [
-    1,
-    1.25,
-    1.4,
-    1.5,
-    1.8,
-    2,
-    4,
-  ]),
+  ...generateScaledWindowsResources(
+    WINDOWS_SQUARE_310_X_310_ICON,
+    [1, 1.25, 1.4, 1.5, 1.8, 2, 4],
+  ),
   WINDOWS_WIDE_310_X_150_LOGO,
-  ...generateScaledWindowsResources(WINDOWS_WIDE_310_X_150_LOGO, [
-    0.8,
-    1,
-    1.25,
-    1.4,
-    1.5,
-    1.8,
-    2,
-    2.4,
-    4,
-  ]),
+  ...generateScaledWindowsResources(
+    WINDOWS_WIDE_310_X_150_LOGO,
+    [0.8, 1, 1.25, 1.4, 1.5, 1.8, 2, 2.4, 4],
+  ),
   WINDOWS_STORE_LOGO,
-  ...generateScaledWindowsResources(WINDOWS_STORE_LOGO, [
-    1,
-    1.25,
-    1.4,
-    1.5,
-    1.8,
-    2,
-    2.4,
-    4,
-  ]),
+  ...generateScaledWindowsResources(
+    WINDOWS_STORE_LOGO,
+    [1, 1.25, 1.4, 1.5, 1.8, 2, 2.4, 4],
+  ),
 ];
 
 export const WINDOWS_SPLASH_SCREEN: WindowsSplashResourceConfig = {
@@ -733,16 +700,14 @@ export const WINDOWS_SPLASH_SCREEN: WindowsSplashResourceConfig = {
  * @see https://msdn.microsoft.com/en-us/windows/desktop/hh465338
  * @see https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-splashscreen/index.html#windows-specific-information
  */
-export const WINDOWS_SPLASH_RESOURCES: readonly WindowsSplashResourceConfig[] = [
-  WINDOWS_SPLASH_SCREEN,
-  ...generateScaledWindowsResources(WINDOWS_SPLASH_SCREEN, [
-    1,
-    1.25,
-    1.5,
-    2,
-    4,
-  ]),
-];
+export const WINDOWS_SPLASH_RESOURCES: readonly WindowsSplashResourceConfig[] =
+  [
+    WINDOWS_SPLASH_SCREEN,
+    ...generateScaledWindowsResources(
+      WINDOWS_SPLASH_SCREEN,
+      [1, 1.25, 1.5, 2, 4],
+    ),
+  ];
 
 export const ANDROID_LDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   platform: Platform.ANDROID,
@@ -799,25 +764,27 @@ export const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
   density: Density.XXHDPI,
 };
 
-export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig = {
-  platform: Platform.ANDROID,
-  type: ResourceType.ADAPTIVE_ICON,
-  foreground: 'xxxhdpi-foreground.png',
-  background: 'xxxhdpi-background.png',
-  format: Format.PNG,
-  width: 432,
-  height: 432,
-  density: Density.XXXHDPI,
-};
+export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidAdaptiveIconResourceConfig =
+  {
+    platform: Platform.ANDROID,
+    type: ResourceType.ADAPTIVE_ICON,
+    foreground: 'xxxhdpi-foreground.png',
+    background: 'xxxhdpi-background.png',
+    format: Format.PNG,
+    width: 432,
+    height: 432,
+    density: Density.XXXHDPI,
+  };
 
-export const ANDROID_ADAPTIVE_ICON_RESOURCES: readonly AndroidAdaptiveIconResourceConfig[] = [
-  ANDROID_LDPI_ADAPTIVE_ICON,
-  ANDROID_MDPI_ADAPTIVE_ICON,
-  ANDROID_HDPI_ADAPTIVE_ICON,
-  ANDROID_XHDPI_ADAPTIVE_ICON,
-  ANDROID_XXHDPI_ADAPTIVE_ICON,
-  ANDROID_XXXHDPI_ADAPTIVE_ICON,
-];
+export const ANDROID_ADAPTIVE_ICON_RESOURCES: readonly AndroidAdaptiveIconResourceConfig[] =
+  [
+    ANDROID_LDPI_ADAPTIVE_ICON,
+    ANDROID_MDPI_ADAPTIVE_ICON,
+    ANDROID_HDPI_ADAPTIVE_ICON,
+    ANDROID_XHDPI_ADAPTIVE_ICON,
+    ANDROID_XXHDPI_ADAPTIVE_ICON,
+    ANDROID_XXXHDPI_ADAPTIVE_ICON,
+  ];
 
 export const ANDROID_LDPI_ICON: AndroidIconResourceConfig = {
   platform: Platform.ANDROID,
@@ -1020,20 +987,21 @@ export const ANDROID_PORT_XXXHDPI_SCREEN: AndroidSplashResourceConfig = {
   orientation: Orientation.PORTRAIT,
 };
 
-export const ANDROID_SPLASH_RESOURCES: readonly AndroidSplashResourceConfig[] = [
-  ANDROID_LAND_LDPI_SCREEN,
-  ANDROID_LAND_MDPI_SCREEN,
-  ANDROID_LAND_HDPI_SCREEN,
-  ANDROID_LAND_XHDPI_SCREEN,
-  ANDROID_LAND_XXHDPI_SCREEN,
-  ANDROID_LAND_XXXHDPI_SCREEN,
-  ANDROID_PORT_LDPI_SCREEN,
-  ANDROID_PORT_MDPI_SCREEN,
-  ANDROID_PORT_HDPI_SCREEN,
-  ANDROID_PORT_XHDPI_SCREEN,
-  ANDROID_PORT_XXHDPI_SCREEN,
-  ANDROID_PORT_XXXHDPI_SCREEN,
-];
+export const ANDROID_SPLASH_RESOURCES: readonly AndroidSplashResourceConfig[] =
+  [
+    ANDROID_LAND_LDPI_SCREEN,
+    ANDROID_LAND_MDPI_SCREEN,
+    ANDROID_LAND_HDPI_SCREEN,
+    ANDROID_LAND_XHDPI_SCREEN,
+    ANDROID_LAND_XXHDPI_SCREEN,
+    ANDROID_LAND_XXXHDPI_SCREEN,
+    ANDROID_PORT_LDPI_SCREEN,
+    ANDROID_PORT_MDPI_SCREEN,
+    ANDROID_PORT_HDPI_SCREEN,
+    ANDROID_PORT_XHDPI_SCREEN,
+    ANDROID_PORT_XXHDPI_SCREEN,
+    ANDROID_PORT_XXXHDPI_SCREEN,
+  ];
 
 /**
  * 20pt Icon
