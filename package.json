@@ -71,7 +71,7 @@
     "@types/jest": "^26.0.14",
     "@types/node": "~10.17.13",
     "@types/sharp": "^0.27.1",
-    "eslint": "^7.11.0",
+    "eslint": "^8.4.0",
     "eslint-plugin-import": "^2.22.0",
     "husky": "^4.3.0",
     "jest": "~25.5.0",
