@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import { Context, loadContext, setArguments } from './ctx';
 import { logger } from './util/log';
 import { wrapAction } from './util/cli';
+import { log } from './log';
+import * as c from './colors';
 
 export async function run() {
   try {
@@ -46,6 +48,7 @@ export function runProgram(ctx: Context) {
 
   program.arguments('[command]').action(
     wrapAction((_: any) => {
+      log(c.strong('\n⚡️ Capacitor Assets ⚡️\n'));
       program.outputHelp();
     }),
   );
