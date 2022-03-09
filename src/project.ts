@@ -12,13 +12,12 @@ export class Project extends CapacitorProject {
 
   assetDir: string;
 
-  constructor(config: CapacitorConfig) {
+  constructor(config: CapacitorConfig, assetPath: string = 'assets') {
     super(config);
 
     const projectRoot = join((config.android ?? config.ios)?.path ?? '', '../');
     this.directory = projectRoot;
-    // TODO: Make this configurable
-    this.assetDir = join(projectRoot, 'assets');
+    this.assetDir = join(projectRoot, assetPath);
   }
 
   assetDirectory() {
@@ -29,8 +28,11 @@ export class Project extends CapacitorProject {
     this.assets = {
       icon: await this.loadSourceAsset('icon', AssetKind.Icon),
       splash: await this.loadSourceAsset('splash', AssetKind.Splash),
-      splashDark: await this.loadSourceAsset('splash-dark', AssetKind.SplashDark),
-    }
+      splashDark: await this.loadSourceAsset(
+        'splash-dark',
+        AssetKind.SplashDark,
+      ),
+    };
     return this.assets;
   }
 

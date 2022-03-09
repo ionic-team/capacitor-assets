@@ -9,7 +9,7 @@ export interface Context {
   // Path the to the root of the capacitor project, if needed
   projectRootPath?: string;
   args: any;
-  project: Project,
+  project: Project;
   nodePackageRoot: string;
   rootDir: string;
 }
@@ -21,7 +21,10 @@ export async function loadContext(projectRootPath?: string): Promise<Context> {
 
   let project: Project;
   try {
-    project = await loadProject(projectRootPath);
+    project = await loadProject(
+      projectRootPath,
+      (argv.assetPath as string) ?? 'assets',
+    );
   } catch (e) {
     throw new Error(`Unable to load Capacitor project: ${(e as any).message}`);
   }
@@ -41,20 +44,24 @@ export function setArguments(ctx: Context, args: any) {
   process.env.VERBOSE = '' + !!args.verbose;
 }
 
-async function loadProject(projectRootPath?: string): Promise<Project> {
+async function loadProject(
+  projectRootPath?: string,
+  projectAssetPath?: string,
+): Promise<Project> {
   const config = await loadCapacitorConfig(projectRootPath);
-  const project = new Project(config);
+  const project = new Project(config, projectAssetPath);
   await project.load();
   return project;
 }
 
+// TODO: Use the config loading stuff from @capacitor/configure
 function loadCapacitorConfig(projectRootPath?: string): CapacitorConfig {
   return {
     ios: {
-      path: projectRootPath ? join(projectRootPath, 'ios') : 'ios'
+      path: projectRootPath ? join(projectRootPath, 'ios') : 'ios',
     },
     android: {
-      path: projectRootPath ? join(projectRootPath, 'android') : 'android'
-    }
-  }
+      path: projectRootPath ? join(projectRootPath, 'android') : 'android',
+    },
+  };
 }
