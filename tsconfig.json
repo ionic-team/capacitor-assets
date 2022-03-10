@@ -14,6 +14,6 @@
     "target": "es2019",
     "lib": ["dom", "es2019"]
   },
-  "files": ["src/index.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["test/**/*.ts"]
 }

@@ -6,6 +6,7 @@ export const input = kleur.cyan;
 export const success = kleur.green;
 export const failure = kleur.red;
 export const ancillary = kleur.cyan;
+export const extra = kleur.yellow;
 
 const COLORS = {
   strong,

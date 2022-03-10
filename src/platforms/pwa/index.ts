@@ -1,12 +1,18 @@
-import { basename, extname, join } from "path";
-import { existsSync, mkdirp, readFile, readFileSync, writeFileSync } from '@ionic/utils-fs';
+import { basename, extname, join } from 'path';
+import {
+  existsSync,
+  mkdirp,
+  readFile,
+  readFileSync,
+  writeFileSync,
+} from '@ionic/utils-fs';
 
-import { Asset } from "../../asset";
-import { AssetKind, AssetMeta, Platform } from "../../definitions";
-import { BadPipelineError, BadProjectError } from "../../error";
-import { GeneratedAsset } from "../../generated-asset";
-import { Project } from "../../project";
-import { AssetGenerator } from "../../asset-generator";
+import { Asset } from '../../asset';
+import { AssetKind, AssetMeta, Platform } from '../../definitions';
+import { BadPipelineError, BadProjectError } from '../../error';
+import { GeneratedAsset } from '../../generated-asset';
+import { Project } from '../../project';
+import { AssetGenerator } from '../../asset-generator';
 import * as PwaAssets from './assets';
 
 export const PWA_ASSET_PATH = 'icons';
@@ -52,7 +58,10 @@ export class PwaAssetGenerator extends AssetGenerator {
     }
   }
 
-  private async generateIcons(asset: Asset, project: Project): Promise<GeneratedAsset[]> {
+  private async generateIcons(
+    asset: Asset,
+    project: Project,
+  ): Promise<GeneratedAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -60,22 +69,30 @@ export class PwaAssetGenerator extends AssetGenerator {
     }
 
     const pwaDir = this.getPWADirectory(project.directory ?? undefined);
-    const icons = Object.values(PwaAssets).filter(a => a.kind === AssetKind.Icon);
+    const icons = Object.values(PwaAssets).filter(
+      a => a.kind === AssetKind.Icon,
+    );
 
-    const generatedAssets = await Promise.all(icons.map(async icon => {
-      const destDir = join(this.getPWAAssetsDirectory(pwaDir), PWA_ASSET_PATH);
-      try {
-        await mkdirp(destDir);
-      } catch { }
-      const dest = join(destDir, icon.name);
-      icon.dest = dest;
+    const generatedAssets = await Promise.all(
+      icons.map(async icon => {
+        const destDir = join(
+          this.getPWAAssetsDirectory(pwaDir),
+          PWA_ASSET_PATH,
+        );
+        try {
+          await mkdirp(destDir);
+        } catch {}
+        const dest = join(destDir, icon.name);
+        icon.dest = dest;
 
-      await pipe.resize(icon.width, icon.height)
-        .png()
-        .toFile(dest);
+        const outputInfo = await pipe
+          .resize(icon.width, icon.height)
+          .png()
+          .toFile(dest);
 
-      return new GeneratedAsset(icon, asset, project);
-    }));
+        return new GeneratedAsset(icon, asset, project, outputInfo);
+      }),
+    );
 
     await this.updateManifest(project, generatedAssets);
 
@@ -133,14 +150,13 @@ export class PwaAssetGenerator extends AssetGenerator {
     }
   }
 
-  private updateManifest(
-    project: Project,
-    assets: GeneratedAsset[],
-  ) {
+  private updateManifest(project: Project, assets: GeneratedAsset[]) {
     const pwaDir = this.getPWADirectory(project.directory ?? undefined);
     const pwaAssetDir = this.getPWAAssetsDirectory(pwaDir);
 
-    const manifestPath = this.getManifestJsonPath(project.directory ?? undefined);
+    const manifestPath = this.getManifestJsonPath(
+      project.directory ?? undefined,
+    );
     const pwaAssets = assets.filter(a => a.meta.platform === Platform.Pwa);
 
     let manifestJson: any = {};
@@ -220,4 +236,3 @@ export async function copyIcons(
   return PWA_ICONS.length;
 }
 */
-

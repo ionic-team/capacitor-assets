@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { Context, loadContext, setArguments } from './ctx';
 import { logger } from './util/log';
 import { wrapAction } from './util/cli';
-import { log } from './log';
+import { log } from './util/log';
 import * as c from './colors';
 
 export async function run() {
@@ -24,6 +24,9 @@ export function runProgram(ctx: Context) {
     .command('generate')
     .description(`Run image generation`)
     .option('--verbose', 'Verbose output')
+    .option('--ios', 'Generate iOS assets')
+    .option('--android', 'Generate Android assets')
+    .option('--pwa', 'Generate PWA/Web assets')
     .action(
       wrapAction(async (args = {}) => {
         setArguments(ctx, args);
