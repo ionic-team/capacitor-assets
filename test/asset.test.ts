@@ -44,5 +44,13 @@ describe('Asset test', () => {
     expect(assets.iosNotificationIcon?.format()).toBe(Format.Png);
     expect(assets.iosNotificationIcon?.width).toBe(1024);
     expect(assets.iosNotificationIcon?.height).toBe(1024);
+    expect(assets.iosSettingsIcon).not.toBeNull();
+    expect(assets.iosSettingsIcon?.format()).toBe(Format.Png);
+    expect(assets.iosSettingsIcon?.width).toBe(1024);
+    expect(assets.iosSettingsIcon?.height).toBe(1024);
+    expect(assets.iosSpotlightIcon).not.toBeNull();
+    expect(assets.iosSpotlightIcon?.format()).toBe(Format.Png);
+    expect(assets.iosSpotlightIcon?.width).toBe(1024);
+    expect(assets.iosSpotlightIcon?.height).toBe(1024);
   });
 });

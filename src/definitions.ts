@@ -9,8 +9,8 @@ export interface Assets {
   iosSplash?: Asset | null;
   iosSplashDark?: Asset | null;
   iosNotificationIcon?: Asset | null;
-  iosSettings?: Asset | null;
-  iosSpotlight?: Asset | null;
+  iosSettingsIcon?: Asset | null;
+  iosSpotlightIcon?: Asset | null;
 
   androidIcon?: Asset | null;
   androidSplash?: Asset | null;
