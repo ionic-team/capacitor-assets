@@ -6,6 +6,9 @@ import { PwaAssetGenerator } from '../platforms/pwa';
 import { AndroidAssetGenerator } from '../platforms/android';
 import { AssetGenerator } from '../asset-generator';
 import { GeneratedAsset } from '../generated-asset';
+import { Assets } from '../definitions';
+import { Project } from '../project';
+import { Asset } from '../asset';
 
 export async function generateCommand(ctx: Context) {
   console.log('Generating', ctx);
@@ -44,35 +47,32 @@ export async function generateCommand(ctx: Context) {
 
   const generators = getGenerators(platforms);
 
+  const generated = await generateAssets(assets, generators, ctx.project);
+
+  logGenerated(generated);
+}
+
+async function generateAssets(
+  assets: Assets,
+  generators: AssetGenerator[],
+  project: Project,
+) {
   const generated: GeneratedAsset[] = [];
 
-  if (assets.icon) {
-    const iconGenerated = await Promise.all(
-      generators.map(g => assets.icon?.generate(g, ctx.project)),
+  async function generateAndCollect(asset: Asset) {
+    const g = await Promise.all(
+      generators.map(g => asset.generate(g, project)),
     );
-    generated.push(
-      ...(iconGenerated.flat().filter(f => !!f) as GeneratedAsset[]),
-    );
-  }
-  if (assets.splash) {
-    const splashGenerated = await Promise.all(
-      generators.map(g => assets.splash?.generate(g, ctx.project)),
-    );
-    generated.push(
-      ...(splashGenerated.flat().filter(f => !!f) as GeneratedAsset[]),
-    );
-  }
-  if (assets.splashDark) {
-    const splashDarkGenerated = await Promise.all(
-      generators.map(g => assets.splashDark?.generate(g, ctx.project)),
-    );
-    generated.push(
-      ...(splashDarkGenerated.flat().filter(f => !!f) as GeneratedAsset[]),
-    );
+    generated.push(...(g.flat().filter(f => !!f) as GeneratedAsset[]));
   }
 
-  console.log('Generated', generated.length);
-  logGenerated(generated);
+  const assetTypes = Object.values(assets).filter(v => !v);
+
+  for (const asset of assetTypes) {
+    await generateAndCollect(asset);
+  }
+
+  return generated;
 }
 
 function getGenerators(platforms: string[]): AssetGenerator[] {
@@ -89,6 +89,8 @@ function getGenerators(platforms: string[]): AssetGenerator[] {
   }) as AssetGenerator[];
 }
 
+// Print out a nice report of the assets generated
+// and totals per platform
 function logGenerated(generated: GeneratedAsset[]) {
   for (const g of generated) {
     log(

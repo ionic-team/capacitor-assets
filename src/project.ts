@@ -32,17 +32,46 @@ export class Project extends CapacitorProject {
         'splash-dark',
         AssetKind.SplashDark,
       ),
+
+      iosIcon: await this.loadSourceAsset('ios/icon', AssetKind.Icon),
+      iosSplash: await this.loadSourceAsset('ios/splash', AssetKind.Splash),
+      iosNotificationIcon: await this.loadSourceAsset(
+        'ios/notification-icon',
+        AssetKind.Splash,
+      ),
+      iosSettings: await this.loadSourceAsset(
+        'ios/settings',
+        AssetKind.SettingsIcon,
+      ),
+      iosSpotlight: await this.loadSourceAsset(
+        'ios/spotlight',
+        AssetKind.SpotlightIcon,
+      ),
+
+      androidIcon: await this.loadSourceAsset('android/icon', AssetKind.Icon),
+      androidSplash: await this.loadSourceAsset(
+        'android/splash',
+        AssetKind.Splash,
+      ),
+      androidSplashDark: await this.loadSourceAsset(
+        'android/splash-dark',
+        AssetKind.SplashDark,
+      ),
+      androidNotificationIcon: await this.loadSourceAsset(
+        'android/notification',
+        AssetKind.NotificationIcon,
+      ),
     };
     return this.assets;
   }
 
-  private async loadSourceAsset(name: string, kind: AssetKind) {
+  private async loadSourceAsset(path: string, kind: AssetKind) {
     let imagePath: string | null = null;
 
     const extensions = ['.png', '.webp', '.jpg', '.jpeg', '.svg'];
     let filename: string | null = null;
     for (let ext of extensions) {
-      filename = `${name}${ext}`;
+      filename = `${path}${ext}`;
       if (await pathExists(join(this.assetDir, filename))) {
         imagePath = join(this.assetDir, filename);
         break;

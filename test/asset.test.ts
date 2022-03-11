@@ -35,5 +35,14 @@ describe('Asset test', () => {
     expect(assets.splashDark?.format()).toBe(Format.Png);
     expect(assets.splashDark?.width).toBe(2732);
     expect(assets.splashDark?.height).toBe(2732);
+
+    expect(assets.iosIcon).not.toBeNull();
+    expect(assets.iosIcon?.format()).toBe(Format.Png);
+    expect(assets.iosIcon?.width).toBe(1024);
+    expect(assets.iosIcon?.height).toBe(1024);
+    expect(assets.iosNotificationIcon).not.toBeNull();
+    expect(assets.iosNotificationIcon?.format()).toBe(Format.Png);
+    expect(assets.iosNotificationIcon?.width).toBe(1024);
+    expect(assets.iosNotificationIcon?.height).toBe(1024);
   });
 });

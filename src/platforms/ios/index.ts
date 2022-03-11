@@ -33,12 +33,16 @@ export class IosAssetGenerator extends AssetGenerator {
     switch (asset.kind) {
       case AssetKind.Icon:
         return this.generateIcons(asset, project);
+      case AssetKind.NotificationIcon:
+        return this.generateNotificationIcons(asset, project);
       case AssetKind.AdaptiveIcon:
         return [];
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
     }
+
+    return [];
   }
 
   private async generateIcons(
@@ -54,6 +58,37 @@ export class IosAssetGenerator extends AssetGenerator {
     const iosDir = project.config.ios!.path!;
     const icons = Object.values(IosAssets).filter(
       a => a.kind === AssetKind.Icon,
+    );
+
+    return Promise.all(
+      icons.map(async icon => {
+        const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
+        icon.dest = dest;
+
+        const outputInfo = await pipe
+          .resize(icon.width, icon.height)
+          .png()
+          .toFile(dest);
+
+        return new GeneratedAsset(icon, asset, project, outputInfo);
+      }),
+    );
+  }
+
+  private async generateNotificationIcons(
+    asset: Asset,
+    project: Project,
+  ): Promise<GeneratedAsset[]> {
+    console.log('Generating notification icons', asset);
+    const pipe = asset.pipeline();
+
+    if (!pipe) {
+      throw new BadPipelineError('Sharp instance not created');
+    }
+
+    const iosDir = project.config.ios!.path!;
+    const icons = Object.values(IosAssets).filter(
+      a => a.kind === AssetKind.NotificationIcon,
     );
 
     return Promise.all(

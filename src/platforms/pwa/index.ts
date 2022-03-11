@@ -56,6 +56,7 @@ export class PwaAssetGenerator extends AssetGenerator {
         // PWA has no splashes
         return [];
     }
+    return [];
   }
 
   private async generateIcons(
