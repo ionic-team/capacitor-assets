@@ -24,40 +24,40 @@ export class Project extends CapacitorProject {
     return this.assetDir;
   }
 
-  async loadAssets(): Promise<Assets> {
+  async loadInputAssets(): Promise<Assets> {
     this.assets = {
-      icon: await this.loadSourceAsset('icon', AssetKind.Icon),
-      splash: await this.loadSourceAsset('splash', AssetKind.Splash),
-      splashDark: await this.loadSourceAsset(
+      icon: await this.loadInputAsset('icon', AssetKind.Icon),
+      splash: await this.loadInputAsset('splash', AssetKind.Splash),
+      splashDark: await this.loadInputAsset(
         'splash-dark',
         AssetKind.SplashDark,
       ),
 
-      iosIcon: await this.loadSourceAsset('ios/icon', AssetKind.Icon),
-      iosSplash: await this.loadSourceAsset('ios/splash', AssetKind.Splash),
-      iosNotificationIcon: await this.loadSourceAsset(
+      iosIcon: await this.loadInputAsset('ios/icon', AssetKind.Icon),
+      iosSplash: await this.loadInputAsset('ios/splash', AssetKind.Splash),
+      iosNotificationIcon: await this.loadInputAsset(
         'ios/notification-icon',
         AssetKind.NotificationIcon,
       ),
-      iosSettingsIcon: await this.loadSourceAsset(
+      iosSettingsIcon: await this.loadInputAsset(
         'ios/settings-icon',
         AssetKind.SettingsIcon,
       ),
-      iosSpotlightIcon: await this.loadSourceAsset(
+      iosSpotlightIcon: await this.loadInputAsset(
         'ios/spotlight-icon',
         AssetKind.SpotlightIcon,
       ),
 
-      androidIcon: await this.loadSourceAsset('android/icon', AssetKind.Icon),
-      androidSplash: await this.loadSourceAsset(
+      androidIcon: await this.loadInputAsset('android/icon', AssetKind.Icon),
+      androidSplash: await this.loadInputAsset(
         'android/splash',
         AssetKind.Splash,
       ),
-      androidSplashDark: await this.loadSourceAsset(
+      androidSplashDark: await this.loadInputAsset(
         'android/splash-dark',
         AssetKind.SplashDark,
       ),
-      androidNotificationIcon: await this.loadSourceAsset(
+      androidNotificationIcon: await this.loadInputAsset(
         'android/notification',
         AssetKind.NotificationIcon,
       ),
@@ -65,7 +65,7 @@ export class Project extends CapacitorProject {
     return this.assets;
   }
 
-  private async loadSourceAsset(path: string, kind: AssetKind) {
+  private async loadInputAsset(path: string, kind: AssetKind) {
     let imagePath: string | null = null;
 
     const extensions = ['.png', '.webp', '.jpg', '.jpeg', '.svg'];

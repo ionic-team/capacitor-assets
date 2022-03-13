@@ -13,7 +13,7 @@ import { InputAsset } from '../input-asset';
 export async function generateCommand(ctx: Context) {
   console.log('Generating', ctx);
 
-  const assets = await ctx.project.loadAssets();
+  const assets = await ctx.project.loadInputAssets();
   console.log('Loaded assets', assets);
 
   if ([assets.icon, assets.splash, assets.splashDark].every(a => !a)) {

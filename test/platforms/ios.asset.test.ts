@@ -23,7 +23,7 @@ describe('iOS Asset Test', () => {
 
   beforeEach(async () => {
     ctx = await loadContext(fixtureDir);
-    assets = await ctx.project.loadAssets();
+    assets = await ctx.project.loadInputAssets();
   });
 
   afterAll(async () => {

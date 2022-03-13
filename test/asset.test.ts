@@ -21,7 +21,7 @@ describe('Asset test', () => {
   });
 
   it('Should load assets from project', async () => {
-    const assets = await ctx.project.loadAssets();
+    const assets = await ctx.project.loadInputAssets();
 
     expect(assets.icon).not.toBeNull();
     expect(assets.icon?.format()).toBe(Format.Png);

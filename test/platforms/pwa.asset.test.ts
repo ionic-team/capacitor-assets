@@ -25,36 +25,54 @@ describe('PWA Asset Test', () => {
   });
 
   it('Should generate PWA icons', async () => {
-    const assets = await ctx.project.loadAssets();
+    const assets = await ctx.project.loadInputAssets();
 
-    const exportedIcons = Object.values(PwaAssets).filter(a => a.kind === AssetKind.Icon);
+    const exportedIcons = Object.values(PwaAssets).filter(
+      a => a.kind === AssetKind.Icon,
+    );
 
     const strategy = new PwaAssetGenerator();
-    let generatedAssets = await assets.icon?.generate(strategy, ctx.project) ?? [];
+    let generatedAssets =
+      (await assets.icon?.generate(strategy, ctx.project)) ?? [];
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
-    const existSet = await Promise.all(generatedAssets.map(asset => pathExists(asset.meta.dest!)));
+    const existSet = await Promise.all(
+      generatedAssets.map(asset => pathExists(asset.meta.dest!)),
+    );
     expect(existSet.every(e => !!e)).toBe(true);
 
-    const sizedSet = await Promise.all(generatedAssets.map(async asset => {
-      const pipe = sharp(asset.meta.dest);
-      const metadata = await pipe.metadata();
-      return metadata.width === asset.meta.width && metadata.height === asset.meta.height;
-    }));
+    const sizedSet = await Promise.all(
+      generatedAssets.map(async asset => {
+        const pipe = sharp(asset.meta.dest);
+        const metadata = await pipe.metadata();
+        return (
+          metadata.width === asset.meta.width &&
+          metadata.height === asset.meta.height
+        );
+      }),
+    );
     expect(sizedSet.every(e => !!e)).toBe(true);
 
     const manifest = await strategy.getManifestJson(ctx.project);
     expect(manifest.icons.length).toBe(6);
 
-    expect(manifest.icons.map((icon: any) => {
-      const fname = parse(icon.src).name;
-      const num = fname.split('-')[1];
-      return icon.sizes === `${num}x${num}`;
-    }).every((i: any) => !!i)).toBe(true);
+    expect(
+      manifest.icons
+        .map((icon: any) => {
+          const fname = parse(icon.src).name;
+          const num = fname.split('-')[1];
+          return icon.sizes === `${num}x${num}`;
+        })
+        .every((i: any) => !!i),
+    ).toBe(true);
 
-    expect(manifest.icons.map((icon: any) => {
-      const ext = parse(icon.src).ext
-      return ext === '.webp';
-    }).every((i: any) => !!i)).toBe(true);
+    expect(
+      manifest.icons
+        .map((icon: any) => {
+          const ext = parse(icon.src).ext;
+          return ext === '.webp';
+        })
+        .every((i: any) => !!i),
+    ).toBe(true);
   });
 });

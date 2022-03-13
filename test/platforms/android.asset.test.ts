@@ -20,7 +20,7 @@ describe('Android asset test', () => {
 
   beforeEach(async () => {
     ctx = await loadContext(fixtureDir);
-    assets = await ctx.project.loadAssets();
+    assets = await ctx.project.loadInputAssets();
   });
 
   afterAll(async () => {
@@ -49,7 +49,7 @@ describe('Android asset test', () => {
   }
 
   it('Should generate android icons', async () => {
-    const assets = await ctx.project.loadAssets();
+    const assets = await ctx.project.loadInputAssets();
     const exportedIcons = Object.values(AndroidAssets).filter(
       a => a.kind === AssetKind.Icon,
     );
