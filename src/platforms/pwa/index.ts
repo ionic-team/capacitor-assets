@@ -8,7 +8,7 @@ import {
 } from '@ionic/utils-fs';
 
 import { Asset } from '../../asset';
-import { AssetKind, AssetMeta, Platform } from '../../definitions';
+import { AssetKind, PwaAssetMeta, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { GeneratedAsset } from '../../generated-asset';
 import { Project } from '../../project';
@@ -72,7 +72,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     const pwaDir = this.getPWADirectory(project.directory ?? undefined);
     const icons = Object.values(PwaAssets).filter(
       a => a.kind === AssetKind.Icon,
-    );
+    ) as PwaAssetMeta[];
 
     const generatedAssets = await Promise.all(
       icons.map(async icon => {
@@ -151,7 +151,10 @@ export class PwaAssetGenerator extends AssetGenerator {
     }
   }
 
-  private updateManifest(project: Project, assets: GeneratedAsset[]) {
+  private updateManifest(
+    project: Project,
+    assets: GeneratedAsset<PwaAssetMeta>[],
+  ) {
     const pwaDir = this.getPWADirectory(project.directory ?? undefined);
     const pwaAssetDir = this.getPWAAssetsDirectory(pwaDir);
 
@@ -193,7 +196,7 @@ export class PwaAssetGenerator extends AssetGenerator {
   }
 
   private makeIconManifestEntry(
-    asset: AssetMeta,
+    asset: PwaAssetMeta,
     relativePath: string,
   ): ManifestIcon {
     const ext = extname(relativePath);

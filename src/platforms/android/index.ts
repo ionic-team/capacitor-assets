@@ -1,9 +1,16 @@
+import { join } from 'path';
+
 import { Asset } from '../../asset';
 import { AssetGenerator } from '../../asset-generator';
 import { AssetKind } from '../../definitions';
-import { BadProjectError } from '../../error';
+import { BadPipelineError, BadProjectError } from '../../error';
 import { GeneratedAsset } from '../../generated-asset';
 import { Project } from '../../project';
+import { IOS_SPLASH_IMAGE_SET_PATH } from '../ios';
+import {
+  IOS_2X_UNIVERSAL_ANYANY_SPLASH,
+  IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK,
+} from '../ios/assets';
 
 export class AndroidAssetGenerator extends AssetGenerator {
   constructor() {
@@ -69,7 +76,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     if (asset.kind === AssetKind.SplashDark) {
       // Need to register this as a dark-mode splash
-      await this.updateContentsJsonDark(generated, project);
+      // await this.updateContentsJsonDark(generated, project);
     }
 
     return [generated];

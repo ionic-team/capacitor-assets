@@ -82,12 +82,6 @@ export const enum Density {
 export interface AssetMeta {
   platform: Platform;
   kind: AssetKind;
-  // The filename (no path) for the asset
-  name?: string;
-  // Filenames for foreground and background layers (used for
-  // android adaptive icons only)
-  nameForeground?: string;
-  nameBackground?: string;
   // The destination file
   dest?: string;
   format: Format;
@@ -97,6 +91,21 @@ export interface AssetMeta {
   scale?: number;
   theme?: Theme;
   density?: Density;
+}
+
+export interface IosAssetMeta extends AssetMeta {
+  name: string;
+}
+export interface PwaAssetMeta extends AssetMeta {
+  name: string;
+}
+
+export interface AndroidAssetMeta extends AssetMeta {
+  // Filenames for foreground and background layers (used for
+  // android adaptive icons only)
+  name?: string;
+  nameForeground?: string;
+  nameBackground?: string;
 }
 
 // Shape of the Contents.json file inside of ios app appiconset and imageset folders

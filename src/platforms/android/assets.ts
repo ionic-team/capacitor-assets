@@ -1,13 +1,13 @@
 import {
   AssetKind,
-  AssetMeta,
+  AndroidAssetMeta,
   Density,
   Format,
   Orientation,
   Platform,
 } from '../../definitions';
 
-export const ANDROID_LDPI_ADAPTIVE_ICON: AssetMeta = {
+export const ANDROID_LDPI_ADAPTIVE_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.AdaptiveIcon,
   nameForeground: 'ldpi-foreground.png',
@@ -18,7 +18,7 @@ export const ANDROID_LDPI_ADAPTIVE_ICON: AssetMeta = {
   density: Density.Ldpi,
 };
 
-export const ANDROID_MDPI_ADAPTIVE_ICON: AssetMeta = {
+export const ANDROID_MDPI_ADAPTIVE_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.AdaptiveIcon,
   nameForeground: 'mdpi-foreground.png',
@@ -29,7 +29,7 @@ export const ANDROID_MDPI_ADAPTIVE_ICON: AssetMeta = {
   density: Density.Mdpi,
 };
 
-export const ANDROID_HDPI_ADAPTIVE_ICON: AssetMeta = {
+export const ANDROID_HDPI_ADAPTIVE_ICON: AndroidAssetMeta = {
   nameForeground: 'hdpi-foreground.png',
   platform: Platform.Android,
   kind: AssetKind.AdaptiveIcon,
@@ -40,7 +40,7 @@ export const ANDROID_HDPI_ADAPTIVE_ICON: AssetMeta = {
   density: Density.Hdpi,
 };
 
-export const ANDROID_XHDPI_ADAPTIVE_ICON: AssetMeta = {
+export const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.AdaptiveIcon,
   nameForeground: 'xhdpi-foreground.png',
@@ -51,7 +51,7 @@ export const ANDROID_XHDPI_ADAPTIVE_ICON: AssetMeta = {
   density: Density.Xhdpi,
 };
 
-export const ANDROID_XXHDPI_ADAPTIVE_ICON: AssetMeta = {
+export const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.AdaptiveIcon,
   nameForeground: 'xxhdpi-foreground.png',
@@ -62,7 +62,7 @@ export const ANDROID_XXHDPI_ADAPTIVE_ICON: AssetMeta = {
   density: Density.Xxhdpi,
 };
 
-export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AssetMeta = {
+export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.AdaptiveIcon,
   nameForeground: 'xxxhdpi-foreground.png',
@@ -73,7 +73,7 @@ export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AssetMeta = {
   density: Density.Xxxhdpi,
 };
 
-export const ANDROID_LDPI_ICON: AssetMeta = {
+export const ANDROID_LDPI_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Icon,
   name: 'drawable-ldpi-icon.png',
@@ -83,7 +83,7 @@ export const ANDROID_LDPI_ICON: AssetMeta = {
   density: Density.Ldpi,
 };
 
-export const ANDROID_MDPI_ICON: AssetMeta = {
+export const ANDROID_MDPI_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Icon,
   name: 'drawable-mdpi-icon.png',
@@ -93,7 +93,7 @@ export const ANDROID_MDPI_ICON: AssetMeta = {
   density: Density.Mdpi,
 };
 
-export const ANDROID_HDPI_ICON: AssetMeta = {
+export const ANDROID_HDPI_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Icon,
   name: 'drawable-hdpi-icon.png',
@@ -103,7 +103,7 @@ export const ANDROID_HDPI_ICON: AssetMeta = {
   density: Density.Hdpi,
 };
 
-export const ANDROID_XHDPI_ICON: AssetMeta = {
+export const ANDROID_XHDPI_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Icon,
   name: 'drawable-xhdpi-icon.png',
@@ -113,7 +113,7 @@ export const ANDROID_XHDPI_ICON: AssetMeta = {
   density: Density.Xhdpi,
 };
 
-export const ANDROID_XXHDPI_ICON: AssetMeta = {
+export const ANDROID_XXHDPI_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Icon,
   name: 'drawable-xxhdpi-icon.png',
@@ -123,7 +123,7 @@ export const ANDROID_XXHDPI_ICON: AssetMeta = {
   density: Density.Xxhdpi,
 };
 
-export const ANDROID_XXXHDPI_ICON: AssetMeta = {
+export const ANDROID_XXXHDPI_ICON: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Icon,
   name: 'drawable-xxxhdpi-icon.png',
@@ -133,7 +133,7 @@ export const ANDROID_XXXHDPI_ICON: AssetMeta = {
   density: Density.Xxxhdpi,
 };
 
-export const ANDROID_LAND_LDPI_SCREEN: AssetMeta = {
+export const ANDROID_LAND_LDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-land-ldpi-screen.png',
@@ -144,7 +144,7 @@ export const ANDROID_LAND_LDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_MDPI_SCREEN: AssetMeta = {
+export const ANDROID_LAND_MDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-land-mdpi-screen.png',
@@ -155,7 +155,7 @@ export const ANDROID_LAND_MDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_HDPI_SCREEN: AssetMeta = {
+export const ANDROID_LAND_HDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-land-hdpi-screen.png',
@@ -166,7 +166,7 @@ export const ANDROID_LAND_HDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_XHDPI_SCREEN: AssetMeta = {
+export const ANDROID_LAND_XHDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-land-xhdpi-screen.png',
@@ -177,7 +177,7 @@ export const ANDROID_LAND_XHDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_XXHDPI_SCREEN: AssetMeta = {
+export const ANDROID_LAND_XXHDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-land-xxhdpi-screen.png',
@@ -188,7 +188,7 @@ export const ANDROID_LAND_XXHDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_XXXHDPI_SCREEN: AssetMeta = {
+export const ANDROID_LAND_XXXHDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-land-xxxhdpi-screen.png',
@@ -199,7 +199,7 @@ export const ANDROID_LAND_XXXHDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_PORT_LDPI_SCREEN: AssetMeta = {
+export const ANDROID_PORT_LDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-port-ldpi-screen.png',
@@ -210,7 +210,7 @@ export const ANDROID_PORT_LDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_MDPI_SCREEN: AssetMeta = {
+export const ANDROID_PORT_MDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-port-mdpi-screen.png',
@@ -221,7 +221,7 @@ export const ANDROID_PORT_MDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_HDPI_SCREEN: AssetMeta = {
+export const ANDROID_PORT_HDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-port-hdpi-screen.png',
@@ -232,7 +232,7 @@ export const ANDROID_PORT_HDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_XHDPI_SCREEN: AssetMeta = {
+export const ANDROID_PORT_XHDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-port-xhdpi-screen.png',
@@ -243,7 +243,7 @@ export const ANDROID_PORT_XHDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_XXHDPI_SCREEN: AssetMeta = {
+export const ANDROID_PORT_XXHDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-port-xxhdpi-screen.png',
@@ -254,7 +254,7 @@ export const ANDROID_PORT_XXHDPI_SCREEN: AssetMeta = {
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_XXXHDPI_SCREEN: AssetMeta = {
+export const ANDROID_PORT_XXXHDPI_SCREEN: AndroidAssetMeta = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
   name: 'drawable-port-xxxhdpi-screen.png',

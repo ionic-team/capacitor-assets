@@ -2,7 +2,7 @@ import { join } from 'path';
 import { readFile, writeFile } from '@ionic/utils-fs';
 
 import { Asset } from '../../asset';
-import { AssetKind, AssetMeta } from '../../definitions';
+import { AssetKind, AssetMeta, IosAssetMeta } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { GeneratedAsset } from '../../generated-asset';
 import { Project } from '../../project';
@@ -50,7 +50,7 @@ export class IosAssetGenerator extends AssetGenerator {
   private async _generateIcons(
     asset: Asset,
     project: Project,
-    icons: AssetMeta[],
+    icons: IosAssetMeta[],
   ): Promise<GeneratedAsset[]> {
     const pipe = asset.pipeline();
 
@@ -82,7 +82,7 @@ export class IosAssetGenerator extends AssetGenerator {
       a => a.kind === AssetKind.Icon,
     );
 
-    return this._generateIcons(asset, project, icons);
+    return this._generateIcons(asset, project, icons as IosAssetMeta[]);
   }
 
   private async generateNotificationIcons(
@@ -93,7 +93,7 @@ export class IosAssetGenerator extends AssetGenerator {
       a => a.kind === AssetKind.NotificationIcon,
     );
 
-    return this._generateIcons(asset, project, icons);
+    return this._generateIcons(asset, project, icons as IosAssetMeta[]);
   }
 
   private async generateSettingsIcons(
@@ -104,7 +104,7 @@ export class IosAssetGenerator extends AssetGenerator {
       a => a.kind === AssetKind.SettingsIcon,
     );
 
-    return this._generateIcons(asset, project, icons);
+    return this._generateIcons(asset, project, icons as IosAssetMeta[]);
   }
 
   private async generateSpotlightIcons(
@@ -115,7 +115,7 @@ export class IosAssetGenerator extends AssetGenerator {
       a => a.kind === AssetKind.SpotlightIcon,
     );
 
-    return this._generateIcons(asset, project, icons);
+    return this._generateIcons(asset, project, icons as IosAssetMeta[]);
   }
 
   private async generateSplashes(
@@ -175,7 +175,7 @@ export class IosAssetGenerator extends AssetGenerator {
       ],
       idiom: 'universal',
       scale: `${generated.meta.scale ?? 1}x`,
-      filename: generated.meta.name,
+      filename: (generated.meta as IosAssetMeta).name,
     });
 
     parsed.images = withoutMissing;
