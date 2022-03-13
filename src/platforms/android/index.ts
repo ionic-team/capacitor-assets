@@ -1,10 +1,10 @@
 import { join } from 'path';
 
-import { Asset } from '../../asset';
+import { InputAsset } from '../../input-asset';
 import { AssetGenerator } from '../../asset-generator';
 import { AssetKind } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
-import { GeneratedAsset } from '../../generated-asset';
+import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
 import { IOS_SPLASH_IMAGE_SET_PATH } from '../ios';
 import {
@@ -17,7 +17,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     super();
   }
 
-  async generate(asset: Asset, project: Project): Promise<GeneratedAsset[]> {
+  async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const androidDir = project.config.android?.path;
 
     if (!androidDir) {
@@ -32,7 +32,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
         return this.generateNotificationIcons(asset, project);
       */
       case AssetKind.AdaptiveIcon:
-        return [];
+        return this.generateAdaptiveIcons(asset, project);
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
@@ -42,16 +42,24 @@ export class AndroidAssetGenerator extends AssetGenerator {
   }
 
   private async generateIcons(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
+    return [];
+  }
+
+  private async generateAdaptiveIcons(
+    asset: InputAsset,
+    project: Project,
+  ): Promise<OutputAsset[]> {
+    console.log('Generating adaptive icons', asset);
     return [];
   }
 
   private async generateSplashes(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -72,7 +80,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       .png()
       .toFile(dest);
 
-    const generated = new GeneratedAsset(assetMeta, asset, project, outputInfo);
+    const generated = new OutputAsset(assetMeta, asset, project, outputInfo);
 
     if (asset.kind === AssetKind.SplashDark) {
       // Need to register this as a dark-mode splash

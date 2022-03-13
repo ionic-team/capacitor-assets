@@ -1,10 +1,10 @@
 import { join } from 'path';
 import { readFile, writeFile } from '@ionic/utils-fs';
 
-import { Asset } from '../../asset';
+import { InputAsset } from '../../input-asset';
 import { AssetKind, AssetMeta, IosAssetMeta } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
-import { GeneratedAsset } from '../../generated-asset';
+import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
 import { AssetGenerator } from '../../asset-generator';
 import {
@@ -23,7 +23,7 @@ export class IosAssetGenerator extends AssetGenerator {
     super();
   }
 
-  async generate(asset: Asset, project: Project): Promise<GeneratedAsset[]> {
+  async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const iosDir = project.config.ios?.path;
 
     if (!iosDir) {
@@ -48,10 +48,10 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async _generateIcons(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
     icons: IosAssetMeta[],
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -69,15 +69,15 @@ export class IosAssetGenerator extends AssetGenerator {
           .png()
           .toFile(dest);
 
-        return new GeneratedAsset(icon, asset, project, outputInfo);
+        return new OutputAsset(icon, asset, project, outputInfo);
       }),
     );
   }
 
   private async generateIcons(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
     const icons = Object.values(IosAssets).filter(
       a => a.kind === AssetKind.Icon,
     );
@@ -86,9 +86,9 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async generateNotificationIcons(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
     const icons = Object.values(IosAssets).filter(
       a => a.kind === AssetKind.NotificationIcon,
     );
@@ -97,9 +97,9 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async generateSettingsIcons(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
     const icons = Object.values(IosAssets).filter(
       a => a.kind === AssetKind.SettingsIcon,
     );
@@ -108,9 +108,9 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async generateSpotlightIcons(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
     const icons = Object.values(IosAssets).filter(
       a => a.kind === AssetKind.SpotlightIcon,
     );
@@ -119,9 +119,9 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async generateSplashes(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -142,7 +142,7 @@ export class IosAssetGenerator extends AssetGenerator {
       .png()
       .toFile(dest);
 
-    const generated = new GeneratedAsset(assetMeta, asset, project, outputInfo);
+    const generated = new OutputAsset(assetMeta, asset, project, outputInfo);
 
     if (asset.kind === AssetKind.SplashDark) {
       // Need to register this as a dark-mode splash
@@ -153,7 +153,7 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async updateContentsJsonDark(
-    generated: GeneratedAsset,
+    generated: OutputAsset,
     project: Project,
   ) {
     const contentsJsonPath = join(

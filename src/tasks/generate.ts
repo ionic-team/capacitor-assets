@@ -5,10 +5,10 @@ import { IosAssetGenerator } from '../platforms/ios';
 import { PwaAssetGenerator } from '../platforms/pwa';
 import { AndroidAssetGenerator } from '../platforms/android';
 import { AssetGenerator } from '../asset-generator';
-import { GeneratedAsset } from '../generated-asset';
+import { OutputAsset } from '../output-asset';
 import { Assets } from '../definitions';
 import { Project } from '../project';
-import { Asset } from '../asset';
+import { InputAsset } from '../input-asset';
 
 export async function generateCommand(ctx: Context) {
   console.log('Generating', ctx);
@@ -57,13 +57,13 @@ async function generateAssets(
   generators: AssetGenerator[],
   project: Project,
 ) {
-  const generated: GeneratedAsset[] = [];
+  const generated: OutputAsset[] = [];
 
-  async function generateAndCollect(asset: Asset) {
+  async function generateAndCollect(asset: InputAsset) {
     const g = await Promise.all(
       generators.map(g => asset.generate(g, project)),
     );
-    generated.push(...(g.flat().filter(f => !!f) as GeneratedAsset[]));
+    generated.push(...(g.flat().filter(f => !!f) as OutputAsset[]));
   }
 
   const assetTypes = Object.values(assets).filter(v => !v);
@@ -91,7 +91,7 @@ function getGenerators(platforms: string[]): AssetGenerator[] {
 
 // Print out a nice report of the assets generated
 // and totals per platform
-function logGenerated(generated: GeneratedAsset[]) {
+function logGenerated(generated: OutputAsset[]) {
   for (const g of generated) {
     log(
       `${c.strong(c.success('CREATE'))} ${c.strong(c.extra(g.meta.platform))} ${

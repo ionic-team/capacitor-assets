@@ -1,11 +1,11 @@
-import { basename, extname, join } from "path";
-import sharp from "sharp";
-import { AssetKind, Format } from "./definitions";
-import { GeneratedAsset } from "./generated-asset";
-import { Project } from "./project";
-import { AssetGenerator } from "./asset-generator";
+import { basename, extname, join } from 'path';
+import sharp from 'sharp';
+import { AssetKind, Format } from './definitions';
+import { OutputAsset } from './output-asset';
+import { Project } from './project';
+import { AssetGenerator } from './asset-generator';
 
-export class Asset {
+export class InputAsset {
   private filename: string;
   public width?: number;
   public height?: number;
@@ -44,7 +44,10 @@ export class Asset {
     this.height = metadata.height;
   }
 
-  async generate(strategy: AssetGenerator, project: Project): Promise<GeneratedAsset[]> {
+  async generate(
+    strategy: AssetGenerator,
+    project: Project,
+  ): Promise<OutputAsset[]> {
     return strategy.generate(this, project);
   }
 }

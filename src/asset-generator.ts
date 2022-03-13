@@ -1,9 +1,12 @@
-import { Asset } from "./asset";
-import { GeneratedAsset } from "./generated-asset";
-import { Project } from "./project";
+import { InputAsset } from './input-asset';
+import { OutputAsset } from './output-asset';
+import { Project } from './project';
 
 export abstract class AssetGenerator {
-  constructor() { }
+  constructor() {}
 
-  abstract generate(asset: Asset, project: Project): Promise<GeneratedAsset[]>;
+  abstract generate(
+    asset: InputAsset,
+    project: Project,
+  ): Promise<OutputAsset[]>;
 }

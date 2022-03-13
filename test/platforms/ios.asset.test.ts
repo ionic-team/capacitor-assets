@@ -10,7 +10,7 @@ import { AssetKind, Assets, Format, IosContents } from '../../src/definitions';
 import * as IosAssets from '../../src/platforms/ios/assets';
 import sharp from 'sharp';
 import { join } from 'path';
-import { GeneratedAsset } from '../../src/generated-asset';
+import { OutputAsset } from '../../src/output-asset';
 
 describe('iOS Asset Test', () => {
   let ctx: Context;
@@ -30,14 +30,14 @@ describe('iOS Asset Test', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
-  async function verifyExists(generatedAssets: GeneratedAsset[]) {
+  async function verifyExists(generatedAssets: OutputAsset[]) {
     const existSet = await Promise.all(
       generatedAssets.map(asset => pathExists(asset.meta.dest!)),
     );
     expect(existSet.every(e => !!e)).toBe(true);
   }
 
-  async function verifySizes(generatedAssets: GeneratedAsset[]) {
+  async function verifySizes(generatedAssets: OutputAsset[]) {
     const sizedSet = await Promise.all(
       generatedAssets.map(async asset => {
         const pipe = sharp(asset.meta.dest);

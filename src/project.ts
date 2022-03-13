@@ -3,7 +3,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 import { AssetKind, Assets } from './definitions';
 import { join } from 'path';
 import { pathExists } from '@ionic/utils-fs';
-import { Asset } from './asset';
+import { InputAsset } from './input-asset';
 import { error } from './util/log';
 
 export class Project extends CapacitorProject {
@@ -82,7 +82,7 @@ export class Project extends CapacitorProject {
       return null;
     }
 
-    const asset = new Asset(imagePath, kind);
+    const asset = new InputAsset(imagePath, kind);
 
     try {
       await asset.load();

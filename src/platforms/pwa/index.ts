@@ -7,10 +7,10 @@ import {
   writeFileSync,
 } from '@ionic/utils-fs';
 
-import { Asset } from '../../asset';
+import { InputAsset } from '../../input-asset';
 import { AssetKind, PwaAssetMeta, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
-import { GeneratedAsset } from '../../generated-asset';
+import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
 import { AssetGenerator } from '../../asset-generator';
 import * as PwaAssets from './assets';
@@ -39,7 +39,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     return JSON.parse(contents);
   }
 
-  async generate(asset: Asset, project: Project): Promise<GeneratedAsset[]> {
+  async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pwaDir = project.directory;
 
     if (!pwaDir) {
@@ -60,9 +60,9 @@ export class PwaAssetGenerator extends AssetGenerator {
   }
 
   private async generateIcons(
-    asset: Asset,
+    asset: InputAsset,
     project: Project,
-  ): Promise<GeneratedAsset[]> {
+  ): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -91,7 +91,7 @@ export class PwaAssetGenerator extends AssetGenerator {
           .png()
           .toFile(dest);
 
-        return new GeneratedAsset(icon, asset, project, outputInfo);
+        return new OutputAsset(icon, asset, project, outputInfo);
       }),
     );
 
@@ -153,7 +153,7 @@ export class PwaAssetGenerator extends AssetGenerator {
 
   private updateManifest(
     project: Project,
-    assets: GeneratedAsset<PwaAssetMeta>[],
+    assets: OutputAsset<PwaAssetMeta>[],
   ) {
     const pwaDir = this.getPWADirectory(project.directory ?? undefined);
     const pwaAssetDir = this.getPWAAssetsDirectory(pwaDir);

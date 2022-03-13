@@ -1,25 +1,25 @@
-import { Asset } from './asset';
+import { InputAsset } from './input-asset';
 
 export interface Assets {
-  icon: Asset | null;
-  splash: Asset | null;
-  splashDark: Asset | null;
+  icon: InputAsset | null;
+  splash: InputAsset | null;
+  splashDark: InputAsset | null;
 
-  iosIcon?: Asset | null;
-  iosSplash?: Asset | null;
-  iosSplashDark?: Asset | null;
-  iosNotificationIcon?: Asset | null;
-  iosSettingsIcon?: Asset | null;
-  iosSpotlightIcon?: Asset | null;
+  iosIcon?: InputAsset | null;
+  iosSplash?: InputAsset | null;
+  iosSplashDark?: InputAsset | null;
+  iosNotificationIcon?: InputAsset | null;
+  iosSettingsIcon?: InputAsset | null;
+  iosSpotlightIcon?: InputAsset | null;
 
-  androidIcon?: Asset | null;
-  androidSplash?: Asset | null;
-  androidSplashDark?: Asset | null;
-  androidNotificationIcon?: Asset | null;
+  androidIcon?: InputAsset | null;
+  androidSplash?: InputAsset | null;
+  androidSplashDark?: InputAsset | null;
+  androidNotificationIcon?: InputAsset | null;
 
-  pwaIcon?: Asset | null;
-  pwaSplash?: Asset | null;
-  pwaSplashDark?: Asset | null;
+  pwaIcon?: InputAsset | null;
+  pwaSplash?: InputAsset | null;
+  pwaSplashDark?: InputAsset | null;
 }
 
 export const enum AssetKind {

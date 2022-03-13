@@ -5,7 +5,7 @@ import { join } from 'path';
 
 import { Context, loadContext } from '../../src/ctx';
 import { AssetKind, Assets } from '../../src/definitions';
-import { GeneratedAsset } from '../../src/generated-asset';
+import { OutputAsset } from '../../src/output-asset';
 import { AndroidAssetGenerator } from '../../src/platforms/android';
 import * as AndroidAssets from '../../src/platforms/android/assets';
 
@@ -27,14 +27,14 @@ describe('Android asset test', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
-  async function verifyExists(generatedAssets: GeneratedAsset[]) {
+  async function verifyExists(generatedAssets: OutputAsset[]) {
     const existSet = await Promise.all(
       generatedAssets.map(asset => pathExists(asset.meta.dest!)),
     );
     expect(existSet.every(e => !!e)).toBe(true);
   }
 
-  async function verifySizes(generatedAssets: GeneratedAsset[]) {
+  async function verifySizes(generatedAssets: OutputAsset[]) {
     const sizedSet = await Promise.all(
       generatedAssets.map(async asset => {
         const pipe = sharp(asset.meta.dest);
@@ -48,7 +48,7 @@ describe('Android asset test', () => {
     expect(sizedSet.every(e => !!e)).toBe(true);
   }
 
-  it.skip('Should generate android icons', async () => {
+  it('Should generate android icons', async () => {
     const assets = await ctx.project.loadAssets();
     const exportedIcons = Object.values(AndroidAssets).filter(
       a => a.kind === AssetKind.Icon,
