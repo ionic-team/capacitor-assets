@@ -1,4 +1,11 @@
-import { AssetKind, AssetMeta, Format, Orientation, Platform, Theme } from "../../definitions";
+import {
+  AssetKind,
+  AssetMeta,
+  Format,
+  Orientation,
+  Platform,
+  Theme,
+} from '../../definitions';
 
 /**
  * 20pt Icon
@@ -8,7 +15,7 @@ import { AssetKind, AssetMeta, Format, Orientation, Platform, Theme } from "../.
  */
 export const IOS_20_PT_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.NotificationIcon,
   name: 'AppIcon-20x20.png',
   format: Format.Png,
   width: 20,
@@ -18,7 +25,7 @@ export const IOS_20_PT_ICON: AssetMeta = {
 
 export const IOS_20_PT_2X_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.NotificationIcon,
   name: 'AppIcon-20x20x20@2x.png',
   format: Format.Png,
   width: 40,
@@ -28,7 +35,7 @@ export const IOS_20_PT_2X_ICON: AssetMeta = {
 
 export const IOS_20_PT_3X_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.NotificationIcon,
   name: 'AppIcon-20x20@3x.png',
   format: Format.Png,
   width: 60,
@@ -46,7 +53,7 @@ export const IOS_20_PT_3X_ICON: AssetMeta = {
  */
 export const IOS_29_PT_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.SettingsIcon,
   name: 'AppIcon-29x29.png',
   format: Format.Png,
   width: 29,
@@ -56,7 +63,7 @@ export const IOS_29_PT_ICON: AssetMeta = {
 
 export const IOS_29_PT_2X_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.SettingsIcon,
   name: 'AppIcon-29x29@2x.png',
   format: Format.Png,
   width: 58,
@@ -66,7 +73,7 @@ export const IOS_29_PT_2X_ICON: AssetMeta = {
 
 export const IOS_29_PT_3X_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.SettingsIcon,
   name: 'AppIcon-29x29@3x.png',
   format: Format.Png,
   width: 87,
@@ -83,7 +90,7 @@ export const IOS_29_PT_3X_ICON: AssetMeta = {
  */
 export const IOS_40_PT_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.SpotlightIcon,
   name: 'AppIcon-40x40.png',
   format: Format.Png,
   width: 40,
@@ -93,7 +100,7 @@ export const IOS_40_PT_ICON: AssetMeta = {
 
 export const IOS_40_PT_2X_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.SpotlightIcon,
   name: 'AppIcon-40x40@2x.png',
   format: Format.Png,
   width: 80,
@@ -103,7 +110,7 @@ export const IOS_40_PT_2X_ICON: AssetMeta = {
 
 export const IOS_40_PT_3X_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.SpotlightIcon,
   name: 'AppIcon-40x40@3x.png',
   format: Format.Png,
   width: 120,
@@ -119,7 +126,7 @@ export const IOS_40_PT_3X_ICON: AssetMeta = {
  */
 export const IOS_50_PT_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.SpotlightIcon,
   name: 'AppIcon-50x50.png',
   format: Format.Png,
   width: 50,
@@ -129,7 +136,7 @@ export const IOS_50_PT_ICON: AssetMeta = {
 
 export const IOS_50_PT_2X_ICON: AssetMeta = {
   platform: Platform.Ios,
-  kind: AssetKind.Icon,
+  kind: AssetKind.SpotlightIcon,
   name: 'AppIcon-50x50@2x.png',
   format: Format.Png,
   width: 100,
@@ -367,7 +374,6 @@ export const IOS_108_PT_2X_ICON: AssetMeta = {
   scale: 2,
 };
 
-
 export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: AssetMeta = {
   platform: Platform.Ios,
   kind: AssetKind.Splash,
@@ -377,7 +383,7 @@ export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: AssetMeta = {
   height: 2732,
   orientation: Orientation.Portrait,
   scale: 2,
-  theme: Theme.Any
+  theme: Theme.Any,
 };
 
 export const IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK: AssetMeta = {
@@ -389,5 +395,5 @@ export const IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK: AssetMeta = {
   height: 2732,
   orientation: Orientation.Portrait,
   scale: 2,
-  theme: Theme.Dark
+  theme: Theme.Dark,
 };

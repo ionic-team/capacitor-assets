@@ -2,7 +2,7 @@ import { join } from 'path';
 import { readFile, writeFile } from '@ionic/utils-fs';
 
 import { Asset } from '../../asset';
-import { AssetKind } from '../../definitions';
+import { AssetKind, AssetMeta } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { GeneratedAsset } from '../../generated-asset';
 import { Project } from '../../project';
@@ -37,73 +37,85 @@ export class IosAssetGenerator extends AssetGenerator {
         return this.generateNotificationIcons(asset, project);
       case AssetKind.AdaptiveIcon:
         return [];
+      case AssetKind.SettingsIcon:
+        return this.generateSettingsIcons(asset, project);
+      case AssetKind.SpotlightIcon:
+        return this.generateSpotlightIcons(asset, project);
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
     }
+  }
 
-    return [];
+  private async _generateIcons(
+    asset: Asset,
+    project: Project,
+    icons: AssetMeta[],
+  ): Promise<GeneratedAsset[]> {
+    const pipe = asset.pipeline();
+
+    if (!pipe) {
+      throw new BadPipelineError('Sharp instance not created');
+    }
+
+    const iosDir = project.config.ios!.path!;
+    return Promise.all(
+      icons.map(async icon => {
+        const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
+        icon.dest = dest;
+
+        const outputInfo = await pipe
+          .resize(icon.width, icon.height)
+          .png()
+          .toFile(dest);
+
+        return new GeneratedAsset(icon, asset, project, outputInfo);
+      }),
+    );
   }
 
   private async generateIcons(
     asset: Asset,
     project: Project,
   ): Promise<GeneratedAsset[]> {
-    const pipe = asset.pipeline();
-
-    if (!pipe) {
-      throw new BadPipelineError('Sharp instance not created');
-    }
-
-    const iosDir = project.config.ios!.path!;
     const icons = Object.values(IosAssets).filter(
       a => a.kind === AssetKind.Icon,
     );
 
-    return Promise.all(
-      icons.map(async icon => {
-        const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
-        icon.dest = dest;
-
-        const outputInfo = await pipe
-          .resize(icon.width, icon.height)
-          .png()
-          .toFile(dest);
-
-        return new GeneratedAsset(icon, asset, project, outputInfo);
-      }),
-    );
+    return this._generateIcons(asset, project, icons);
   }
 
   private async generateNotificationIcons(
     asset: Asset,
     project: Project,
   ): Promise<GeneratedAsset[]> {
-    console.log('Generating notification icons', asset);
-    const pipe = asset.pipeline();
-
-    if (!pipe) {
-      throw new BadPipelineError('Sharp instance not created');
-    }
-
-    const iosDir = project.config.ios!.path!;
     const icons = Object.values(IosAssets).filter(
       a => a.kind === AssetKind.NotificationIcon,
     );
 
-    return Promise.all(
-      icons.map(async icon => {
-        const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
-        icon.dest = dest;
+    return this._generateIcons(asset, project, icons);
+  }
 
-        const outputInfo = await pipe
-          .resize(icon.width, icon.height)
-          .png()
-          .toFile(dest);
-
-        return new GeneratedAsset(icon, asset, project, outputInfo);
-      }),
+  private async generateSettingsIcons(
+    asset: Asset,
+    project: Project,
+  ): Promise<GeneratedAsset[]> {
+    const icons = Object.values(IosAssets).filter(
+      a => a.kind === AssetKind.SettingsIcon,
     );
+
+    return this._generateIcons(asset, project, icons);
+  }
+
+  private async generateSpotlightIcons(
+    asset: Asset,
+    project: Project,
+  ): Promise<GeneratedAsset[]> {
+    const icons = Object.values(IosAssets).filter(
+      a => a.kind === AssetKind.SpotlightIcon,
+    );
+
+    return this._generateIcons(asset, project, icons);
   }
 
   private async generateSplashes(

@@ -58,11 +58,36 @@ export const enum Theme {
   Dark = 'dark',
 }
 
+export const enum Density {
+  Ldpi = 'ldpi',
+  Mdpi = 'mdpi',
+  Hdpi = 'hdpi',
+  Xhdpi = 'xhdpi',
+  Xxhdpi = 'xxhdpi',
+  Xxxhdpi = 'xxxhdpi',
+  LandLdpi = 'land-ldpi',
+  LandMdpi = 'land-mdpi',
+  LandHdpi = 'land-hdpi',
+  LandXhdpi = 'land-xhdpi',
+  LandXxhdpi = 'land-xxhdpi',
+  LandXxxhdpi = 'land-xxxhdpi',
+  PortLdpi = 'port-ldpi',
+  PortMdpi = 'port-mdpi',
+  PortHdpi = 'port-hdpi',
+  PortXhdpi = 'port-xhdpi',
+  PortXxhdpi = 'port-xxhdpi',
+  PortXxxhdpi = 'port-xxxhdpi',
+}
+
 export interface AssetMeta {
   platform: Platform;
   kind: AssetKind;
   // The filename (no path) for the asset
-  name: string;
+  name?: string;
+  // Filenames for foreground and background layers (used for
+  // android adaptive icons only)
+  nameForeground?: string;
+  nameBackground?: string;
   // The destination file
   dest?: string;
   format: Format;
@@ -71,6 +96,7 @@ export interface AssetMeta {
   orientation?: Orientation;
   scale?: number;
   theme?: Theme;
+  density?: Density;
 }
 
 // Shape of the Contents.json file inside of ios app appiconset and imageset folders
