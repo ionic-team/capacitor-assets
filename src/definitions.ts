@@ -101,8 +101,10 @@ export interface AndroidOutputAssetTemplate extends OutputAssetTemplate {
   // Filenames for foreground and background layers (used for
   // android adaptive icons only)
   name?: string;
-  nameForeground?: string;
-  nameBackground?: string;
+}
+export interface AndroidOutputAssetTemplateAdaptiveIcon
+  extends OutputAssetTemplate {
+  density: Density;
 }
 
 // Shape of the Contents.json file inside of ios app appiconset and imageset folders

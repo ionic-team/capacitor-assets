@@ -1,19 +1,19 @@
-import { join } from 'path';
+import { dirname, join } from 'path';
+import { Sharp } from 'sharp';
+import { mkdirp, pathExists, writeFile } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
 import { AssetGenerator } from '../../asset-generator';
 import {
-  AndroidOutputAssetTemplate,
+  AndroidOutputAssetTemplateAdaptiveIcon,
   AssetKind,
   OutputAssetTemplate,
 } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
-import { IOS_SPLASH_IMAGE_SET_PATH } from '../ios';
 
 import * as AndroidAssetTemplates from './assets';
-import { Sharp } from 'sharp';
 
 export class AndroidAssetGenerator extends AssetGenerator {
   constructor() {
@@ -44,7 +44,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
   ): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
       a => a.kind === AssetKind.Icon,
-    );
+    ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const pipe = asset.pipeline();
 
@@ -52,46 +52,131 @@ export class AndroidAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    const iosDir = project.config.ios!.path!;
-    return Promise.all(
+    const output = await Promise.all(
       icons.map(icon => this.generateAdaptiveIcon(icon, asset, project, pipe)),
     );
+
+    await this.updateManifest(project, output);
+
+    return output;
   }
 
   private async generateAdaptiveIcon(
-    icon: AndroidOutputAssetTemplate,
+    icon: AndroidOutputAssetTemplateAdaptiveIcon,
     asset: InputAsset,
     project: Project,
     pipe: Sharp,
   ) {
     const androidDir = project.config.android!.path!;
 
-    const destForeground = join(androidDir, 'app', 'src', 'main', 'res');
+    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
 
+    // Create the foreground and background images
+    const destForeground = join(
+      resPath,
+      `mipmap-${icon.density}`,
+      'ic_launcher_foreground.png',
+    );
+    let parentDir = dirname(destForeground);
+    if (!(await pathExists(parentDir))) {
+      await mkdirp(parentDir);
+    }
     const outputInfoForeground = await pipe
       .resize(icon.width, icon.height)
       .png()
       .toFile(destForeground);
 
-    const destBackground = join(androidDir, 'app', 'src', 'main', 'res');
+    const destBackground = join(
+      resPath,
+      `mipmap-${icon.density}`,
+      'ic_launcher_background.png',
+    );
+    parentDir = dirname(destBackground);
+    if (!(await pathExists(parentDir))) {
+      await mkdirp(parentDir);
+    }
     const outputInfoBackground = await pipe
       .resize(icon.width, icon.height)
       .png()
       .toFile(destBackground);
 
+    // Create the adaptive icon XML
+    const icLauncherXml = `
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>
+    `.trim();
+
+    const mipmapAnyPath = join(resPath, `mipmap-anydpi-v26`);
+    if (!(await pathExists(mipmapAnyPath))) {
+      await mkdirp(mipmapAnyPath);
+    }
+    const destIcLauncher = join(mipmapAnyPath, `ic_launcher.xml`);
+    const destIcLauncherRound = join(mipmapAnyPath, `ic_launcher_round.xml`);
+    await writeFile(destIcLauncher, icLauncherXml);
+    await writeFile(destIcLauncherRound, icLauncherXml);
+
+    // Make standard and rounded versions
+    await this.generateRoundIcon(project, asset, icon, pipe);
+
+    // Return the created files for this OutputAsset
     return new OutputAsset(
       icon,
       asset,
       project,
       {
-        [icon.nameForeground!]: destForeground,
-        [icon.nameBackground!]: destBackground,
+        [`mipmap-${icon.density}/ic_launcher_foreground.png`]: destForeground,
+        [`mipmap-${icon.density}/ic_launcher_background.png`]: destBackground,
+        'mipmap-anydpi-v26/ic_launcher.xml': destIcLauncher,
+        'mipmap-anydpi-v26/ic_launcher_round.xml': destIcLauncherRound,
       },
       {
-        [icon.nameForeground!]: outputInfoForeground,
-        [icon.nameBackground!]: outputInfoBackground,
+        [`mipmap-${icon.density}/ic_launcher_foreground.png`]:
+          outputInfoForeground,
+        [`mipmap-${icon.density}/ic_launcher_background.png`]:
+          outputInfoBackground,
       },
     );
+  }
+
+  private async generateRoundIcon(
+    project: Project,
+    asset: InputAsset,
+    template: OutputAssetTemplate,
+    pipe: Sharp,
+  ) {
+    const svg = `<svg width="${template.width}" height="${
+      template.height
+    }"><circle cx="${template.width / 2}" cy="${template.height / 2}" r="${
+      template.width / 2
+    }" fill="#ffffff"/></svg>`;
+
+    const androidDir = project.config.android!.path!;
+
+    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const destRound = join(
+      resPath,
+      `mipmap-${template.density}`,
+      'ic_launcher_round.png',
+    );
+    console.log('Generating round icon', destRound);
+
+    await pipe
+      .resize(template.width, template.height)
+      .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
+      .png()
+      .toFile(destRound);
+  }
+
+  private async updateManifest(project: Project, output: OutputAsset[]) {
+    project.android?.getAndroidManifest()?.setAttrs('manifest/application', {
+      'android:icon': '@mipmap/ic_launcher',
+      'android:roundIcon': '@mipmap/ic_launcher_round',
+    });
+
+    await project.commit();
   }
 
   private async generateSplashes(
