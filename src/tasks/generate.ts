@@ -93,11 +93,15 @@ function getGenerators(platforms: string[]): AssetGenerator[] {
 // and totals per platform
 function logGenerated(generated: OutputAsset[]) {
   for (const g of generated) {
-    log(
-      `${c.strong(c.success('CREATE'))} ${c.strong(
-        c.extra(g.template.platform),
-      )} ${g.template.dest ?? ''} (${size(g.outputInfo.size)})`,
-    );
+    Object.keys(g.destFilenames).forEach(name => {
+      const filename = g.getDestFilename(name);
+      const outputInfo = g.getOutputInfo(name);
+      log(
+        `${c.strong(c.success('CREATE'))} ${c.strong(
+          c.extra(g.template.platform),
+        )} ${filename ?? ''} (${size(outputInfo.size)})`,
+      );
+    });
   }
 
   log('\n');
@@ -114,9 +118,15 @@ function logGenerated(generated: OutputAsset[]) {
 
       const entry = totals[g.template.platform];
 
+      const count = Object.values(g.outputInfoMap).reduce(v => v + 1, 0);
+      const size = Object.values(g.outputInfoMap).reduce(
+        (v, c) => v + c.size,
+        0,
+      );
+
       totals[g.template.platform] = {
-        count: entry.count + 1,
-        size: entry.size + g.outputInfo.size,
+        count: entry.count + count,
+        size: entry.size + size,
       };
 
       return totals;

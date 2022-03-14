@@ -9,7 +9,7 @@ import {
 
 export const ANDROID_LDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
   platform: Platform.Android,
-  kind: AssetKind.AdaptiveIcon,
+  kind: AssetKind.Icon,
   nameForeground: 'ldpi-foreground.png',
   nameBackground: 'ldpi-background.png',
   format: Format.Png,
@@ -20,7 +20,7 @@ export const ANDROID_LDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
 
 export const ANDROID_MDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
   platform: Platform.Android,
-  kind: AssetKind.AdaptiveIcon,
+  kind: AssetKind.Icon,
   nameForeground: 'mdpi-foreground.png',
   nameBackground: 'mdpi-background.png',
   format: Format.Png,
@@ -32,7 +32,7 @@ export const ANDROID_MDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
 export const ANDROID_HDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
   nameForeground: 'hdpi-foreground.png',
   platform: Platform.Android,
-  kind: AssetKind.AdaptiveIcon,
+  kind: AssetKind.Icon,
   nameBackground: 'hdpi-background.png',
   format: Format.Png,
   width: 162,
@@ -42,7 +42,7 @@ export const ANDROID_HDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
 
 export const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
   platform: Platform.Android,
-  kind: AssetKind.AdaptiveIcon,
+  kind: AssetKind.Icon,
   nameForeground: 'xhdpi-foreground.png',
   nameBackground: 'xhdpi-background.png',
   format: Format.Png,
@@ -53,7 +53,7 @@ export const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
 
 export const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
   platform: Platform.Android,
-  kind: AssetKind.AdaptiveIcon,
+  kind: AssetKind.Icon,
   nameForeground: 'xxhdpi-foreground.png',
   nameBackground: 'xxhdpi-background.png',
   format: Format.Png,
@@ -64,72 +64,12 @@ export const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
 
 export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplate = {
   platform: Platform.Android,
-  kind: AssetKind.AdaptiveIcon,
+  kind: AssetKind.Icon,
   nameForeground: 'xxxhdpi-foreground.png',
   nameBackground: 'xxxhdpi-background.png',
   format: Format.Png,
   width: 432,
   height: 432,
-  density: Density.Xxxhdpi,
-};
-
-export const ANDROID_LDPI_ICON: AndroidOutputAssetTemplate = {
-  platform: Platform.Android,
-  kind: AssetKind.Icon,
-  name: 'drawable-ldpi-icon.png',
-  format: Format.Png,
-  width: 36,
-  height: 36,
-  density: Density.Ldpi,
-};
-
-export const ANDROID_MDPI_ICON: AndroidOutputAssetTemplate = {
-  platform: Platform.Android,
-  kind: AssetKind.Icon,
-  name: 'drawable-mdpi-icon.png',
-  format: Format.Png,
-  width: 48,
-  height: 48,
-  density: Density.Mdpi,
-};
-
-export const ANDROID_HDPI_ICON: AndroidOutputAssetTemplate = {
-  platform: Platform.Android,
-  kind: AssetKind.Icon,
-  name: 'drawable-hdpi-icon.png',
-  format: Format.Png,
-  width: 72,
-  height: 72,
-  density: Density.Hdpi,
-};
-
-export const ANDROID_XHDPI_ICON: AndroidOutputAssetTemplate = {
-  platform: Platform.Android,
-  kind: AssetKind.Icon,
-  name: 'drawable-xhdpi-icon.png',
-  format: Format.Png,
-  width: 96,
-  height: 96,
-  density: Density.Xhdpi,
-};
-
-export const ANDROID_XXHDPI_ICON: AndroidOutputAssetTemplate = {
-  platform: Platform.Android,
-  kind: AssetKind.Icon,
-  name: 'drawable-xxhdpi-icon.png',
-  format: Format.Png,
-  width: 144,
-  height: 144,
-  density: Density.Xxhdpi,
-};
-
-export const ANDROID_XXXHDPI_ICON: AndroidOutputAssetTemplate = {
-  platform: Platform.Android,
-  kind: AssetKind.Icon,
-  name: 'drawable-xxxhdpi-icon.png',
-  format: Format.Png,
-  width: 192,
-  height: 192,
   density: Density.Xxxhdpi,
 };
 

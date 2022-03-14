@@ -3,10 +3,11 @@ import tempy from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';
 import { PwaAssetGenerator } from '../../src/platforms/pwa';
-import { AssetKind } from '../../src/definitions';
+import { AssetKind, PwaOutputAssetTemplate } from '../../src/definitions';
 import * as PwaAssets from '../../src/platforms/pwa/assets';
 import sharp from 'sharp';
 import { parse } from 'path';
+import { OutputAsset } from '../../src/output-asset';
 
 describe('PWA Asset Test', () => {
   let ctx: Context;
@@ -32,18 +33,24 @@ describe('PWA Asset Test', () => {
     );
 
     const strategy = new PwaAssetGenerator();
-    let generatedAssets =
-      (await assets.icon?.generate(strategy, ctx.project)) ?? [];
+    let generatedAssets = ((await assets.icon?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<PwaOutputAssetTemplate>[];
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     const existSet = await Promise.all(
-      generatedAssets.map(asset => pathExists(asset.template.dest!)),
+      generatedAssets.map(asset => {
+        const dest = asset.destFilenames[asset.template.name];
+        return pathExists(dest);
+      }),
     );
     expect(existSet.every(e => !!e)).toBe(true);
 
     const sizedSet = await Promise.all(
       generatedAssets.map(async asset => {
-        const pipe = sharp(asset.template.dest);
+        const dest = asset.destFilenames[asset.template.name];
+        const pipe = sharp(dest);
         const metadata = await pipe.metadata();
         return (
           metadata.width === asset.template.width &&

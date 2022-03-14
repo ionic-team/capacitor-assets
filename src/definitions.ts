@@ -27,7 +27,6 @@ export const enum AssetKind {
   NotificationIcon = 'notification-icon',
   SettingsIcon = 'settings-icon',
   SpotlightIcon = 'spotlight-icon',
-  AdaptiveIcon = 'adaptive-icon',
   Splash = 'splash',
   SplashDark = 'splash-dark',
 }
@@ -82,8 +81,6 @@ export const enum Density {
 export interface OutputAssetTemplate {
   platform: Platform;
   kind: AssetKind;
-  // The destination file
-  dest?: string;
   format: Format;
   width: number;
   height: number;

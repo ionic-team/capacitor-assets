@@ -49,7 +49,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     switch (asset.kind) {
       case AssetKind.Icon:
         return this.generateIcons(asset, project);
-      case AssetKind.AdaptiveIcon:
+      case AssetKind.Icon:
         return [];
       case AssetKind.Splash:
       case AssetKind.SplashDark:
@@ -84,14 +84,23 @@ export class PwaAssetGenerator extends AssetGenerator {
           await mkdirp(destDir);
         } catch {}
         const dest = join(destDir, icon.name);
-        icon.dest = dest;
 
         const outputInfo = await pipe
           .resize(icon.width, icon.height)
           .png()
           .toFile(dest);
 
-        return new OutputAsset(icon, asset, project, outputInfo);
+        return new OutputAsset(
+          icon,
+          asset,
+          project,
+          {
+            [icon.name]: dest,
+          },
+          {
+            [icon.name]: outputInfo,
+          },
+        );
       }),
     );
 
@@ -217,7 +226,7 @@ export class PwaAssetGenerator extends AssetGenerator {
       sizes: `${asset.width}x${asset.height}`,
     };
 
-    if (asset.kind === AssetKind.AdaptiveIcon) {
+    if (asset.kind === AssetKind.Icon) {
       entry.purpose = 'any maskable';
     }
 

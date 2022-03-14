@@ -6,7 +6,13 @@ import {
   IosAssetGenerator,
   IOS_SPLASH_IMAGE_SET_PATH,
 } from '../../src/platforms/ios';
-import { AssetKind, Assets, Format, IosContents } from '../../src/definitions';
+import {
+  AssetKind,
+  Assets,
+  Format,
+  IosContents,
+  IosOutputAssetTemplate,
+} from '../../src/definitions';
 import * as IosAssets from '../../src/platforms/ios/assets';
 import sharp from 'sharp';
 import { join } from 'path';
@@ -30,17 +36,25 @@ describe('iOS Asset Test', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
-  async function verifyExists(generatedAssets: OutputAsset[]) {
+  async function verifyExists(
+    generatedAssets: OutputAsset<IosOutputAssetTemplate>[],
+  ) {
     const existSet = await Promise.all(
-      generatedAssets.map(asset => pathExists(asset.template.dest!)),
+      generatedAssets.map(asset => {
+        const dest = asset.destFilenames[asset.template.name];
+        return pathExists(dest);
+      }),
     );
     expect(existSet.every(e => !!e)).toBe(true);
   }
 
-  async function verifySizes(generatedAssets: OutputAsset[]) {
+  async function verifySizes(
+    generatedAssets: OutputAsset<IosOutputAssetTemplate>[],
+  ) {
     const sizedSet = await Promise.all(
       generatedAssets.map(async asset => {
-        const pipe = sharp(asset.template.dest);
+        const dest = asset.destFilenames[asset.template.name];
+        const pipe = sharp(dest);
         const metadata = await pipe.metadata();
         return (
           metadata.width === asset.template.width &&
@@ -53,21 +67,27 @@ describe('iOS Asset Test', () => {
 
   it('Should generate ios splashes', async () => {
     const strategy = new IosAssetGenerator();
-    let generatedAssets =
-      (await assets.splash?.generate(strategy, ctx.project)) ?? [];
+    let generatedAssets = ((await assets.splash?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
 
-    expect(generatedAssets.length).toBe(1);
-    expect(await pathExists(generatedAssets[0]?.template.dest ?? '')).toBe(
-      true,
+    let dest = generatedAssets[0].getDestFilename(
+      generatedAssets[0]?.template.name,
     );
-
-    generatedAssets =
-      (await assets.splashDark?.generate(strategy, ctx.project)) ?? [];
-
     expect(generatedAssets.length).toBe(1);
-    expect(await pathExists(generatedAssets[0]?.template.dest ?? '')).toBe(
-      true,
+    expect(await pathExists(dest ?? '')).toBe(true);
+
+    generatedAssets = ((await assets.splashDark?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+
+    dest = generatedAssets[0].getDestFilename(
+      generatedAssets[0]?.template.name,
     );
+    expect(generatedAssets.length).toBe(1);
+    expect(await pathExists(dest ?? '')).toBe(true);
 
     const contentsJson = JSON.parse(
       await readFile(
@@ -92,8 +112,10 @@ describe('iOS Asset Test', () => {
     );
 
     const strategy = new IosAssetGenerator();
-    let generatedAssets =
-      (await assets.icon?.generate(strategy, ctx.project)) ?? [];
+    let generatedAssets = ((await assets.icon?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     await verifyExists(generatedAssets);
@@ -106,8 +128,10 @@ describe('iOS Asset Test', () => {
     );
 
     const strategy = new IosAssetGenerator();
-    let generatedAssets =
-      (await assets.iosNotificationIcon?.generate(strategy, ctx.project)) ?? [];
+    let generatedAssets = ((await assets.iosNotificationIcon?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
     expect(generatedAssets.length).toBeGreaterThan(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
@@ -121,8 +145,10 @@ describe('iOS Asset Test', () => {
     );
 
     const strategy = new IosAssetGenerator();
-    let generatedAssets =
-      (await assets.iosSettingsIcon?.generate(strategy, ctx.project)) ?? [];
+    let generatedAssets = ((await assets.iosSettingsIcon?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
     expect(generatedAssets.length).toBeGreaterThan(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
@@ -136,8 +162,10 @@ describe('iOS Asset Test', () => {
     );
 
     const strategy = new IosAssetGenerator();
-    let generatedAssets =
-      (await assets.iosSpotlightIcon?.generate(strategy, ctx.project)) ?? [];
+    let generatedAssets = ((await assets.iosSpotlightIcon?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
     expect(generatedAssets.length).toBeGreaterThan(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 

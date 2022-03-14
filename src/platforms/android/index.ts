@@ -2,15 +2,18 @@ import { join } from 'path';
 
 import { InputAsset } from '../../input-asset';
 import { AssetGenerator } from '../../asset-generator';
-import { AssetKind } from '../../definitions';
+import {
+  AndroidOutputAssetTemplate,
+  AssetKind,
+  OutputAssetTemplate,
+} from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
 import { IOS_SPLASH_IMAGE_SET_PATH } from '../ios';
-import {
-  IOS_2X_UNIVERSAL_ANYANY_SPLASH,
-  IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK,
-} from '../ios/assets';
+
+import * as AndroidAssetTemplates from './assets';
+import { Sharp } from 'sharp';
 
 export class AndroidAssetGenerator extends AssetGenerator {
   constructor() {
@@ -27,12 +30,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
     switch (asset.kind) {
       case AssetKind.Icon:
         return this.generateIcons(asset, project);
-      /*
-      case AssetKind.NotificationIcon:
-        return this.generateNotificationIcons(asset, project);
-      */
-      case AssetKind.AdaptiveIcon:
-        return this.generateAdaptiveIcons(asset, project);
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
@@ -45,15 +42,56 @@ export class AndroidAssetGenerator extends AssetGenerator {
     asset: InputAsset,
     project: Project,
   ): Promise<OutputAsset[]> {
-    return [];
+    const icons = Object.values(AndroidAssetTemplates).filter(
+      a => a.kind === AssetKind.Icon,
+    );
+
+    const pipe = asset.pipeline();
+
+    if (!pipe) {
+      throw new BadPipelineError('Sharp instance not created');
+    }
+
+    const iosDir = project.config.ios!.path!;
+    return Promise.all(
+      icons.map(icon => this.generateAdaptiveIcon(icon, asset, project, pipe)),
+    );
   }
 
-  private async generateAdaptiveIcons(
+  private async generateAdaptiveIcon(
+    icon: AndroidOutputAssetTemplate,
     asset: InputAsset,
     project: Project,
-  ): Promise<OutputAsset[]> {
-    console.log('Generating adaptive icons', asset);
-    return [];
+    pipe: Sharp,
+  ) {
+    const androidDir = project.config.android!.path!;
+
+    const destForeground = join(androidDir, 'app', 'src', 'main', 'res');
+
+    const outputInfoForeground = await pipe
+      .resize(icon.width, icon.height)
+      .png()
+      .toFile(destForeground);
+
+    const destBackground = join(androidDir, 'app', 'src', 'main', 'res');
+    const outputInfoBackground = await pipe
+      .resize(icon.width, icon.height)
+      .png()
+      .toFile(destBackground);
+
+    return new OutputAsset(
+      icon,
+      asset,
+      project,
+      {
+        [icon.nameForeground!]: destForeground,
+        [icon.nameBackground!]: destBackground,
+      },
+      {
+        [icon.nameForeground!]: outputInfoForeground,
+        [icon.nameBackground!]: outputInfoBackground,
+      },
+    );
   }
 
   private async generateSplashes(
@@ -66,6 +104,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
+    /*
     const assetMeta =
       asset.kind === AssetKind.Splash
         ? IOS_2X_UNIVERSAL_ANYANY_SPLASH
@@ -88,5 +127,8 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
 
     return [generated];
+    */
+
+    return [];
   }
 }

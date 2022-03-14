@@ -8,6 +8,15 @@ export class OutputAsset<OutputAssetTemplateType = OutputAssetTemplate> {
     public template: OutputAssetTemplateType,
     public asset: InputAsset,
     public project: Project,
-    public outputInfo: OutputInfo,
+    public destFilenames: { [name: string]: string },
+    public outputInfoMap: { [name: string]: OutputInfo },
   ) {}
+
+  getDestFilename(assetName: string) {
+    return this.destFilenames[assetName];
+  }
+
+  getOutputInfo(assetName: string) {
+    return this.outputInfoMap[assetName];
+  }
 }
