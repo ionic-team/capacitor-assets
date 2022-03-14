@@ -161,7 +161,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
       `mipmap-${template.density}`,
       'ic_launcher_round.png',
     );
-    console.log('Generating round icon', destRound);
 
     await pipe
       .resize(template.width, template.height)
