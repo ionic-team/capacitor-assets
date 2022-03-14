@@ -2,7 +2,11 @@ import { join } from 'path';
 import { readFile, writeFile } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
-import { AssetKind, AssetMeta, IosAssetMeta } from '../../definitions';
+import {
+  AssetKind,
+  OutputAssetTemplate,
+  IosOutputAssetTemplate,
+} from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
@@ -50,7 +54,7 @@ export class IosAssetGenerator extends AssetGenerator {
   private async _generateIcons(
     asset: InputAsset,
     project: Project,
-    icons: IosAssetMeta[],
+    icons: IosOutputAssetTemplate[],
   ): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
@@ -82,7 +86,11 @@ export class IosAssetGenerator extends AssetGenerator {
       a => a.kind === AssetKind.Icon,
     );
 
-    return this._generateIcons(asset, project, icons as IosAssetMeta[]);
+    return this._generateIcons(
+      asset,
+      project,
+      icons as IosOutputAssetTemplate[],
+    );
   }
 
   private async generateNotificationIcons(
@@ -93,7 +101,11 @@ export class IosAssetGenerator extends AssetGenerator {
       a => a.kind === AssetKind.NotificationIcon,
     );
 
-    return this._generateIcons(asset, project, icons as IosAssetMeta[]);
+    return this._generateIcons(
+      asset,
+      project,
+      icons as IosOutputAssetTemplate[],
+    );
   }
 
   private async generateSettingsIcons(
@@ -104,7 +116,11 @@ export class IosAssetGenerator extends AssetGenerator {
       a => a.kind === AssetKind.SettingsIcon,
     );
 
-    return this._generateIcons(asset, project, icons as IosAssetMeta[]);
+    return this._generateIcons(
+      asset,
+      project,
+      icons as IosOutputAssetTemplate[],
+    );
   }
 
   private async generateSpotlightIcons(
@@ -115,7 +131,11 @@ export class IosAssetGenerator extends AssetGenerator {
       a => a.kind === AssetKind.SpotlightIcon,
     );
 
-    return this._generateIcons(asset, project, icons as IosAssetMeta[]);
+    return this._generateIcons(
+      asset,
+      project,
+      icons as IosOutputAssetTemplate[],
+    );
   }
 
   private async generateSplashes(
@@ -174,8 +194,8 @@ export class IosAssetGenerator extends AssetGenerator {
         },
       ],
       idiom: 'universal',
-      scale: `${generated.meta.scale ?? 1}x`,
-      filename: (generated.meta as IosAssetMeta).name,
+      scale: `${generated.template.scale ?? 1}x`,
+      filename: (generated.template as IosOutputAssetTemplate).name,
     });
 
     parsed.images = withoutMissing;

@@ -32,7 +32,7 @@ describe('iOS Asset Test', () => {
 
   async function verifyExists(generatedAssets: OutputAsset[]) {
     const existSet = await Promise.all(
-      generatedAssets.map(asset => pathExists(asset.meta.dest!)),
+      generatedAssets.map(asset => pathExists(asset.template.dest!)),
     );
     expect(existSet.every(e => !!e)).toBe(true);
   }
@@ -40,11 +40,11 @@ describe('iOS Asset Test', () => {
   async function verifySizes(generatedAssets: OutputAsset[]) {
     const sizedSet = await Promise.all(
       generatedAssets.map(async asset => {
-        const pipe = sharp(asset.meta.dest);
+        const pipe = sharp(asset.template.dest);
         const metadata = await pipe.metadata();
         return (
-          metadata.width === asset.meta.width &&
-          metadata.height === asset.meta.height
+          metadata.width === asset.template.width &&
+          metadata.height === asset.template.height
         );
       }),
     );
@@ -57,13 +57,17 @@ describe('iOS Asset Test', () => {
       (await assets.splash?.generate(strategy, ctx.project)) ?? [];
 
     expect(generatedAssets.length).toBe(1);
-    expect(await pathExists(generatedAssets[0]?.meta.dest ?? '')).toBe(true);
+    expect(await pathExists(generatedAssets[0]?.template.dest ?? '')).toBe(
+      true,
+    );
 
     generatedAssets =
       (await assets.splashDark?.generate(strategy, ctx.project)) ?? [];
 
     expect(generatedAssets.length).toBe(1);
-    expect(await pathExists(generatedAssets[0]?.meta.dest ?? '')).toBe(true);
+    expect(await pathExists(generatedAssets[0]?.template.dest ?? '')).toBe(
+      true,
+    );
 
     const contentsJson = JSON.parse(
       await readFile(

@@ -1,11 +1,11 @@
 import { OutputInfo } from 'sharp';
 import { InputAsset } from './input-asset';
-import { AssetMeta } from './definitions';
+import { OutputAssetTemplate } from './definitions';
 import { Project } from './project';
 
-export class OutputAsset<AssetMetaType = AssetMeta> {
+export class OutputAsset<OutputAssetTemplateType = OutputAssetTemplate> {
   constructor(
-    public meta: AssetMetaType,
+    public template: OutputAssetTemplateType,
     public asset: InputAsset,
     public project: Project,
     public outputInfo: OutputInfo,

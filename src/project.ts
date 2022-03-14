@@ -35,6 +35,10 @@ export class Project extends CapacitorProject {
 
       iosIcon: await this.loadInputAsset('ios/icon', AssetKind.Icon),
       iosSplash: await this.loadInputAsset('ios/splash', AssetKind.Splash),
+      iosSplashDark: await this.loadInputAsset(
+        'ios/splash-dark',
+        AssetKind.SplashDark,
+      ),
       iosNotificationIcon: await this.loadInputAsset(
         'ios/notification-icon',
         AssetKind.NotificationIcon,

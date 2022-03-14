@@ -79,7 +79,7 @@ export const enum Density {
   PortXxxhdpi = 'port-xxxhdpi',
 }
 
-export interface AssetMeta {
+export interface OutputAssetTemplate {
   platform: Platform;
   kind: AssetKind;
   // The destination file
@@ -93,14 +93,14 @@ export interface AssetMeta {
   density?: Density;
 }
 
-export interface IosAssetMeta extends AssetMeta {
+export interface IosOutputAssetTemplate extends OutputAssetTemplate {
   name: string;
 }
-export interface PwaAssetMeta extends AssetMeta {
+export interface PwaOutputAssetTemplate extends OutputAssetTemplate {
   name: string;
 }
 
-export interface AndroidAssetMeta extends AssetMeta {
+export interface AndroidOutputAssetTemplate extends OutputAssetTemplate {
   // Filenames for foreground and background layers (used for
   // android adaptive icons only)
   name?: string;

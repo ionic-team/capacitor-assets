@@ -94,9 +94,9 @@ function getGenerators(platforms: string[]): AssetGenerator[] {
 function logGenerated(generated: OutputAsset[]) {
   for (const g of generated) {
     log(
-      `${c.strong(c.success('CREATE'))} ${c.strong(c.extra(g.meta.platform))} ${
-        g.meta.dest ?? ''
-      } (${size(g.outputInfo.size)})`,
+      `${c.strong(c.success('CREATE'))} ${c.strong(
+        c.extra(g.template.platform),
+      )} ${g.template.dest ?? ''} (${size(g.outputInfo.size)})`,
     );
   }
 
@@ -105,16 +105,16 @@ function logGenerated(generated: OutputAsset[]) {
   // Aggregate total assets and size per platform
   const totals = generated.reduce(
     (totals, g) => {
-      if (!(g.meta.platform in totals)) {
-        totals[g.meta.platform] = {
+      if (!(g.template.platform in totals)) {
+        totals[g.template.platform] = {
           count: 0,
           size: 0,
         };
       }
 
-      const entry = totals[g.meta.platform];
+      const entry = totals[g.template.platform];
 
-      totals[g.meta.platform] = {
+      totals[g.template.platform] = {
         count: entry.count + 1,
         size: entry.size + g.outputInfo.size,
       };

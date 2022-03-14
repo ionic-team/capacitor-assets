@@ -8,7 +8,7 @@ import {
 } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
-import { AssetKind, PwaAssetMeta, Platform } from '../../definitions';
+import { AssetKind, PwaOutputAssetTemplate, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
@@ -72,7 +72,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     const pwaDir = this.getPWADirectory(project.directory ?? undefined);
     const icons = Object.values(PwaAssets).filter(
       a => a.kind === AssetKind.Icon,
-    ) as PwaAssetMeta[];
+    ) as PwaOutputAssetTemplate[];
 
     const generatedAssets = await Promise.all(
       icons.map(async icon => {
@@ -153,7 +153,7 @@ export class PwaAssetGenerator extends AssetGenerator {
 
   private updateManifest(
     project: Project,
-    assets: OutputAsset<PwaAssetMeta>[],
+    assets: OutputAsset<PwaOutputAssetTemplate>[],
   ) {
     const pwaDir = this.getPWADirectory(project.directory ?? undefined);
     const pwaAssetDir = this.getPWAAssetsDirectory(pwaDir);
@@ -161,7 +161,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     const manifestPath = this.getManifestJsonPath(
       project.directory ?? undefined,
     );
-    const pwaAssets = assets.filter(a => a.meta.platform === Platform.Pwa);
+    const pwaAssets = assets.filter(a => a.template.platform === Platform.Pwa);
 
     let manifestJson: any = {};
     if (existsSync(manifestPath)) {
@@ -173,13 +173,13 @@ export class PwaAssetGenerator extends AssetGenerator {
     const icons = manifestJson['icons'] || [];
 
     for (let asset of pwaAssets) {
-      const src = asset.meta.name;
+      const src = asset.template.name;
       const fname = basename(src);
       const relativePath = join(pwaAssetDir, PWA_ASSET_PATH, fname);
 
       const existing = !!icons.find((i: any) => i.src === relativePath);
       if (!existing) {
-        icons.push(this.makeIconManifestEntry(asset.meta, relativePath));
+        icons.push(this.makeIconManifestEntry(asset.template, relativePath));
       }
     }
 
@@ -196,7 +196,7 @@ export class PwaAssetGenerator extends AssetGenerator {
   }
 
   private makeIconManifestEntry(
-    asset: PwaAssetMeta,
+    asset: PwaOutputAssetTemplate,
     relativePath: string,
   ): ManifestIcon {
     const ext = extname(relativePath);

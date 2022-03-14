@@ -37,17 +37,17 @@ describe('PWA Asset Test', () => {
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     const existSet = await Promise.all(
-      generatedAssets.map(asset => pathExists(asset.meta.dest!)),
+      generatedAssets.map(asset => pathExists(asset.template.dest!)),
     );
     expect(existSet.every(e => !!e)).toBe(true);
 
     const sizedSet = await Promise.all(
       generatedAssets.map(async asset => {
-        const pipe = sharp(asset.meta.dest);
+        const pipe = sharp(asset.template.dest);
         const metadata = await pipe.metadata();
         return (
-          metadata.width === asset.meta.width &&
-          metadata.height === asset.meta.height
+          metadata.width === asset.template.width &&
+          metadata.height === asset.template.height
         );
       }),
     );

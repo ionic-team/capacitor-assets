@@ -1,6 +1,11 @@
-import { AssetKind, PwaAssetMeta, Format, Platform } from '../../definitions';
+import {
+  AssetKind,
+  PwaOutputAssetTemplate,
+  Format,
+  Platform,
+} from '../../definitions';
 
-export const PWA_48_PX_ICON: PwaAssetMeta = {
+export const PWA_48_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
   kind: AssetKind.Icon,
   name: 'icon-192.webp',
@@ -8,7 +13,7 @@ export const PWA_48_PX_ICON: PwaAssetMeta = {
   width: 192,
   height: 192,
 };
-export const PWA_72_PX_ICON: PwaAssetMeta = {
+export const PWA_72_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
   kind: AssetKind.Icon,
   name: 'icon-72.webp',
@@ -16,7 +21,7 @@ export const PWA_72_PX_ICON: PwaAssetMeta = {
   width: 72,
   height: 72,
 };
-export const PWA_96_PX_ICON: PwaAssetMeta = {
+export const PWA_96_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
   kind: AssetKind.Icon,
   name: 'icon-96.webp',
@@ -24,7 +29,7 @@ export const PWA_96_PX_ICON: PwaAssetMeta = {
   width: 96,
   height: 96,
 };
-export const PWA_128_PX_ICON: PwaAssetMeta = {
+export const PWA_128_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
   kind: AssetKind.Icon,
   name: 'icon-128.webp',
@@ -32,7 +37,7 @@ export const PWA_128_PX_ICON: PwaAssetMeta = {
   width: 128,
   height: 128,
 };
-export const PWA_192_PX_ICON: PwaAssetMeta = {
+export const PWA_192_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
   kind: AssetKind.Icon,
   name: 'icon-192.webp',
@@ -40,7 +45,7 @@ export const PWA_192_PX_ICON: PwaAssetMeta = {
   width: 192,
   height: 192,
 };
-export const PWA_256_PX_ICON: PwaAssetMeta = {
+export const PWA_256_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
   kind: AssetKind.Icon,
   name: 'icon-256.webp',
@@ -48,7 +53,7 @@ export const PWA_256_PX_ICON: PwaAssetMeta = {
   width: 256,
   height: 256,
 };
-export const PWA_512_PX_ICON: PwaAssetMeta = {
+export const PWA_512_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
   kind: AssetKind.Icon,
   name: 'icon-512.webp',
