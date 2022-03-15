@@ -49,6 +49,8 @@ export class IosAssetGenerator extends AssetGenerator {
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
     }
+
+    return [];
   }
 
   private async _generateIcons(

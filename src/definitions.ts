@@ -2,6 +2,8 @@ import { InputAsset } from './input-asset';
 
 export interface Assets {
   icon: InputAsset | null;
+  iconForeground: InputAsset | null;
+  iconBackground: InputAsset | null;
   splash: InputAsset | null;
   splashDark: InputAsset | null;
 
@@ -13,6 +15,9 @@ export interface Assets {
   iosSpotlightIcon?: InputAsset | null;
 
   androidIcon?: InputAsset | null;
+  androidIconForeground?: InputAsset | null;
+  androidIconBackground?: InputAsset | null;
+
   androidSplash?: InputAsset | null;
   androidSplashDark?: InputAsset | null;
   androidNotificationIcon?: InputAsset | null;
@@ -24,6 +29,8 @@ export interface Assets {
 
 export const enum AssetKind {
   Icon = 'icon',
+  IconForeground = 'icon-foreground',
+  IconBackground = 'icon-background',
   NotificationIcon = 'notification-icon',
   SettingsIcon = 'settings-icon',
   SpotlightIcon = 'spotlight-icon',

@@ -11,42 +11,46 @@ import { Project } from '../project';
 import { InputAsset } from '../input-asset';
 
 export async function generateCommand(ctx: Context) {
-  const assets = await ctx.project.loadInputAssets();
+  try {
+    const assets = await ctx.project.loadInputAssets();
 
-  if ([assets.icon, assets.splash, assets.splashDark].every(a => !a)) {
-    fatal(
-      `No assets found in the asset path ${c.ancillary(
-        ctx.project.assetDir,
-      )}. See capacitor-assets documentation to learn how to use this tool.`,
+    if ([assets.icon, assets.splash, assets.splashDark].every(a => !a)) {
+      fatal(
+        `No assets found in the asset path ${c.ancillary(
+          ctx.project.assetDir,
+        )}. See capacitor-assets documentation to learn how to use this tool.`,
+      );
+    }
+
+    let platforms = ['ios', 'android', 'pwa'];
+    if (ctx.args.ios || ctx.args.android || ctx.args.pwa) {
+      platforms = [];
+    }
+
+    if (ctx.args.ios) {
+      platforms.push('ios');
+    }
+    if (ctx.args.android) {
+      platforms.push('android');
+    }
+    if (ctx.args.pwa) {
+      platforms.push('pwa');
+    }
+
+    log(
+      `Generating assets for ${platforms
+        .map(p => c.strong(c.success(p)))
+        .join(', ')}`,
     );
+
+    const generators = getGenerators(platforms);
+
+    const generated = await generateAssets(assets, generators, ctx.project);
+
+    logGenerated(generated);
+  } catch (e) {
+    fatal('Unable to generate assets', e as Error);
   }
-
-  let platforms = ['ios', 'android', 'pwa'];
-  if (ctx.args.ios || ctx.args.android || ctx.args.pwa) {
-    platforms = [];
-  }
-
-  if (ctx.args.ios) {
-    platforms.push('ios');
-  }
-  if (ctx.args.android) {
-    platforms.push('android');
-  }
-  if (ctx.args.pwa) {
-    platforms.push('pwa');
-  }
-
-  log(
-    `Generating assets for ${platforms
-      .map(p => c.strong(c.success(p)))
-      .join(', ')}`,
-  );
-
-  const generators = getGenerators(platforms);
-
-  const generated = await generateAssets(assets, generators, ctx.project);
-
-  logGenerated(generated);
 }
 
 async function generateAssets(
@@ -115,7 +119,7 @@ function logGenerated(generated: OutputAsset[]) {
 
       const entry = totals[g.template.platform];
 
-      const count = Object.values(g.outputInfoMap).reduce(v => v + 1, 0);
+      const count = Object.values(g.destFilenames).reduce(v => v + 1, 0);
       const size = Object.values(g.outputInfoMap).reduce(
         (v, c) => v + c.size,
         0,

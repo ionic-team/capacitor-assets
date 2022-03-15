@@ -3,6 +3,9 @@ import { InputAsset } from './input-asset';
 import { OutputAssetTemplate } from './definitions';
 import { Project } from './project';
 
+/**
+ * An instance of a generated asset
+ */
 export class OutputAsset<OutputAssetTemplateType = OutputAssetTemplate> {
   constructor(
     public template: OutputAssetTemplateType,

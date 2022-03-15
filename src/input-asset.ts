@@ -5,6 +5,10 @@ import { OutputAsset } from './output-asset';
 import { Project } from './project';
 import { AssetGenerator } from './asset-generator';
 
+/**
+ * An instance of an asset that we will use to generate
+ * a number of output assets.
+ */
 export class InputAsset {
   private filename: string;
   public width?: number;
@@ -12,7 +16,7 @@ export class InputAsset {
 
   private _sharp: sharp.Sharp | null = null;
 
-  constructor(private path: string, public kind: AssetKind) {
+  constructor(public path: string, public kind: AssetKind) {
     this.filename = basename(path);
   }
 

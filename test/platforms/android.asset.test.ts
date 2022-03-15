@@ -71,7 +71,7 @@ describe('Android asset test', () => {
   }
   */
 
-  it('Should generate android icons', async () => {
+  it('Should generate android legacy icons', async () => {
     const assets = await ctx.project.loadInputAssets();
 
     const strategy = new AndroidAssetGenerator();
@@ -80,9 +80,40 @@ describe('Android asset test', () => {
       ctx.project,
     )) ?? []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
 
-    expect(generatedAssets.length).toBe(6);
+    // Expect legacy main icons and rounded to be generated
+    expect(generatedAssets.length).toBe(12);
 
     const template = generatedAssets[0].template;
+
+    Object.values(generatedAssets[0].destFilenames).map(async f =>
+      expect(await pathExists(f)).toBe(true),
+    );
+
+    // await verifyExists(generatedAssets);
+    // await verifySizes(generatedAssets);
+  });
+
+  it('Should generate android adaptive icons', async () => {
+    const assets = await ctx.project.loadInputAssets();
+
+    const strategy = new AndroidAssetGenerator();
+    let generatedAssets = ((await assets.iconForeground?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
+
+    expect(generatedAssets.length).toBe(6);
+
+    Object.values(generatedAssets[0].destFilenames).map(async f =>
+      expect(await pathExists(f)).toBe(true),
+    );
+
+    generatedAssets = ((await assets.iconBackground?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
+
+    expect(generatedAssets.length).toBe(6);
 
     Object.values(generatedAssets[0].destFilenames).map(async f =>
       expect(await pathExists(f)).toBe(true),

@@ -27,6 +27,14 @@ export class Project extends CapacitorProject {
   async loadInputAssets(): Promise<Assets> {
     this.assets = {
       icon: await this.loadInputAsset('icon', AssetKind.Icon),
+      iconForeground: await this.loadInputAsset(
+        'icon-foreground',
+        AssetKind.IconForeground,
+      ),
+      iconBackground: await this.loadInputAsset(
+        'icon-background',
+        AssetKind.IconBackground,
+      ),
       splash: await this.loadInputAsset('splash', AssetKind.Splash),
       splashDark: await this.loadInputAsset(
         'splash-dark',
@@ -53,6 +61,15 @@ export class Project extends CapacitorProject {
       ),
 
       androidIcon: await this.loadInputAsset('android/icon', AssetKind.Icon),
+      androidIconForeground: await this.loadInputAsset(
+        'android/icon-foreground',
+        AssetKind.Icon,
+      ),
+      androidIconBackground: await this.loadInputAsset(
+        'android/icon-background',
+        AssetKind.Icon,
+      ),
+
       androidSplash: await this.loadInputAsset(
         'android/splash',
         AssetKind.Splash,
