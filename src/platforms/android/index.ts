@@ -119,7 +119,8 @@ export class AndroidAssetGenerator extends AssetGenerator {
     await writeFile(destIcLauncherRound, icLauncherXml);
 
     // Make standard and rounded versions
-    await this.generateRoundIcon(project, asset, icon, pipe);
+    await this.generateLegacyLauncherIcon(project, asset, icon, pipe);
+    await this.generateRoundLauncherIcon(project, asset, icon, pipe);
 
     // Return the created files for this OutputAsset
     return new OutputAsset(
@@ -141,7 +142,33 @@ export class AndroidAssetGenerator extends AssetGenerator {
     );
   }
 
-  private async generateRoundIcon(
+  private async generateLegacyLauncherIcon(
+    project: Project,
+    asset: InputAsset,
+    template: OutputAssetTemplate,
+    pipe: Sharp,
+  ) {
+    // 8.33% found here: https://stackoverflow.com/a/35232500/32140
+    const radius = template.width * 0.0833;
+    const svg = `<svg width="${template.width}" height="${template.height}"><rect x="0" y="0" width="${template.width}" height="${template.height}" rx="${radius}" fill="#ffffff"/></svg>`;
+
+    const androidDir = project.config.android!.path!;
+
+    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const destRound = join(
+      resPath,
+      `mipmap-${template.density}`,
+      'ic_launcher.png',
+    );
+
+    await pipe
+      .resize(template.width, template.height)
+      .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
+      .png()
+      .toFile(destRound);
+  }
+
+  private async generateRoundLauncherIcon(
     project: Project,
     asset: InputAsset,
     template: OutputAssetTemplate,

@@ -34,7 +34,10 @@ describe('Android asset test', () => {
   });
 
   afterAll(async () => {
-    console.log('Wrote to', fixtureDir);
+    console.log(
+      'Wrote to',
+      join(fixtureDir, 'android', 'app', 'src', 'main', 'res'),
+    );
     const files = await readdirp(
       join(fixtureDir, 'android', 'app', 'src', 'main', 'res'),
     );
