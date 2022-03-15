@@ -11,10 +11,7 @@ import { Project } from '../project';
 import { InputAsset } from '../input-asset';
 
 export async function generateCommand(ctx: Context) {
-  console.log('Generating', ctx);
-
   const assets = await ctx.project.loadInputAssets();
-  console.log('Loaded assets', assets);
 
   if ([assets.icon, assets.splash, assets.splashDark].every(a => !a)) {
     fatal(
@@ -66,7 +63,7 @@ async function generateAssets(
     generated.push(...(g.flat().filter(f => !!f) as OutputAsset[]));
   }
 
-  const assetTypes = Object.values(assets).filter(v => !v);
+  const assetTypes = Object.values(assets).filter(v => !!v);
 
   for (const asset of assetTypes) {
     await generateAndCollect(asset);
@@ -99,7 +96,7 @@ function logGenerated(generated: OutputAsset[]) {
       log(
         `${c.strong(c.success('CREATE'))} ${c.strong(
           c.extra(g.template.platform),
-        )} ${filename ?? ''} (${size(outputInfo.size)})`,
+        )} ${filename ?? ''}${outputInfo ? ` (${size(outputInfo.size)})` : ''}`,
       );
     });
   }

@@ -1,5 +1,5 @@
 import { dirname, join } from 'path';
-import { Sharp } from 'sharp';
+import { OutputInfo, Sharp } from 'sharp';
 import { mkdirp, pathExists, writeFile } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
@@ -119,8 +119,14 @@ export class AndroidAssetGenerator extends AssetGenerator {
     await writeFile(destIcLauncherRound, icLauncherXml);
 
     // Make standard and rounded versions
-    await this.generateLegacyLauncherIcon(project, asset, icon, pipe);
-    await this.generateRoundLauncherIcon(project, asset, icon, pipe);
+    const [destLegacy, outputInfoLegacy] =
+      await this.generateLegacyLauncherIcon(project, asset, icon, pipe);
+    const [destRound, outputInfoRound] = await this.generateRoundLauncherIcon(
+      project,
+      asset,
+      icon,
+      pipe,
+    );
 
     // Return the created files for this OutputAsset
     return new OutputAsset(
@@ -128,12 +134,16 @@ export class AndroidAssetGenerator extends AssetGenerator {
       asset,
       project,
       {
+        [`mipmap-${icon.density}/ic_launcher.png`]: destLegacy,
+        [`mipmap-${icon.density}/ic_launcher_round.png`]: destRound,
         [`mipmap-${icon.density}/ic_launcher_foreground.png`]: destForeground,
         [`mipmap-${icon.density}/ic_launcher_background.png`]: destBackground,
         'mipmap-anydpi-v26/ic_launcher.xml': destIcLauncher,
         'mipmap-anydpi-v26/ic_launcher_round.xml': destIcLauncherRound,
       },
       {
+        [`mipmap-${icon.density}/ic_launcher.png`]: outputInfoLegacy,
+        [`mipmap-${icon.density}/ic_launcher_round.png`]: outputInfoRound,
         [`mipmap-${icon.density}/ic_launcher_foreground.png`]:
           outputInfoForeground,
         [`mipmap-${icon.density}/ic_launcher_background.png`]:
@@ -147,7 +157,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     asset: InputAsset,
     template: OutputAssetTemplate,
     pipe: Sharp,
-  ) {
+  ): Promise<[string, OutputInfo]> {
     // 8.33% found here: https://stackoverflow.com/a/35232500/32140
     const radius = template.width * 0.0833;
     const svg = `<svg width="${template.width}" height="${template.height}"><rect x="0" y="0" width="${template.width}" height="${template.height}" rx="${radius}" fill="#ffffff"/></svg>`;
@@ -161,11 +171,13 @@ export class AndroidAssetGenerator extends AssetGenerator {
       'ic_launcher.png',
     );
 
-    await pipe
+    const outputInfo = await pipe
       .resize(template.width, template.height)
       .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .png()
       .toFile(destRound);
+
+    return [destRound, outputInfo];
   }
 
   private async generateRoundLauncherIcon(
@@ -173,7 +185,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     asset: InputAsset,
     template: OutputAssetTemplate,
     pipe: Sharp,
-  ) {
+  ): Promise<[string, OutputInfo]> {
     const svg = `<svg width="${template.width}" height="${
       template.height
     }"><circle cx="${template.width / 2}" cy="${template.height / 2}" r="${
@@ -189,11 +201,13 @@ export class AndroidAssetGenerator extends AssetGenerator {
       'ic_launcher_round.png',
     );
 
-    await pipe
+    const outputInfo = await pipe
       .resize(template.width, template.height)
       .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .png()
       .toFile(destRound);
+
+    return [destRound, outputInfo];
   }
 
   private async updateManifest(project: Project, output: OutputAsset[]) {
