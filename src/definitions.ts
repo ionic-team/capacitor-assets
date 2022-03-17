@@ -64,7 +64,7 @@ export const enum Theme {
   Dark = 'dark',
 }
 
-export const enum Density {
+export const enum AndroidDensity {
   Ldpi = 'ldpi',
   Mdpi = 'mdpi',
   Hdpi = 'hdpi',
@@ -91,27 +91,32 @@ export interface OutputAssetTemplate {
   format: Format;
   width: number;
   height: number;
-  orientation?: Orientation;
   scale?: number;
-  theme?: Theme;
-  density?: Density;
 }
 
 export interface IosOutputAssetTemplate extends OutputAssetTemplate {
   name: string;
+}
+export interface IosOutputAssetTemplateIcon extends IosOutputAssetTemplate {}
+export interface IosOutputAssetTemplateSplash extends IosOutputAssetTemplate {
+  orientation: Orientation;
+  theme: Theme;
 }
 export interface PwaOutputAssetTemplate extends OutputAssetTemplate {
   name: string;
 }
 
 export interface AndroidOutputAssetTemplate extends OutputAssetTemplate {
-  // Filenames for foreground and background layers (used for
-  // android adaptive icons only)
-  name?: string;
+  density: AndroidDensity;
+}
+export interface AndroidOutputAssetTemplateSplash extends OutputAssetTemplate {
+  density: AndroidDensity;
+  orientation: Orientation;
+  theme: Theme;
 }
 export interface AndroidOutputAssetTemplateAdaptiveIcon
   extends OutputAssetTemplate {
-  density: Density;
+  density: AndroidDensity;
 }
 
 // Shape of the Contents.json file inside of ios app appiconset and imageset folders

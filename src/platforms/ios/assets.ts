@@ -2,6 +2,8 @@ import {
   AssetKind,
   Format,
   IosOutputAssetTemplate,
+  IosOutputAssetTemplateIcon,
+  IosOutputAssetTemplateSplash,
   Orientation,
   Platform,
   Theme,
@@ -13,7 +15,7 @@ import {
  * - iPhone Notification (iOS 7+)
  * - iPad Notification (iOS 7+)
  */
-export const IOS_20_PT_ICON: IosOutputAssetTemplate = {
+export const IOS_20_PT_ICON: IosOutputAssetTemplateIcon = {
   platform: Platform.Ios,
   kind: AssetKind.NotificationIcon,
   name: 'AppIcon-20x20.png',
@@ -374,7 +376,7 @@ export const IOS_108_PT_2X_ICON: IosOutputAssetTemplate = {
   scale: 2,
 };
 
-export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplate = {
+export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {
   platform: Platform.Ios,
   kind: AssetKind.Splash,
   name: 'Default@2x~universal~anyany.png',
@@ -386,14 +388,15 @@ export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplate = {
   theme: Theme.Any,
 };
 
-export const IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK: IosOutputAssetTemplate = {
-  platform: Platform.Ios,
-  kind: AssetKind.SplashDark,
-  name: 'Default@2x~universal~anyany-dark.png',
-  format: Format.Png,
-  width: 2732,
-  height: 2732,
-  orientation: Orientation.Portrait,
-  scale: 2,
-  theme: Theme.Dark,
-};
+export const IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK: IosOutputAssetTemplateSplash =
+  {
+    platform: Platform.Ios,
+    kind: AssetKind.SplashDark,
+    name: 'Default@2x~universal~anyany-dark.png',
+    format: Format.Png,
+    width: 2732,
+    height: 2732,
+    orientation: Orientation.Portrait,
+    scale: 2,
+    theme: Theme.Dark,
+  };

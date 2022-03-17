@@ -1,11 +1,13 @@
-import { dirname, join } from 'path';
+import { dirname, join, relative } from 'path';
 import sharp, { OutputInfo, Sharp } from 'sharp';
 import { mkdirp, pathExists, writeFile } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
 import { AssetGenerator } from '../../asset-generator';
 import {
+  AndroidOutputAssetTemplate,
   AndroidOutputAssetTemplateAdaptiveIcon,
+  AndroidOutputAssetTemplateSplash,
   AssetKind,
   OutputAssetTemplate,
 } from '../../definitions';
@@ -104,7 +106,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
   private async generateLegacyLauncherIcon(
     project: Project,
     asset: InputAsset,
-    template: OutputAssetTemplate,
+    template: AndroidOutputAssetTemplate,
     pipe: Sharp,
   ): Promise<[string, OutputInfo]> {
     const radius = 18; //template.width * 0.0833;
@@ -139,7 +141,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
   private async generateRoundLauncherIcon(
     project: Project,
     asset: InputAsset,
-    template: OutputAssetTemplate,
+    template: AndroidOutputAssetTemplate,
     pipe: Sharp,
   ): Promise<[string, OutputInfo]> {
     const svg = `<svg width="${template.width}" height="${
@@ -359,31 +361,68 @@ export class AndroidAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    /*
-    const assetMeta =
+    const splashes = (
       asset.kind === AssetKind.Splash
-        ? IOS_2X_UNIVERSAL_ANYANY_SPLASH
-        : IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK;
+        ? Object.values(AndroidAssetTemplates).filter(
+            a => a.kind === AssetKind.Splash,
+          )
+        : Object.values(AndroidAssetTemplates).filter(
+            a => a.kind === AssetKind.SplashDark,
+          )
+    ) as AndroidOutputAssetTemplateSplash[];
 
-    const iosDir = project.config.ios!.path!;
-    const dest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, assetMeta.name);
-    assetMeta.dest = dest;
+    const androidDir = project.config.android!.path!;
+    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
 
+    const collected = await Promise.all(
+      splashes.map(async splash => {
+        const [dest, outputInfo] = await this.generateSplash(
+          project,
+          asset,
+          splash,
+          pipe,
+        );
+
+        const relPath = relative(resPath, dest);
+        return new OutputAsset(
+          splash,
+          asset,
+          project,
+          { [relPath]: dest },
+          { [relPath]: outputInfo },
+        );
+      }),
+    );
+
+    return collected;
+  }
+
+  private async generateSplash(
+    project: Project,
+    asset: InputAsset,
+    template: AndroidOutputAssetTemplateSplash,
+    pipe: Sharp,
+  ): Promise<[string, OutputInfo]> {
+    const androidDir = project.config.android!.path!;
+
+    const drawableDir = `drawable${
+      template.kind === AssetKind.SplashDark ? `-night` : ''
+    }-${template.density}`;
+
+    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const parentDir = join(resPath, drawableDir);
+    if (!(await pathExists(parentDir))) {
+      await mkdirp(parentDir);
+    }
+    const dest = join(resPath, drawableDir, 'splash.png');
+
+    // This pipeline is trick, but we need two separate pipelines
+    // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
     const outputInfo = await pipe
-      .resize(assetMeta.width, assetMeta.height)
+      .resize(template.width, template.height)
       .png()
       .toFile(dest);
 
-    const generated = new OutputAsset(assetMeta, asset, project, outputInfo);
-
-    if (asset.kind === AssetKind.SplashDark) {
-      // Need to register this as a dark-mode splash
-      // await this.updateContentsJsonDark(generated, project);
-    }
-
-    return [generated];
-    */
-
-    return [];
+    return [dest, outputInfo];
   }
 }

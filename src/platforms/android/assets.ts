@@ -1,11 +1,13 @@
 import {
   AssetKind,
   AndroidOutputAssetTemplate,
-  Density,
+  AndroidDensity,
   Format,
   Orientation,
   Platform,
   AndroidOutputAssetTemplateAdaptiveIcon,
+  AndroidOutputAssetTemplateSplash,
+  Theme,
 } from '../../definitions';
 
 export const ANDROID_LDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon =
@@ -15,7 +17,7 @@ export const ANDROID_LDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon 
     format: Format.Png,
     width: 81,
     height: 81,
-    density: Density.Ldpi,
+    density: AndroidDensity.Ldpi,
   };
 
 export const ANDROID_MDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon =
@@ -25,7 +27,7 @@ export const ANDROID_MDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon 
     format: Format.Png,
     width: 108,
     height: 108,
-    density: Density.Mdpi,
+    density: AndroidDensity.Mdpi,
   };
 
 export const ANDROID_HDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon =
@@ -35,7 +37,7 @@ export const ANDROID_HDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon 
     format: Format.Png,
     width: 162,
     height: 162,
-    density: Density.Hdpi,
+    density: AndroidDensity.Hdpi,
   };
 
 export const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon =
@@ -45,7 +47,7 @@ export const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon
     format: Format.Png,
     width: 216,
     height: 216,
-    density: Density.Xhdpi,
+    density: AndroidDensity.Xhdpi,
   };
 
 export const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon =
@@ -55,7 +57,7 @@ export const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIco
     format: Format.Png,
     width: 324,
     height: 324,
-    density: Density.Xxhdpi,
+    density: AndroidDensity.Xxhdpi,
   };
 
 export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon =
@@ -65,300 +67,278 @@ export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIc
     format: Format.Png,
     width: 432,
     height: 432,
-    density: Density.Xxxhdpi,
+    density: AndroidDensity.Xxxhdpi,
   };
 
-export const ANDROID_LAND_LDPI_SCREEN: AndroidOutputAssetTemplate = {
+//
+// Splash screens
+//
+export const ANDROID_LAND_LDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-land-ldpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 320,
   height: 240,
-  density: Density.LandLdpi,
+  density: AndroidDensity.LandLdpi,
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_MDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_LAND_MDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-land-mdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 480,
   height: 320,
-  density: Density.LandMdpi,
+  density: AndroidDensity.LandMdpi,
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_HDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_LAND_HDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-land-hdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 800,
   height: 480,
-  density: Density.LandHdpi,
+  density: AndroidDensity.LandHdpi,
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_XHDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_LAND_XHDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-land-xhdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 1280,
   height: 720,
-  density: Density.LandXhdpi,
+  density: AndroidDensity.LandXhdpi,
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_XXHDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_LAND_XXHDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-land-xxhdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 1600,
   height: 960,
-  density: Density.LandXxhdpi,
+  density: AndroidDensity.LandXxhdpi,
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_LAND_XXXHDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_LAND_XXXHDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-land-xxxhdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 1920,
   height: 1280,
-  density: Density.LandXxxhdpi,
+  density: AndroidDensity.LandXxxhdpi,
   orientation: Orientation.Landscape,
 };
 
-export const ANDROID_PORT_LDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_PORT_LDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-port-ldpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 240,
   height: 320,
-  density: Density.PortLdpi,
+  density: AndroidDensity.PortLdpi,
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_MDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_PORT_MDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-port-mdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 320,
   height: 480,
-  density: Density.PortMdpi,
+  density: AndroidDensity.PortMdpi,
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_HDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_PORT_HDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-port-hdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 480,
   height: 800,
-  density: Density.PortHdpi,
+  density: AndroidDensity.PortHdpi,
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_XHDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_PORT_XHDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-port-xhdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 720,
   height: 1280,
-  density: Density.PortXhdpi,
+  density: AndroidDensity.PortXhdpi,
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_XXHDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_PORT_XXHDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-port-xxhdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 960,
   height: 1600,
-  density: Density.PortXxhdpi,
+  density: AndroidDensity.PortXxhdpi,
   orientation: Orientation.Portrait,
 };
 
-export const ANDROID_PORT_XXXHDPI_SCREEN: AndroidOutputAssetTemplate = {
+export const ANDROID_PORT_XXXHDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
-  name: 'drawable-port-xxxhdpi-screen.png',
+  theme: Theme.Light,
   format: Format.Png,
   width: 1280,
   height: 1920,
-  density: Density.PortXxxhdpi,
+  density: AndroidDensity.PortXxxhdpi,
   orientation: Orientation.Portrait,
 };
 
-/*
-export const ANDROID_ICONS: readonly NativeResource[] = [
-  {
-    type: NativeResourceType.ANDROID_LEGACY,
-    source: ANDROID_MDPI_ICON.src,
-    target: 'mipmap-mdpi/ic_launcher.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ROUND,
-    source: ANDROID_MDPI_ICON.src,
-    target: 'mipmap-mdpi/ic_launcher_round.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_FOREGROUND,
-    source: ANDROID_MDPI_ADAPTIVE_ICON.foreground,
-    target: 'mipmap-mdpi/ic_launcher_foreground.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
-    source: ANDROID_MDPI_ADAPTIVE_ICON.background,
-    target: 'mipmap-mdpi/ic_launcher_background.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_LEGACY,
-    source: ANDROID_HDPI_ICON.src,
-    target: 'mipmap-hdpi/ic_launcher.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ROUND,
-    source: ANDROID_HDPI_ICON.src,
-    target: 'mipmap-hdpi/ic_launcher_round.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_FOREGROUND,
-    source: ANDROID_HDPI_ADAPTIVE_ICON.foreground,
-    target: 'mipmap-hdpi/ic_launcher_foreground.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
-    source: ANDROID_HDPI_ADAPTIVE_ICON.background,
-    target: 'mipmap-hdpi/ic_launcher_background.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_LEGACY,
-    source: ANDROID_XHDPI_ICON.src,
-    target: 'mipmap-xhdpi/ic_launcher.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ROUND,
-    source: ANDROID_XHDPI_ICON.src,
-    target: 'mipmap-xhdpi/ic_launcher_round.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_FOREGROUND,
-    source: ANDROID_XHDPI_ADAPTIVE_ICON.foreground,
-    target: 'mipmap-xhdpi/ic_launcher_foreground.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
-    source: ANDROID_XHDPI_ADAPTIVE_ICON.background,
-    target: 'mipmap-xhdpi/ic_launcher_background.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_LEGACY,
-    source: ANDROID_XXHDPI_ICON.src,
-    target: 'mipmap-xxhdpi/ic_launcher.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ROUND,
-    source: ANDROID_XXHDPI_ICON.src,
-    target: 'mipmap-xxhdpi/ic_launcher_round.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_FOREGROUND,
-    source: ANDROID_XXHDPI_ADAPTIVE_ICON.foreground,
-    target: 'mipmap-xxhdpi/ic_launcher_foreground.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
-    source: ANDROID_XXHDPI_ADAPTIVE_ICON.background,
-    target: 'mipmap-xxhdpi/ic_launcher_background.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_LEGACY,
-    source: ANDROID_XXXHDPI_ICON.src,
-    target: 'mipmap-xxxhdpi/ic_launcher.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ROUND,
-    source: ANDROID_XXXHDPI_ICON.src,
-    target: 'mipmap-xxxhdpi/ic_launcher_round.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_FOREGROUND,
-    source: ANDROID_XXXHDPI_ADAPTIVE_ICON.foreground,
-    target: 'mipmap-xxxhdpi/ic_launcher_foreground.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_ADAPTIVE_BACKGROUND,
-    source: ANDROID_XXXHDPI_ADAPTIVE_ICON.background,
-    target: 'mipmap-xxxhdpi/ic_launcher_background.png',
-  },
-];
+export const ANDROID_LAND_LDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash = {
+  platform: Platform.Android,
+  kind: AssetKind.SplashDark,
+  theme: Theme.Light,
+  format: Format.Png,
+  width: 320,
+  height: 240,
+  density: AndroidDensity.LandLdpi,
+  orientation: Orientation.Landscape,
+};
 
-export const ANDROID_SPLASHES: readonly NativeResource[] = [
+export const ANDROID_LAND_MDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash = {
+  platform: Platform.Android,
+  kind: AssetKind.SplashDark,
+  theme: Theme.Light,
+  format: Format.Png,
+  width: 480,
+  height: 320,
+  density: AndroidDensity.LandMdpi,
+  orientation: Orientation.Landscape,
+};
+
+export const ANDROID_LAND_HDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash = {
+  platform: Platform.Android,
+  kind: AssetKind.SplashDark,
+  theme: Theme.Light,
+  format: Format.Png,
+  width: 800,
+  height: 480,
+  density: AndroidDensity.LandHdpi,
+  orientation: Orientation.Landscape,
+};
+
+export const ANDROID_LAND_XHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash =
   {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_LAND_MDPI_SCREEN.src,
-    target: 'drawable/splash.png',
-  },
+    platform: Platform.Android,
+    kind: AssetKind.SplashDark,
+    theme: Theme.Light,
+    format: Format.Png,
+    width: 1280,
+    height: 720,
+    density: AndroidDensity.LandXhdpi,
+    orientation: Orientation.Landscape,
+  };
+
+export const ANDROID_LAND_XXHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash =
   {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_LAND_MDPI_SCREEN.src,
-    target: 'drawable-land-mdpi/splash.png',
-  },
+    platform: Platform.Android,
+    kind: AssetKind.SplashDark,
+    theme: Theme.Light,
+    format: Format.Png,
+    width: 1600,
+    height: 960,
+    density: AndroidDensity.LandXxhdpi,
+    orientation: Orientation.Landscape,
+  };
+
+export const ANDROID_LAND_XXXHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash =
   {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_LAND_HDPI_SCREEN.src,
-    target: 'drawable-land-hdpi/splash.png',
-  },
+    platform: Platform.Android,
+    kind: AssetKind.SplashDark,
+    theme: Theme.Light,
+    format: Format.Png,
+    width: 1920,
+    height: 1280,
+    density: AndroidDensity.LandXxxhdpi,
+    orientation: Orientation.Landscape,
+  };
+
+export const ANDROID_PORT_LDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash = {
+  platform: Platform.Android,
+  kind: AssetKind.SplashDark,
+  theme: Theme.Light,
+  format: Format.Png,
+  width: 240,
+  height: 320,
+  density: AndroidDensity.PortLdpi,
+  orientation: Orientation.Portrait,
+};
+
+export const ANDROID_PORT_MDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash = {
+  platform: Platform.Android,
+  kind: AssetKind.SplashDark,
+  theme: Theme.Light,
+  format: Format.Png,
+  width: 320,
+  height: 480,
+  density: AndroidDensity.PortMdpi,
+  orientation: Orientation.Portrait,
+};
+
+export const ANDROID_PORT_HDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash = {
+  platform: Platform.Android,
+  kind: AssetKind.SplashDark,
+  theme: Theme.Light,
+  format: Format.Png,
+  width: 480,
+  height: 800,
+  density: AndroidDensity.PortHdpi,
+  orientation: Orientation.Portrait,
+};
+
+export const ANDROID_PORT_XHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash =
   {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_LAND_XHDPI_SCREEN.src,
-    target: 'drawable-land-xhdpi/splash.png',
-  },
+    platform: Platform.Android,
+    kind: AssetKind.SplashDark,
+    theme: Theme.Light,
+    format: Format.Png,
+    width: 720,
+    height: 1280,
+    density: AndroidDensity.PortXhdpi,
+    orientation: Orientation.Portrait,
+  };
+
+export const ANDROID_PORT_XXHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash =
   {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_LAND_XXHDPI_SCREEN.src,
-    target: 'drawable-land-xxhdpi/splash.png',
-  },
+    platform: Platform.Android,
+    kind: AssetKind.SplashDark,
+    theme: Theme.Light,
+    format: Format.Png,
+    width: 960,
+    height: 1600,
+    density: AndroidDensity.PortXxhdpi,
+    orientation: Orientation.Portrait,
+  };
+
+export const ANDROID_PORT_XXXHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash =
   {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_LAND_XXXHDPI_SCREEN.src,
-    target: 'drawable-land-xxxhdpi/splash.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_PORT_MDPI_SCREEN.src,
-    target: 'drawable-port-mdpi/splash.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_PORT_HDPI_SCREEN.src,
-    target: 'drawable-port-hdpi/splash.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_PORT_XHDPI_SCREEN.src,
-    target: 'drawable-port-xhdpi/splash.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_PORT_XXHDPI_SCREEN.src,
-    target: 'drawable-port-xxhdpi/splash.png',
-  },
-  {
-    type: NativeResourceType.ANDROID_SPLASH,
-    source: ANDROID_PORT_XXXHDPI_SCREEN.src,
-    target: 'drawable-port-xxxhdpi/splash.png',
-  },
-];
-*/
+    platform: Platform.Android,
+    kind: AssetKind.SplashDark,
+    theme: Theme.Light,
+    format: Format.Png,
+    width: 1280,
+    height: 1920,
+    density: AndroidDensity.PortXxxhdpi,
+    orientation: Orientation.Portrait,
+  };

@@ -12,6 +12,7 @@ import { join } from 'path';
 
 import { Context, loadContext } from '../../src/ctx';
 import {
+  AndroidOutputAssetTemplate,
   AndroidOutputAssetTemplateAdaptiveIcon,
   Assets,
 } from '../../src/definitions';
@@ -123,30 +124,18 @@ describe('Android asset test', () => {
     // await verifySizes(generatedAssets);
   });
 
-  /*
   it('Should generate android splashes', async () => {
+    const assets = await ctx.project.loadInputAssets();
+
     const strategy = new AndroidAssetGenerator();
     let generatedAssets =
       (await assets.splash?.generate(strategy, ctx.project)) ?? [];
 
-    expect(generatedAssets.length).toBe(1);
-
-    const template = generatedAssets[0].template as AndroidOutputAssetTemplate;
-
-    const outputForeground = generatedAssets[0].destFilenames[template.nameForeground];
-    expect(await pathExists(outputForeground)).toBe(
-      true,
-    );
-
-    const outputBackground = generatedAssets[0].destFilenames[template.nameBackground];
-    expect(await pathExists(outputBackground)).toBe(
-      true,
-    );
+    expect(generatedAssets.length).toBe(12);
 
     generatedAssets =
       (await assets.splashDark?.generate(strategy, ctx.project)) ?? [];
 
-    expect(generatedAssets.length).toBe(1);
+    expect(generatedAssets.length).toBe(12);
   });
-  */
 });
