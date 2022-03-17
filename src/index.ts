@@ -36,19 +36,6 @@ export function runProgram(ctx: Context) {
       }),
     );
 
-  program
-    .command('copy')
-    .description(`Copy generated images to project`)
-    .option('--verbose', 'Verbose output')
-    .action(
-      wrapAction(async (args = {}) => {
-        setArguments(ctx, args);
-
-        const { copyCommand } = await import('./tasks/copy');
-        await copyCommand(ctx);
-      }),
-    );
-
   program.arguments('[command]').action(
     wrapAction((_: any) => {
       log(c.strong('\n⚡️ Capacitor Assets ⚡️\n'));
