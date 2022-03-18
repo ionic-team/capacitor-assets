@@ -15,17 +15,17 @@ Then add this script to your `package.json`:
 ```
 {
   "scripts": {
-    "capacitor-assets": "capacitor-assets"
+    "capacitor-assets": "capacitor-assets generate"
   }
 }
 ```
 
 ## Usage
 
-The tool expects a `resources` folder to exist in the root of the project with the following structure:
+The tool expects a `assets` folder to exist in the root of the project with the following structure:
 
 ```
-resources/
+assets/
 ├── icon.png
 ├── icon-foreground.png
 ├── icon-background.png
@@ -33,9 +33,9 @@ resources/
 └── splash-dark.png
 ```
 
-- `resources/icon.(png|jpg)` must be at least 1024×1024px
-- `resources/icon-(foreground|background).(png|jpg)` must be at least 1024×1024px
-- `resources/splash[-dark].(png|jpg)` must be at least 2732×2732px
+- `assets/icon.(png|jpg)` must be at least 1024×1024px
+- `assets/icon-(foreground|background).(png|jpg)` must be at least 1024×1024px
+- `assets/splash[-dark].(png|jpg)` must be at least 2732×2732px
 
 To generate resources with all the default options, just run:
 
@@ -46,7 +46,7 @@ $ npm run capacitor-assets
 `capacitor-assets` accepts a platform for the first argument. If specified, resources are generated only for that platform:
 
 ```bash
-$ capacitor-assets ios
+$ npm run capacitor-assets ios
 ```
 
 Otherwise `capacitor-assets` will use all detected Capacitor platforms.
