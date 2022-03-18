@@ -15,7 +15,7 @@ Then add this script to your `package.json`:
 ```
 {
   "scripts": {
-    "capacitor-assets": "capacitor-assets generate"
+    "capacitor-assets": "capacitor-assets"
   }
 }
 ```
@@ -40,13 +40,13 @@ assets/
 To generate resources with all the default options, just run:
 
 ```bash
-$ npm run capacitor-assets
+$ npm run capacitor-assets generate
 ```
 
 `capacitor-assets` accepts a platform for the first argument. If specified, resources are generated only for that platform:
 
 ```bash
-$ npm run capacitor-assets ios
+$ npm run capacitor-assets generate ios
 ```
 
 Otherwise `capacitor-assets` will use all detected Capacitor platforms.
@@ -56,5 +56,5 @@ Otherwise `capacitor-assets` will use all detected Capacitor platforms.
 See the help documentation on the command line with the `--help` flag.
 
 ```bash
-$ npm run capacitor-assets --help
+$ npm run capacitor-assets generate --help
 ```
