@@ -2,20 +2,17 @@ import { join } from 'path';
 import { readFile, writeFile } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
-import {
-  AssetKind,
-  OutputAssetTemplate,
-  IosOutputAssetTemplate,
-} from '../../definitions';
+import { AssetKind, IosOutputAssetTemplate } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
-import { AssetGenerator } from '../../asset-generator';
+import { AssetGenerator, AssetGeneratorOptions } from '../../asset-generator';
 import {
   IOS_2X_UNIVERSAL_ANYANY_SPLASH,
   IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK,
 } from './assets';
 import * as IosAssetTemplates from './assets';
+import sharp from 'sharp';
 
 export const IOS_APP_ICON_SET_NAME = 'AppIcon';
 export const IOS_APP_ICON_SET_PATH = `App/App/Assets.xcassets/${IOS_APP_ICON_SET_NAME}.appiconset`;
@@ -23,8 +20,8 @@ export const IOS_SPLASH_IMAGE_SET_NAME = 'Splash';
 export const IOS_SPLASH_IMAGE_SET_PATH = `App/App/Assets.xcassets/${IOS_SPLASH_IMAGE_SET_NAME}.imageset`;
 
 export class IosAssetGenerator extends AssetGenerator {
-  constructor() {
-    super();
+  constructor(options: AssetGeneratorOptions = {}) {
+    super(options);
   }
 
   async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
@@ -35,6 +32,9 @@ export class IosAssetGenerator extends AssetGenerator {
     }
 
     switch (asset.kind) {
+      case AssetKind.Logo:
+      case AssetKind.LogoDark:
+        return this.generateFromLogo(asset, project);
       case AssetKind.Icon:
         return this.generateIcons(asset, project);
       case AssetKind.NotificationIcon:
@@ -51,6 +51,112 @@ export class IosAssetGenerator extends AssetGenerator {
     }
 
     return [];
+  }
+
+  private async generateFromLogo(
+    asset: InputAsset,
+    project: Project,
+  ): Promise<OutputAsset[]> {
+    const pipe = asset.pipeline();
+
+    if (!pipe) {
+      throw new BadPipelineError('Sharp instance not created');
+    }
+
+    const iosDir = project.config.ios!.path!;
+
+    // Generate logos
+    const logos = await this.generateIcons(asset, project);
+
+    console.log('Generating from logo', asset.kind);
+
+    const generated: OutputAsset[] = [];
+
+    if (asset.kind === AssetKind.Logo) {
+      // Generate light splash
+      const lightDefaultBackground = '#ffffff';
+      const lightSplash = IOS_2X_UNIVERSAL_ANYANY_SPLASH;
+      const lightDest = join(
+        iosDir,
+        IOS_SPLASH_IMAGE_SET_PATH,
+        lightSplash.name,
+      );
+      const lightExtend = lightSplash.width - (asset.width ?? 0);
+      const lightOutputInfo = await pipe
+        .extend({
+          top: lightExtend,
+          right: lightExtend,
+          bottom: lightExtend,
+          left: lightExtend,
+          background: this.options.backgroundColor ?? lightDefaultBackground,
+        })
+        .flatten({
+          background: this.options.backgroundColor ?? lightDefaultBackground,
+        })
+        .resize(lightSplash.width, lightSplash.height, {
+          fit: sharp.fit.outside,
+          position: sharp.gravity.center,
+          background: this.options.backgroundColor ?? lightDefaultBackground,
+        })
+        .png()
+        .toFile(lightDest);
+
+      const lightSplashOutput = new OutputAsset(
+        lightSplash,
+        asset,
+        project,
+        {
+          [lightDest]: lightDest,
+        },
+        {
+          [lightDest]: lightOutputInfo,
+        },
+      );
+
+      generated.push(lightSplashOutput);
+    }
+
+    // Generate dark splash
+    const darkDefaultBackground = '#111111';
+    const darkSplash = IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK;
+    const darkDest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, darkSplash.name);
+    const darkExtend = darkSplash.width - (asset.width ?? 0);
+    const darkOutputInfo = await pipe
+      .extend({
+        top: darkExtend,
+        right: darkExtend,
+        bottom: darkExtend,
+        left: darkExtend,
+        background: this.options.backgroundColorDark ?? darkDefaultBackground,
+      })
+      .flatten({
+        background: this.options.backgroundColorDark ?? darkDefaultBackground,
+      })
+      .resize(darkSplash.width, darkSplash.height, {
+        fit: sharp.fit.outside,
+        position: sharp.gravity.center,
+        background: this.options.backgroundColorDark ?? darkDefaultBackground,
+      })
+      .png()
+      .toFile(darkDest);
+
+    const darkSplashOutput = new OutputAsset(
+      darkSplash,
+      asset,
+      project,
+      {
+        [darkDest]: darkDest,
+      },
+      {
+        [darkDest]: darkOutputInfo,
+      },
+    );
+
+    generated.push(darkSplashOutput);
+
+    await this.updateContentsJsonDark(darkSplashOutput, project);
+
+    return [...logos, ...generated];
   }
 
   private async _generateIcons(

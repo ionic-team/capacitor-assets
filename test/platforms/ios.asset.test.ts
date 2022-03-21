@@ -173,3 +173,105 @@ describe('iOS Asset Test', () => {
     await verifySizes(generatedAssets);
   });
 });
+
+describe.only('iOS Asset Test - Logo Only', () => {
+  let ctx: Context;
+  let assets: Assets;
+  const fixtureDir = tempy.directory();
+
+  beforeAll(async () => {
+    await copy('test/fixtures/app-logo-only', fixtureDir);
+    console.log('Fixtures only', fixtureDir);
+  });
+
+  beforeEach(async () => {
+    ctx = await loadContext(fixtureDir);
+    assets = await ctx.project.loadInputAssets();
+  });
+
+  afterAll(async () => {
+    // await rm(fixtureDir, { force: true, recursive: true });
+  });
+
+  it('Should generate icons and splashes from logo', async () => {
+    const strategy = new IosAssetGenerator({
+      backgroundColor: '#999999',
+      backgroundColorDark: '#122140',
+    });
+    let generatedAssets = ((await assets.logo?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+
+    const assetTemplates = Object.values(IosAssets).filter(
+      a =>
+        [AssetKind.Icon, AssetKind.Splash, AssetKind.SplashDark].indexOf(
+          a.kind,
+        ) >= 0,
+    );
+
+    expect(generatedAssets.length).toBe(assetTemplates.length);
+
+    const contentsJson = JSON.parse(
+      await readFile(
+        join(
+          ctx.project.config.ios!.path!,
+          IOS_SPLASH_IMAGE_SET_PATH,
+          'Contents.json',
+        ),
+        { encoding: 'utf-8' },
+      ),
+    ) as IosContents;
+    expect(
+      contentsJson.images.find(
+        i => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name,
+      ),
+    );
+  });
+
+  it('Should generate icons and splashes from logo-dark', async () => {
+    const strategy = new IosAssetGenerator({
+      backgroundColor: '#999999',
+      backgroundColorDark: '#122140',
+    });
+    let generatedAssets = ((await assets.logoDark?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+
+    const assetTemplates = Object.values(IosAssets).filter(
+      a =>
+        [AssetKind.Icon, AssetKind.Splash, AssetKind.SplashDark].indexOf(
+          a.kind,
+        ) >= 0,
+    );
+
+    expect(
+      generatedAssets.find(f => f.asset.kind === AssetKind.Splash),
+    ).toBeUndefined();
+    expect(generatedAssets.length).toBe(assetTemplates.length - 1);
+    console.log(
+      generatedAssets.filter(
+        f =>
+          f.asset.kind === AssetKind.Splash ||
+          f.asset.kind === AssetKind.SplashDark,
+      ),
+    );
+
+    const contentsJson = JSON.parse(
+      await readFile(
+        join(
+          ctx.project.config.ios!.path!,
+          IOS_SPLASH_IMAGE_SET_PATH,
+          'Contents.json',
+        ),
+        { encoding: 'utf-8' },
+      ),
+    ) as IosContents;
+    expect(
+      contentsJson.images.find(
+        i => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name,
+      ),
+    );
+  });
+});

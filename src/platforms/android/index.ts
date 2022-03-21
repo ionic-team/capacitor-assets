@@ -3,7 +3,7 @@ import sharp, { OutputInfo, Sharp } from 'sharp';
 import { mkdirp, pathExists, writeFile } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
-import { AssetGenerator } from '../../asset-generator';
+import { AssetGenerator, AssetGeneratorOptions } from '../../asset-generator';
 import {
   AndroidOutputAssetTemplate,
   AndroidOutputAssetTemplateAdaptiveIcon,
@@ -18,8 +18,8 @@ import { Project } from '../../project';
 import * as AndroidAssetTemplates from './assets';
 
 export class AndroidAssetGenerator extends AssetGenerator {
-  constructor() {
-    super();
+  constructor(options: AssetGeneratorOptions = {}) {
+    super(options);
   }
 
   async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {

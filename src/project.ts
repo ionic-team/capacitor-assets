@@ -26,6 +26,8 @@ export class Project extends CapacitorProject {
 
   async loadInputAssets(): Promise<Assets> {
     this.assets = {
+      logo: await this.loadInputAsset('logo', AssetKind.Logo),
+      logoDark: await this.loadInputAsset('logo-dark', AssetKind.LogoDark),
       icon: await this.loadInputAsset('icon', AssetKind.Icon),
       iconForeground: await this.loadInputAsset(
         'icon-foreground',

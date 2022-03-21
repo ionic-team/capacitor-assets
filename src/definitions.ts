@@ -1,6 +1,8 @@
 import { InputAsset } from './input-asset';
 
 export interface Assets {
+  logo: InputAsset | null;
+  logoDark: InputAsset | null;
   icon: InputAsset | null;
   iconForeground: InputAsset | null;
   iconBackground: InputAsset | null;
@@ -28,6 +30,8 @@ export interface Assets {
 }
 
 export const enum AssetKind {
+  Logo = 'logo',
+  LogoDark = 'logo-dark',
   Icon = 'icon',
   IconForeground = 'icon-foreground',
   IconBackground = 'icon-background',

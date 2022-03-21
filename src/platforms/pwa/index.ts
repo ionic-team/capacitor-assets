@@ -12,7 +12,7 @@ import { AssetKind, PwaOutputAssetTemplate, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
-import { AssetGenerator } from '../../asset-generator';
+import { AssetGenerator, AssetGeneratorOptions } from '../../asset-generator';
 import * as PwaAssets from './assets';
 
 export const PWA_ASSET_PATH = 'icons';
@@ -27,8 +27,8 @@ export interface ManifestIcon {
 }
 
 export class PwaAssetGenerator extends AssetGenerator {
-  constructor() {
-    super();
+  constructor(options: AssetGeneratorOptions = {}) {
+    super(options);
   }
 
   async getManifestJson(project: Project) {

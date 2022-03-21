@@ -14,7 +14,11 @@ export async function generateCommand(ctx: Context) {
   try {
     const assets = await ctx.project.loadInputAssets();
 
-    if ([assets.icon, assets.splash, assets.splashDark].every(a => !a)) {
+    if (
+      [assets.logo, assets.icon, assets.splash, assets.splashDark].every(
+        a => !a,
+      )
+    ) {
       fatal(
         `No assets found in the asset path ${c.ancillary(
           ctx.project.assetDir,
@@ -43,7 +47,7 @@ export async function generateCommand(ctx: Context) {
         .join(', ')}`,
     );
 
-    const generators = getGenerators(platforms);
+    const generators = getGenerators(ctx, platforms);
 
     const generated = await generateAssets(assets, generators, ctx.project);
 
@@ -76,16 +80,18 @@ async function generateAssets(
   return generated;
 }
 
-function getGenerators(platforms: string[]): AssetGenerator[] {
+function getGenerators(ctx: Context, platforms: string[]): AssetGenerator[] {
+  const backgroundColor = ctx.args.bgColor;
+
   return platforms.map(p => {
     if (p === 'ios') {
-      return new IosAssetGenerator();
+      return new IosAssetGenerator({ backgroundColor });
     }
     if (p === 'android') {
-      return new AndroidAssetGenerator();
+      return new AndroidAssetGenerator({ backgroundColor });
     }
     if (p === 'pwa') {
-      return new PwaAssetGenerator();
+      return new PwaAssetGenerator({ backgroundColor });
     }
   }) as AssetGenerator[];
 }
