@@ -30,6 +30,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
 
     switch (asset.kind) {
+      case AssetKind.Logo:
+      case AssetKind.LogoDark:
+        return this.generateFromLogo(asset, project);
       case AssetKind.Icon:
         return this.generateLegacyIcon(asset, project);
       case AssetKind.IconForeground:
@@ -42,6 +45,122 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
 
     return [];
+  }
+
+  private async generateFromLogo(
+    asset: InputAsset,
+    project: Project,
+  ): Promise<OutputAsset[]> {
+    const pipe = asset.pipeline();
+
+    if (!pipe) {
+      throw new BadPipelineError('Sharp instance not created');
+    }
+
+    // Generate logos
+    //const logos = await this.generate// this.generateIcons(asset, project);
+
+    console.log('Generating from logo', asset.kind);
+
+    const generated: OutputAsset[] = [];
+
+    if (asset.kind === AssetKind.Logo) {
+      const splashes = Object.values(AndroidAssetTemplates).filter(
+        a => a.kind === AssetKind.Splash,
+      );
+
+      const generatedSplashes = await Promise.all(
+        splashes.map(async splash => {
+          return this._generateSplashesFromLogo(
+            project,
+            asset,
+            splash,
+            pipe,
+            this.options.backgroundColor ?? '#ffffff',
+          );
+        }),
+      );
+
+      generated.push(...generatedSplashes);
+    }
+
+    // Generate dark splash
+    const darkSplashes = Object.values(AndroidAssetTemplates).filter(
+      a => a.kind === AssetKind.SplashDark,
+    );
+    const generatedSplashes = await Promise.all(
+      darkSplashes.map(async splash => {
+        return this._generateSplashesFromLogo(
+          project,
+          asset,
+          splash,
+          pipe,
+          this.options.backgroundColorDark ?? '#111111',
+        );
+      }),
+    );
+
+    generated.push(...generatedSplashes);
+
+    return [...generated];
+  }
+
+  private async _generateSplashesFromLogo(
+    project: Project,
+    asset: InputAsset,
+    splash: AndroidOutputAssetTemplate,
+    pipe: Sharp,
+    backgroundColor: string,
+  ): Promise<OutputAsset> {
+    // Generate light splash
+    const androidDir = project.config.android!.path!;
+    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+
+    const drawableDir = `drawable${
+      splash.kind === AssetKind.SplashDark ? `-night` : ''
+    }-${splash.density}`;
+
+    const parentDir = join(resPath, drawableDir);
+    if (!(await pathExists(parentDir))) {
+      await mkdirp(parentDir);
+    }
+    const dest = join(resPath, drawableDir, 'splash.png');
+
+    const targetLogoWidthPercent = 0.2;
+    const targetWidth = splash.width * targetLogoWidthPercent;
+    const extend = splash.width - targetWidth; //(asset.width ?? 0);
+    const outputInfo = await pipe
+      .extend({
+        top: extend,
+        right: extend,
+        bottom: extend,
+        left: extend,
+        background: backgroundColor,
+      })
+      .flatten({
+        background: backgroundColor,
+      })
+      .resize(splash.width, splash.height, {
+        fit: sharp.fit.outside,
+        position: sharp.gravity.center,
+        background: backgroundColor,
+      })
+      .png()
+      .toFile(dest);
+
+    const splashOutput = new OutputAsset(
+      splash,
+      asset,
+      project,
+      {
+        [dest]: dest,
+      },
+      {
+        [dest]: outputInfo,
+      },
+    );
+
+    return splashOutput;
   }
 
   private async generateLegacyIcon(
@@ -416,8 +535,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
     const dest = join(resPath, drawableDir, 'splash.png');
 
-    // This pipeline is trick, but we need two separate pipelines
-    // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
     const outputInfo = await pipe
       .resize(template.width, template.height)
       .png()
