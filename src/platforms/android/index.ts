@@ -52,17 +52,45 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
   ): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
+    const generated: OutputAsset[] = [];
 
     if (!pipe) {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    // Generate logos
-    //const logos = await this.generate// this.generateIcons(asset, project);
+    // Generate icons
 
-    console.log('Generating from logo', asset.kind);
+    // Create the background buffer for the generated icons
+    const backgroundPipe = sharp({
+      create: {
+        width: asset.width!,
+        height: asset.height!,
+        channels: 4,
+        background:
+          asset.kind === AssetKind.Logo
+            ? this.options.iconBackgroundColor ?? '#ffffff'
+            : this.options.backgroundColorDark ?? '#111111',
+      },
+    });
 
-    const generated: OutputAsset[] = [];
+    const icons = Object.values(AndroidAssetTemplates).filter(
+      a => a.kind === AssetKind.Icon,
+    ) as AndroidOutputAssetTemplateAdaptiveIcon[];
+
+    const generatedAdaptiveIconBackgrounds = await Promise.all(
+      icons.map(async icon => {
+        return await this._generateAdaptiveIconBackground(
+          project,
+          asset,
+          icon,
+          backgroundPipe,
+        );
+      }),
+    );
+
+    console.log('Generated adaptive backgrounds');
+
+    generated.push(...generatedAdaptiveIconBackgrounds);
 
     if (asset.kind === AssetKind.Logo) {
       const splashes = Object.values(AndroidAssetTemplates).filter(
@@ -408,6 +436,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     icon: AndroidOutputAssetTemplateAdaptiveIcon,
     pipe: Sharp,
   ) {
+    console.log('Generating adaptive background', icon.width);
     const androidDir = project.config.android!.path!;
 
     const resPath = join(androidDir, 'app', 'src', 'main', 'res');
@@ -421,11 +450,14 @@ export class AndroidAssetGenerator extends AssetGenerator {
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
+
+    console.log('Calling sharp here', destBackground);
     const outputInfoBackground = await pipe
       .resize(icon.width, icon.height)
       .png()
       .toFile(destBackground);
 
+    console.log('Generated', destBackground);
     // Create the adaptive icon XML
     const icLauncherXml = `
 <?xml version="1.0" encoding="utf-8"?>
