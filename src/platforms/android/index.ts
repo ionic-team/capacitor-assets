@@ -47,6 +47,11 @@ export class AndroidAssetGenerator extends AssetGenerator {
     return [];
   }
 
+  /**
+   * Generate from logo combines all of the other operations into a single operation
+   * from a single asset source file. In this mode, a logo along with a background color
+   * is used to generate all icons and splash screens (with dark mode where possible).
+   */
   private async generateFromLogo(
     asset: InputAsset,
     project: Project,
@@ -58,41 +63,22 @@ export class AndroidAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    // Generate icons
-
-    // Create the background buffer for the generated icons
-    const backgroundPipe = sharp({
-      create: {
-        width: asset.width!,
-        height: asset.height!,
-        channels: 4,
-        background:
-          asset.kind === AssetKind.Logo
-            ? this.options.iconBackgroundColor ?? '#ffffff'
-            : this.options.backgroundColorDark ?? '#111111',
-      },
-    });
-
-    const icons = Object.values(AndroidAssetTemplates).filter(
-      a => a.kind === AssetKind.Icon,
-    ) as AndroidOutputAssetTemplateAdaptiveIcon[];
-
-    const generatedAdaptiveIconBackgrounds = await Promise.all(
-      icons.map(async icon => {
-        return await this._generateAdaptiveIconBackground(
-          project,
-          asset,
-          icon,
-          backgroundPipe,
-        );
-      }),
+    // Generate adaptive icons
+    const generatedAdaptiveIcons = await this._generateAdaptiveIconsFromLogo(
+      project,
+      asset,
+      pipe,
     );
-
-    console.log('Generated adaptive backgrounds');
-
-    generated.push(...generatedAdaptiveIconBackgrounds);
+    generated.push(...generatedAdaptiveIcons);
 
     if (asset.kind === AssetKind.Logo) {
+      // Generate legacy icons
+      const generatedLegacyIcons = await this.generateLegacyIcon(
+        asset,
+        project,
+      );
+      generated.push(...generatedLegacyIcons);
+
       const splashes = Object.values(AndroidAssetTemplates).filter(
         a => a.kind === AssetKind.Splash,
       );
@@ -131,6 +117,60 @@ export class AndroidAssetGenerator extends AssetGenerator {
     generated.push(...generatedSplashes);
 
     return [...generated];
+  }
+
+  // Generate adaptive icons from the source logo
+  private async _generateAdaptiveIconsFromLogo(
+    project: Project,
+    asset: InputAsset,
+    pipe: Sharp,
+  ): Promise<OutputAsset[]> {
+    // Current versions of Android don't appear to support night mode icons (13+ might?)
+    // so, for now, we only generate light mode ones
+    if (asset.kind === AssetKind.LogoDark) {
+      return [];
+    }
+
+    // Create the background pipeline for the generated icons
+    const backgroundPipe = sharp({
+      create: {
+        width: asset.width!,
+        height: asset.height!,
+        channels: 4,
+        background:
+          asset.kind === AssetKind.Logo
+            ? this.options.iconBackgroundColor ?? '#ffffff'
+            : this.options.iconBackgroundColorDark ?? '#111111',
+      },
+    });
+
+    const icons = Object.values(AndroidAssetTemplates).filter(
+      a => a.kind === AssetKind.Icon,
+    ) as AndroidOutputAssetTemplateAdaptiveIcon[];
+
+    const backgroundImages = await Promise.all(
+      icons.map(async icon => {
+        return await this._generateAdaptiveIconBackground(
+          project,
+          asset,
+          icon,
+          backgroundPipe,
+        );
+      }),
+    );
+
+    const foregroundImages = await Promise.all(
+      icons.map(async icon => {
+        return await this._generateAdaptiveIconForeground(
+          project,
+          asset,
+          icon,
+          pipe,
+        );
+      }),
+    );
+
+    return [...foregroundImages, ...backgroundImages];
   }
 
   private async _generateSplashesFromLogo(
@@ -308,6 +348,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is trick, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
+    console.log('Generating round', asset.path);
     const resized = await sharp(asset.path)
       .resize(template.width, template.height)
       .toBuffer();
@@ -436,7 +477,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
     icon: AndroidOutputAssetTemplateAdaptiveIcon,
     pipe: Sharp,
   ) {
-    console.log('Generating adaptive background', icon.width);
     const androidDir = project.config.android!.path!;
 
     const resPath = join(androidDir, 'app', 'src', 'main', 'res');
@@ -451,7 +491,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
       await mkdirp(parentDir);
     }
 
-    console.log('Calling sharp here', destBackground);
     const outputInfoBackground = await pipe
       .resize(icon.width, icon.height)
       .png()

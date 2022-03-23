@@ -21,7 +21,7 @@ import { OutputAsset } from '../../src/output-asset';
 import { AndroidAssetGenerator } from '../../src/platforms/android';
 import * as AndroidAssets from '../../src/platforms/android/assets';
 
-describe('Android asset test', () => {
+describe.only('Android asset test', () => {
   let ctx: Context;
   let assets: Assets;
   const fixtureDir = tempy.directory();
@@ -37,7 +37,7 @@ describe('Android asset test', () => {
 
   afterAll(async () => {
     console.log(
-      'Wrote to',
+      'Using text/fixtures/app Wrote to',
       join(fixtureDir, 'android', 'app', 'src', 'main', 'res'),
     );
     const files = await readdirp(
