@@ -100,7 +100,7 @@ describe('PWA Asset Test - logo only', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
-  it.only('Should update manifest with generated assets and colors from logo', async () => {
+  it('Should update manifest with generated assets and colors from logo', async () => {
     const assets = await ctx.project.loadInputAssets();
 
     const exportedIcons = Object.values(PwaAssets).filter(

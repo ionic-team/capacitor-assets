@@ -4,11 +4,12 @@ import { hideBin } from 'yargs/helpers';
 import { Project } from './project';
 
 import { CapacitorConfig } from '@capacitor/cli';
+import { AssetGeneratorOptions } from './asset-generator';
 
 export interface Context {
   // Path the to the root of the capacitor project, if needed
   projectRootPath?: string;
-  args: any;
+  args: AssetGeneratorOptions | any;
   project: Project;
   nodePackageRoot: string;
   rootDir: string;

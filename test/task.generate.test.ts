@@ -1,4 +1,5 @@
-import { copy, rm } from '@ionic/utils-fs';
+import { copy, readJSON, rm } from '@ionic/utils-fs';
+import { join } from 'path';
 import tempy from 'tempy';
 
 import { Context, loadContext } from '../src/ctx';
@@ -35,7 +36,14 @@ describe('Task: Generate test', () => {
   it('Should support custom pwa manifest dir', async () => {
     const { run } = await import('../src/tasks/generate');
 
+    ctx.args.pwaManifestPath = 'public/custom.manifest';
+    ctx.args.splashBackgroundColor = '#abcdef';
+
     const generated = await run(ctx);
+
+    const manifestPath = join(fixtureDir, 'public', 'custom.manifest');
+    const manifest = await readJSON(manifestPath);
+    expect(manifest['background_color']).toBe('#abcdef');
 
     // TODO: Make this more specific instead of "it generated a lot of assets"
     expect(generated.length).toBeGreaterThan(100);

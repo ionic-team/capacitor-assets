@@ -32,9 +32,7 @@ export class PwaAssetGenerator extends AssetGenerator {
   }
 
   async getManifestJson(project: Project) {
-    const path =
-      this.options.pwaManifestPath ??
-      (await this.getManifestJsonPath(project.directory ?? ''));
+    const path = await this.getManifestJsonPath(project.directory ?? '');
 
     const contents = await readFile(path, { encoding: 'utf-8' });
 
@@ -48,7 +46,6 @@ export class PwaAssetGenerator extends AssetGenerator {
       throw new BadProjectError('No web app (PWA) found');
     }
 
-    console.log('Generating', asset.kind);
     switch (asset.kind) {
       case AssetKind.Logo:
       case AssetKind.LogoDark:
@@ -154,6 +151,10 @@ export class PwaAssetGenerator extends AssetGenerator {
   private async getManifestJsonPath(projectRoot?: string): Promise<string> {
     const r = (p: string) => join(projectRoot ?? '', p);
 
+    if (this.options.pwaManifestPath) {
+      return r(this.options.pwaManifestPath);
+    }
+
     if (await pathExists(r('public'))) {
       if (await pathExists(r('public/manifest.json'))) {
         return r('public/manifest.json');
@@ -193,7 +194,6 @@ export class PwaAssetGenerator extends AssetGenerator {
     );
     const pwaAssets = assets.filter(a => a.template.platform === Platform.Pwa);
 
-    console.log('Updating pwa manifest', pwaDir, pwaAssetDir, manifestPath);
     let manifestJson: any = {};
     if (await pathExists(manifestPath)) {
       manifestJson = await readJSON(manifestPath);
@@ -223,7 +223,6 @@ export class PwaAssetGenerator extends AssetGenerator {
       icons,
     };
 
-    console.log('Writing manifest', manifestPath);
     await writeJSON(manifestPath, jsonOutput, {
       spaces: 2,
     });
