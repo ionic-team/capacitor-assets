@@ -49,6 +49,7 @@ export function error(...args: any[]) {
 
 export function fatal(msg: string, exc?: Error): never {
   console.error(c.failure(`Fatal error: ${msg}`));
+  console.log('ERROR', msg, exc);
   if (exc) {
     console.error(exc);
   }

@@ -1,10 +1,10 @@
 import { basename, extname, join } from 'path';
 import {
-  existsSync,
   mkdirp,
+  pathExists,
   readFile,
-  readFileSync,
-  writeFileSync,
+  readJSON,
+  writeJSON,
 } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
@@ -32,7 +32,9 @@ export class PwaAssetGenerator extends AssetGenerator {
   }
 
   async getManifestJson(project: Project) {
-    const path = this.getManifestJsonPath(project.directory ?? '');
+    const path =
+      this.options.pwaManifestPath ??
+      (await this.getManifestJsonPath(project.directory ?? ''));
 
     const contents = await readFile(path, { encoding: 'utf-8' });
 
@@ -46,7 +48,11 @@ export class PwaAssetGenerator extends AssetGenerator {
       throw new BadProjectError('No web app (PWA) found');
     }
 
+    console.log('Generating', asset.kind);
     switch (asset.kind) {
+      case AssetKind.Logo:
+      case AssetKind.LogoDark:
+        return this.generateFromLogo(asset, project);
       case AssetKind.Icon:
         return this.generateIcons(asset, project);
       case AssetKind.Icon:
@@ -59,6 +65,19 @@ export class PwaAssetGenerator extends AssetGenerator {
     return [];
   }
 
+  private async generateFromLogo(
+    asset: InputAsset,
+    project: Project,
+  ): Promise<OutputAsset[]> {
+    const pipe = asset.pipeline();
+
+    if (!pipe) {
+      throw new BadPipelineError('Sharp instance not created');
+    }
+
+    return this.generateIcons(asset, project);
+  }
+
   private async generateIcons(
     asset: InputAsset,
     project: Project,
@@ -69,7 +88,7 @@ export class PwaAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    const pwaDir = this.getPWADirectory(project.directory ?? undefined);
+    const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
     const icons = Object.values(PwaAssets).filter(
       a => a.kind === AssetKind.Icon,
     ) as PwaOutputAssetTemplate[];
@@ -77,7 +96,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     const generatedAssets = await Promise.all(
       icons.map(async icon => {
         const destDir = join(
-          this.getPWAAssetsDirectory(pwaDir),
+          await this.getPWAAssetsDirectory(pwaDir),
           PWA_ASSET_PATH,
         );
         try {
@@ -109,46 +128,48 @@ export class PwaAssetGenerator extends AssetGenerator {
     return generatedAssets;
   }
 
-  private getPWADirectory(projectRoot?: string): string {
-    if (existsSync(join(projectRoot ?? '', 'public')) /* React */) {
+  private async getPWADirectory(projectRoot?: string): Promise<string> {
+    if (await pathExists(join(projectRoot ?? '', 'public')) /* React */) {
       return join(projectRoot ?? '', 'public');
     } else if (
-      existsSync(join(projectRoot ?? '', 'src/assets')) /* Angular and Vue */
+      await pathExists(
+        join(projectRoot ?? '', 'src/assets'),
+      ) /* Angular and Vue */
     ) {
       return join(projectRoot ?? '', 'src/assets');
-    } else if (existsSync(join(projectRoot ?? '', 'www'))) {
+    } else if (await pathExists(join(projectRoot ?? '', 'www'))) {
       return join(projectRoot ?? '', 'www');
     } else {
       return join(projectRoot ?? '', 'www');
     }
   }
 
-  private getPWAAssetsDirectory(pwaDir?: string): string {
-    if (existsSync(join(pwaDir ?? '', 'assets'))) {
+  private async getPWAAssetsDirectory(pwaDir?: string): Promise<string> {
+    if (await pathExists(join(pwaDir ?? '', 'assets'))) {
       return join(pwaDir ?? '', 'assets');
     }
     return '';
   }
 
-  private getManifestJsonPath(projectRoot?: string): string {
+  private async getManifestJsonPath(projectRoot?: string): Promise<string> {
     const r = (p: string) => join(projectRoot ?? '', p);
 
-    if (existsSync(r('public'))) {
-      if (existsSync(r('public/manifest.json'))) {
+    if (await pathExists(r('public'))) {
+      if (await pathExists(r('public/manifest.json'))) {
         return r('public/manifest.json');
       }
 
       // Default to the spec-preferred naming
       return r('public/manifest.webmanifest');
-    } else if (existsSync(r('src/assets'))) {
-      if (existsSync(r('src/manifest.json'))) {
+    } else if (await pathExists(r('src/assets'))) {
+      if (await pathExists(r('src/manifest.json'))) {
         return r('src/manifest.json');
       }
 
       // Default to the spec-preferred naming
       return r('src/manifest.webmanifest');
-    } else if (existsSync(r('www'))) {
-      if (existsSync(r('www'))) {
+    } else if (await pathExists(r('www'))) {
+      if (await pathExists(r('www'))) {
         return r('www/manifest.json');
       }
 
@@ -160,23 +181,22 @@ export class PwaAssetGenerator extends AssetGenerator {
     }
   }
 
-  private updateManifest(
+  private async updateManifest(
     project: Project,
     assets: OutputAsset<PwaOutputAssetTemplate>[],
   ) {
-    const pwaDir = this.getPWADirectory(project.directory ?? undefined);
-    const pwaAssetDir = this.getPWAAssetsDirectory(pwaDir);
+    const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
+    const pwaAssetDir = await this.getPWAAssetsDirectory(pwaDir);
 
-    const manifestPath = this.getManifestJsonPath(
+    const manifestPath = await this.getManifestJsonPath(
       project.directory ?? undefined,
     );
     const pwaAssets = assets.filter(a => a.template.platform === Platform.Pwa);
 
+    console.log('Updating pwa manifest', pwaDir, pwaAssetDir, manifestPath);
     let manifestJson: any = {};
-    if (existsSync(manifestPath)) {
-      manifestJson = JSON.parse(
-        readFileSync(manifestPath, { encoding: 'utf-8' }),
-      );
+    if (await pathExists(manifestPath)) {
+      manifestJson = await readJSON(manifestPath);
     }
 
     const icons = manifestJson['icons'] || [];
@@ -192,16 +212,21 @@ export class PwaAssetGenerator extends AssetGenerator {
       }
     }
 
-    const jsonOutput = JSON.stringify(
-      {
-        ...manifestJson,
-        icons,
-      },
-      null,
-      2,
-    );
+    // Update the manifest background color to the splash one if provided to ensure
+    // platform automatic splash generation works
+    if (this.options.splashBackgroundColor) {
+      manifestJson['background_color'] = this.options.splashBackgroundColor;
+    }
 
-    writeFileSync(manifestPath, jsonOutput);
+    const jsonOutput = {
+      ...manifestJson,
+      icons,
+    };
+
+    console.log('Writing manifest', manifestPath);
+    await writeJSON(manifestPath, jsonOutput, {
+      spaces: 2,
+    });
   }
 
   private makeIconManifestEntry(

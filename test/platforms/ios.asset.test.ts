@@ -174,14 +174,13 @@ describe('iOS Asset Test', () => {
   });
 });
 
-describe.only('iOS Asset Test - Logo Only', () => {
+describe('iOS Asset Test - Logo Only', () => {
   let ctx: Context;
   let assets: Assets;
   const fixtureDir = tempy.directory();
 
   beforeAll(async () => {
     await copy('test/fixtures/app-logo-only', fixtureDir);
-    console.log('Fixtures only', fixtureDir);
   });
 
   beforeEach(async () => {
@@ -190,13 +189,13 @@ describe.only('iOS Asset Test - Logo Only', () => {
   });
 
   afterAll(async () => {
-    // await rm(fixtureDir, { force: true, recursive: true });
+    await rm(fixtureDir, { force: true, recursive: true });
   });
 
   it('Should generate icons and splashes from logo', async () => {
     const strategy = new IosAssetGenerator({
-      backgroundColor: '#999999',
-      backgroundColorDark: '#122140',
+      splashBackgroundColor: '#999999',
+      splashBackgroundColorDark: '#122140',
     });
     let generatedAssets = ((await assets.logo?.generate(
       strategy,
@@ -231,8 +230,8 @@ describe.only('iOS Asset Test - Logo Only', () => {
 
   it('Should generate icons and splashes from logo-dark', async () => {
     const strategy = new IosAssetGenerator({
-      backgroundColor: '#999999',
-      backgroundColorDark: '#122140',
+      splashBackgroundColor: '#999999',
+      splashBackgroundColorDark: '#122140',
     });
     let generatedAssets = ((await assets.logoDark?.generate(
       strategy,
@@ -249,14 +248,8 @@ describe.only('iOS Asset Test - Logo Only', () => {
     expect(
       generatedAssets.find(f => f.asset.kind === AssetKind.Splash),
     ).toBeUndefined();
+    expect(generatedAssets.length).toBeGreaterThan(0);
     expect(generatedAssets.length).toBe(assetTemplates.length - 1);
-    console.log(
-      generatedAssets.filter(
-        f =>
-          f.asset.kind === AssetKind.Splash ||
-          f.asset.kind === AssetKind.SplashDark,
-      ),
-    );
 
     const contentsJson = JSON.parse(
       await readFile(

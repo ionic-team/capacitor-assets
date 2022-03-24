@@ -27,12 +27,32 @@ export function runProgram(ctx: Context) {
     .option('--ios', 'Generate iOS assets')
     .option('--android', 'Generate Android assets')
     .option('--pwa', 'Generate PWA/Web assets')
+    .option(
+      '--iconBackgroundColor',
+      'Background color used for icons when generating from a single logo file',
+    )
+    .option(
+      '--iconBackgroundColorDark',
+      'Background color used for icon in dark mode when generating from a single logo file',
+    )
+    .option(
+      '--splashBackgroundColor',
+      'Background color used for splash screens when generating from a single logo file',
+    )
+    .option(
+      '--splashBackgroundColorDark',
+      'Background color used for splash screens in dark mode when generating from a single logo file',
+    )
+    .option(
+      '--pwaManifestPath',
+      "Path to the web app's manifest.json or manifest.webmanifest file",
+    )
     .action(
       wrapAction(async (args = {}) => {
         setArguments(ctx, args);
 
-        const { generateCommand } = await import('./tasks/generate');
-        await generateCommand(ctx);
+        const { run } = await import('./tasks/generate');
+        await run(ctx);
       }),
     );
 

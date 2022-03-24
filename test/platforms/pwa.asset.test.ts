@@ -1,4 +1,4 @@
-import { copy, pathExists, rm } from '@ionic/utils-fs';
+import { copy, pathExists, readJSON, rm } from '@ionic/utils-fs';
 import tempy from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';
@@ -6,7 +6,7 @@ import { PwaAssetGenerator } from '../../src/platforms/pwa';
 import { AssetKind, PwaOutputAssetTemplate } from '../../src/definitions';
 import * as PwaAssets from '../../src/platforms/pwa/assets';
 import sharp from 'sharp';
-import { parse } from 'path';
+import { join, parse } from 'path';
 import { OutputAsset } from '../../src/output-asset';
 
 describe('PWA Asset Test', () => {
@@ -81,5 +81,40 @@ describe('PWA Asset Test', () => {
         })
         .every((i: any) => !!i),
     ).toBe(true);
+  });
+});
+
+describe('PWA Asset Test - logo only', () => {
+  let ctx: Context;
+  const fixtureDir = tempy.directory();
+
+  beforeAll(async () => {
+    await copy('test/fixtures/app-logo-only', fixtureDir);
+  });
+
+  beforeEach(async () => {
+    ctx = await loadContext(fixtureDir);
+  });
+
+  afterAll(async () => {
+    await rm(fixtureDir, { force: true, recursive: true });
+  });
+
+  it.only('Should update manifest with generated assets and colors from logo', async () => {
+    const assets = await ctx.project.loadInputAssets();
+
+    const exportedIcons = Object.values(PwaAssets).filter(
+      a => a.kind === AssetKind.Icon,
+    );
+
+    const strategy = new PwaAssetGenerator({
+      splashBackgroundColor: '#dedbef',
+    });
+
+    await assets.logo?.generate(strategy, ctx.project);
+
+    const manifestPath = join(fixtureDir, 'public', 'manifest.webmanifest');
+    const manifest = await readJSON(manifestPath);
+    expect(manifest['background_color']).toBe('#dedbef');
   });
 });

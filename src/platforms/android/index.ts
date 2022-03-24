@@ -90,7 +90,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
             asset,
             splash,
             pipe,
-            this.options.backgroundColor ?? '#ffffff',
+            this.options.splashBackgroundColor ?? '#ffffff',
           );
         }),
       );
@@ -98,7 +98,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       generated.push(...generatedSplashes);
     }
 
-    // Generate dark splash
+    // Generate dark splashes
     const darkSplashes = Object.values(AndroidAssetTemplates).filter(
       a => a.kind === AssetKind.SplashDark,
     );
@@ -109,7 +109,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
           asset,
           splash,
           pipe,
-          this.options.backgroundColorDark ?? '#111111',
+          this.options.splashBackgroundColorDark ?? '#111111',
         );
       }),
     );
@@ -348,7 +348,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is trick, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    console.log('Generating round', asset.path);
     const resized = await sharp(asset.path)
       .resize(template.width, template.height)
       .toBuffer();
@@ -496,7 +495,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
       .png()
       .toFile(destBackground);
 
-    console.log('Generated', destBackground);
     // Create the adaptive icon XML
     const icLauncherXml = `
 <?xml version="1.0" encoding="utf-8"?>

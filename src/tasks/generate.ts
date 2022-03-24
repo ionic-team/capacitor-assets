@@ -1,16 +1,16 @@
 import { Context } from '../ctx';
 import * as c from '../colors';
-import { error, fatal, log } from '../util/log';
+import { error, log } from '../util/log';
 import { IosAssetGenerator } from '../platforms/ios';
 import { PwaAssetGenerator } from '../platforms/pwa';
 import { AndroidAssetGenerator } from '../platforms/android';
-import { AssetGenerator } from '../asset-generator';
+import { AssetGenerator, AssetGeneratorOptions } from '../asset-generator';
 import { OutputAsset } from '../output-asset';
 import { Assets } from '../definitions';
 import { Project } from '../project';
 import { InputAsset } from '../input-asset';
 
-export async function generateCommand(ctx: Context) {
+export async function run(ctx: Context): Promise<OutputAsset[]> {
   try {
     const assets = await ctx.project.loadInputAssets();
 
@@ -19,11 +19,12 @@ export async function generateCommand(ctx: Context) {
         a => !a,
       )
     ) {
-      fatal(
+      error(
         `No assets found in the asset path ${c.ancillary(
           ctx.project.assetDir,
         )}. See capacitor-assets documentation to learn how to use this tool.`,
       );
+      return [];
     }
 
     let platforms = ['ios', 'android', 'pwa'];
@@ -41,20 +42,27 @@ export async function generateCommand(ctx: Context) {
       platforms.push('pwa');
     }
 
-    log(
-      `Generating assets for ${platforms
-        .map(p => c.strong(c.success(p)))
-        .join(', ')}`,
-    );
+    if (!ctx.args.silent) {
+      log(
+        `Generating assets for ${platforms
+          .map(p => c.strong(c.success(p)))
+          .join(', ')}`,
+      );
+    }
 
     const generators = getGenerators(ctx, platforms);
 
     const generated = await generateAssets(assets, generators, ctx.project);
 
-    logGenerated(generated);
+    if (!ctx.args.silent) {
+      logGenerated(generated);
+    }
+
+    return generated;
   } catch (e) {
-    fatal('Unable to generate assets', e as Error);
+    error('Unable to generate assets', e as Error);
   }
+  return [];
 }
 
 async function generateAssets(
@@ -81,17 +89,15 @@ async function generateAssets(
 }
 
 function getGenerators(ctx: Context, platforms: string[]): AssetGenerator[] {
-  const backgroundColor = ctx.args.bgColor;
-
   return platforms.map(p => {
     if (p === 'ios') {
-      return new IosAssetGenerator({ backgroundColor });
+      return new IosAssetGenerator(ctx.args as AssetGeneratorOptions);
     }
     if (p === 'android') {
-      return new AndroidAssetGenerator({ backgroundColor });
+      return new AndroidAssetGenerator(ctx.args as AssetGeneratorOptions);
     }
     if (p === 'pwa') {
-      return new PwaAssetGenerator({ backgroundColor });
+      return new PwaAssetGenerator(ctx.args as AssetGeneratorOptions);
     }
   }) as AssetGenerator[];
 }

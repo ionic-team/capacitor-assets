@@ -21,7 +21,7 @@ import { OutputAsset } from '../../src/output-asset';
 import { AndroidAssetGenerator } from '../../src/platforms/android';
 import * as AndroidAssets from '../../src/platforms/android/assets';
 
-describe.only('Android asset test', () => {
+describe('Android asset test', () => {
   let ctx: Context;
   let assets: Assets;
   const fixtureDir = tempy.directory();
@@ -36,6 +36,7 @@ describe.only('Android asset test', () => {
   });
 
   afterAll(async () => {
+    /*
     console.log(
       'Using text/fixtures/app Wrote to',
       join(fixtureDir, 'android', 'app', 'src', 'main', 'res'),
@@ -54,7 +55,8 @@ describe.only('Android asset test', () => {
         ),
     );
     // console.log(await readFile(join(fixtureDir, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), { encoding: 'utf-8' }));
-    // await rm(fixtureDir, { force: true, recursive: true });
+    */
+    await rm(fixtureDir, { force: true, recursive: true });
   });
 
   /*
@@ -141,7 +143,7 @@ describe.only('Android asset test', () => {
   });
 });
 
-describe.only('Android Asset Test - Logo Only', () => {
+describe('Android Asset Test - Logo Only', () => {
   let ctx: Context;
   let assets: Assets;
   const fixtureDir = tempy.directory();
@@ -156,6 +158,7 @@ describe.only('Android Asset Test - Logo Only', () => {
   });
 
   afterAll(async () => {
+    /*
     console.log(
       'Wrote to',
       join(fixtureDir, 'android', 'app', 'src', 'main', 'res'),
@@ -173,57 +176,34 @@ describe.only('Android Asset Test - Logo Only', () => {
           ),
         ),
     );
+    */
     // console.log(await readFile(join(fixtureDir, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), { encoding: 'utf-8' }));
-    // await rm(fixtureDir, { force: true, recursive: true });
+    await rm(fixtureDir, { force: true, recursive: true });
   });
 
   it('Should generate icons and splashes from logo', async () => {
     const strategy = new AndroidAssetGenerator({
-      backgroundColor: '#999999',
-      backgroundColorDark: '#122140',
+      splashBackgroundColor: '#999999',
+      splashBackgroundColorDark: '#122140',
     });
     let generatedAssets = ((await assets.logo?.generate(
       strategy,
       ctx.project,
     )) ?? []) as OutputAsset<AndroidOutputAssetTemplate>[];
 
-    const assetTemplates = Object.values(AndroidAssets).filter(
-      a =>
-        [AssetKind.Icon, AssetKind.Splash, AssetKind.SplashDark].indexOf(
-          a.kind,
-        ) >= 0,
-    );
-
-    expect(generatedAssets.length).toBe(assetTemplates.length);
+    expect(generatedAssets.length).toBe(48);
   });
 
   it('Should generate icons and splashes from logo-dark', async () => {
     const strategy = new AndroidAssetGenerator({
-      backgroundColor: '#999999',
-      backgroundColorDark: '#122140',
+      splashBackgroundColor: '#999999',
+      splashBackgroundColorDark: '#122140',
     });
     let generatedAssets = ((await assets.logoDark?.generate(
       strategy,
       ctx.project,
     )) ?? []) as OutputAsset<AndroidOutputAssetTemplate>[];
 
-    const assetTemplates = Object.values(AndroidAssets).filter(
-      a =>
-        [AssetKind.Icon, AssetKind.Splash, AssetKind.SplashDark].indexOf(
-          a.kind,
-        ) >= 0,
-    );
-
-    expect(
-      generatedAssets.find(f => f.asset.kind === AssetKind.Splash),
-    ).toBeUndefined();
-    expect(generatedAssets.length).toBe(assetTemplates.length - 1);
-    console.log(
-      generatedAssets.filter(
-        f =>
-          f.asset.kind === AssetKind.Splash ||
-          f.asset.kind === AssetKind.SplashDark,
-      ),
-    );
+    expect(generatedAssets.length).toBe(12);
   });
 });

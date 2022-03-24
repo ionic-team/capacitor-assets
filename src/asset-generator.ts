@@ -17,7 +17,9 @@ export interface AssetGeneratorOptions {
   // Background color for icon generation for use in dark mode scenarios
   iconBackgroundColorDark?: string;
   // Background color for light mode splash generation
-  backgroundColor?: string;
+  splashBackgroundColor?: string;
   // Background color for dark mode splash generation
-  backgroundColorDark?: string;
+  splashBackgroundColorDark?: string;
+  // Path to the web app manifest
+  pwaManifestPath?: string;
 }

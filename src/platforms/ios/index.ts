@@ -68,8 +68,6 @@ export class IosAssetGenerator extends AssetGenerator {
     // Generate logos
     const logos = await this.generateIcons(asset, project);
 
-    console.log('Generating from logo', asset.kind);
-
     const generated: OutputAsset[] = [];
 
     if (asset.kind === AssetKind.Logo) {
@@ -88,15 +86,18 @@ export class IosAssetGenerator extends AssetGenerator {
           right: lightExtend,
           bottom: lightExtend,
           left: lightExtend,
-          background: this.options.backgroundColor ?? lightDefaultBackground,
+          background:
+            this.options.splashBackgroundColor ?? lightDefaultBackground,
         })
         .flatten({
-          background: this.options.backgroundColor ?? lightDefaultBackground,
+          background:
+            this.options.splashBackgroundColor ?? lightDefaultBackground,
         })
         .resize(lightSplash.width, lightSplash.height, {
           fit: sharp.fit.outside,
           position: sharp.gravity.center,
-          background: this.options.backgroundColor ?? lightDefaultBackground,
+          background:
+            this.options.splashBackgroundColor ?? lightDefaultBackground,
         })
         .png()
         .toFile(lightDest);
@@ -127,15 +128,18 @@ export class IosAssetGenerator extends AssetGenerator {
         right: darkExtend,
         bottom: darkExtend,
         left: darkExtend,
-        background: this.options.backgroundColorDark ?? darkDefaultBackground,
+        background:
+          this.options.splashBackgroundColorDark ?? darkDefaultBackground,
       })
       .flatten({
-        background: this.options.backgroundColorDark ?? darkDefaultBackground,
+        background:
+          this.options.splashBackgroundColorDark ?? darkDefaultBackground,
       })
       .resize(darkSplash.width, darkSplash.height, {
         fit: sharp.fit.outside,
         position: sharp.gravity.center,
-        background: this.options.backgroundColorDark ?? darkDefaultBackground,
+        background:
+          this.options.splashBackgroundColorDark ?? darkDefaultBackground,
       })
       .png()
       .toFile(darkDest);
