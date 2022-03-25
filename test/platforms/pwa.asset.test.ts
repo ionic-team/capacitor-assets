@@ -90,16 +90,18 @@ describe('PWA Asset Test', () => {
   it('Should generate PWA splashes', async () => {
     const assets = await ctx.project.loadInputAssets();
 
-    const exportedIcons = Object.values(PwaAssets).filter(
-      a => a.kind === AssetKind.Icon,
-    );
-
     const strategy = new PwaAssetGenerator();
     let generatedAssets = ((await assets.splash?.generate(
       strategy,
       ctx.project,
     )) ?? []) as OutputAsset<PwaOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBe(PWA_IOS_DEVICE_SIZES.length);
+
+    expect(generatedAssets.length).toBeGreaterThan(10);
+
+    generatedAssets = ((await assets.splashDark?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<PwaOutputAssetTemplate>[];
   });
 });
 

@@ -323,9 +323,11 @@ export class PwaAssetGenerator extends AssetGenerator {
     const width = parseFloat(sizeParts[0]);
     const height = parseFloat(sizeParts[1]);
     const density = parts[1];
-    const name = `apple-splash-${width}-${height}@${density}.png`;
+    const name = `apple-splash-${width}-${height}@${density}${
+      asset.kind === AssetKind.SplashDark ? '-dark' : ''
+    }.png`;
 
-    console.log('Generating splash', width, height);
+    console.log('Generating splash', asset.kind, width, height);
 
     const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
     const pwaAssetDir = await this.getPWAAssetsDirectory(pwaDir);
@@ -335,30 +337,10 @@ export class PwaAssetGenerator extends AssetGenerator {
     } catch {}
     const dest = join(destDir, name);
 
-    const backgroundColor = this.options.splashBackgroundColor ?? '#ffffff';
-
     // console.log(width, height);
     const targetLogoWidthPercent = 0.2;
     const targetWidth = Math.floor(width * targetLogoWidthPercent);
-    const extend = width - targetWidth; //(asset.width ?? 0);
-    const outputInfo = await pipe
-      .extend({
-        top: extend,
-        right: extend,
-        bottom: extend,
-        left: extend,
-        background: backgroundColor,
-      })
-      .flatten({
-        background: backgroundColor,
-      })
-      .resize(width, height, {
-        fit: sharp.fit.outside,
-        position: sharp.gravity.center,
-        background: backgroundColor,
-      })
-      .png()
-      .toFile(dest);
+    const outputInfo = await pipe.resize(width, height).png().toFile(dest);
 
     const template: OutputAssetTemplate = {
       platform: Platform.Pwa,
