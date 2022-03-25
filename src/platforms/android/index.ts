@@ -195,7 +195,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     const dest = join(resPath, drawableDir, 'splash.png');
 
     const targetLogoWidthPercent = 0.2;
-    const targetWidth = splash.width * targetLogoWidthPercent;
+    const targetWidth = Math.floor(splash.width * targetLogoWidthPercent);
     const extend = splash.width - targetWidth; //(asset.width ?? 0);
     const outputInfo = await pipe
       .extend({

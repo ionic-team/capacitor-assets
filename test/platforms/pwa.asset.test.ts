@@ -4,7 +4,10 @@ import tempy from 'tempy';
 import { Context, loadContext } from '../../src/ctx';
 import { PwaAssetGenerator } from '../../src/platforms/pwa';
 import { AssetKind, PwaOutputAssetTemplate } from '../../src/definitions';
-import * as PwaAssets from '../../src/platforms/pwa/assets';
+import {
+  ASSETS as PwaAssets,
+  PWA_IOS_DEVICE_SIZES,
+} from '../../src/platforms/pwa/assets';
 import sharp from 'sharp';
 import { join, parse } from 'path';
 import { OutputAsset } from '../../src/output-asset';
@@ -22,7 +25,8 @@ describe('PWA Asset Test', () => {
   });
 
   afterAll(async () => {
-    await rm(fixtureDir, { force: true, recursive: true });
+    // await rm(fixtureDir, { force: true, recursive: true });
+    console.log(fixtureDir);
   });
 
   it('Should generate PWA icons', async () => {
@@ -81,6 +85,21 @@ describe('PWA Asset Test', () => {
         })
         .every((i: any) => !!i),
     ).toBe(true);
+  });
+
+  it('Should generate PWA splashes', async () => {
+    const assets = await ctx.project.loadInputAssets();
+
+    const exportedIcons = Object.values(PwaAssets).filter(
+      a => a.kind === AssetKind.Icon,
+    );
+
+    const strategy = new PwaAssetGenerator();
+    let generatedAssets = ((await assets.splash?.generate(
+      strategy,
+      ctx.project,
+    )) ?? []) as OutputAsset<PwaOutputAssetTemplate>[];
+    expect(generatedAssets.length).toBe(PWA_IOS_DEVICE_SIZES.length);
   });
 });
 

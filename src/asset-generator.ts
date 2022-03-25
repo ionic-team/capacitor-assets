@@ -22,4 +22,6 @@ export interface AssetGeneratorOptions {
   splashBackgroundColorDark?: string;
   // Path to the web app manifest
   pwaManifestPath?: string;
+  // Whether to fetch latest device sizes from official apple site
+  pwaNoAppleFetch?: boolean;
 }

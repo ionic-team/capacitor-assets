@@ -58,6 +58,10 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
       logGenerated(generated);
     }
 
+    if (!ctx.args.silent && platforms.indexOf('pwa') >= 0) {
+      PwaAssetGenerator.logInstructions(generated);
+    }
+
     return generated;
   } catch (e) {
     error('Unable to generate assets', e as Error);
@@ -105,7 +109,11 @@ function getGenerators(ctx: Context, platforms: string[]): AssetGenerator[] {
 // Print out a nice report of the assets generated
 // and totals per platform
 function logGenerated(generated: OutputAsset[]) {
-  for (const g of generated) {
+  const sorted = generated.slice().sort((a, b) => {
+    return a.template.platform.localeCompare(b.template.platform);
+  });
+
+  for (const g of sorted) {
     Object.keys(g.destFilenames).forEach(name => {
       const filename = g.getDestFilename(name);
       const outputInfo = g.getOutputInfo(name);
@@ -120,7 +128,7 @@ function logGenerated(generated: OutputAsset[]) {
   log('\n');
 
   // Aggregate total assets and size per platform
-  const totals = generated.reduce(
+  const totals = sorted.reduce(
     (totals, g) => {
       if (!(g.template.platform in totals)) {
         totals[g.template.platform] = {

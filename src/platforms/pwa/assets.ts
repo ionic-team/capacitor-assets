@@ -61,3 +61,70 @@ export const PWA_512_PX_ICON: PwaOutputAssetTemplate = {
   width: 512,
   height: 512,
 };
+
+export const PWA_SPLASH: PwaOutputAssetTemplate = {
+  platform: Platform.Pwa,
+  kind: AssetKind.Splash,
+  name: 'apple-splash.webp',
+  format: Format.WebP,
+  width: 2048,
+  height: 2048,
+};
+
+export const ASSETS = {
+  PWA_48_PX_ICON,
+  PWA_72_PX_ICON,
+  PWA_96_PX_ICON,
+  PWA_128_PX_ICON,
+  PWA_192_PX_ICON,
+  PWA_256_PX_ICON,
+  PWA_512_PX_ICON,
+  PWA_SPLASH,
+};
+
+export const PWA_IOS_DEVICE_SIZES = [
+  '2048x2732@2x',
+  '1668x2388@2x',
+  '1668x2388@2x',
+  '1536x2048@2x',
+  '1536x2048@2x',
+  '1668x2224@2x',
+  '1536x2048@2x',
+  '1620x2160@2x',
+  '1536x2048@2x',
+  // iPhone 13's
+  '1284x2778@3x',
+  '1170x2532@3x',
+  '1170x2532@3x',
+  '1125x2436@3x',
+  // iPhone 12's
+  '1284x2778@3x',
+  '1170x2532@3x',
+  '1170x2532@3x',
+  '1125x2436@3x',
+  // iPhone 11's
+  '1242x2688@3x',
+  '1125x2436@3x',
+  '828x1792@2x',
+  // iPhone X's
+  '1242x2688@3x',
+  '1125x2436@3x',
+  '828x1792@2x',
+  '1125x2436@3x',
+  // iPhone 8
+  '1080x1920@3x',
+  '750x1334@2x',
+  // iPhone 7
+  '1080x1920@3x',
+  '750x1334@2x',
+  // iPhone 6
+  '1080x1920@3x',
+  '750x1334@2x',
+  '1080x1920@3x',
+  '750x1334@2x',
+  // iPhone SE
+  '750x1334@2x',
+  '640x1136@2x',
+  // iPod Touch
+  '640x1136@2x',
+];

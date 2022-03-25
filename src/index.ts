@@ -47,6 +47,10 @@ export function runProgram(ctx: Context) {
       '--pwaManifestPath',
       "Path to the web app's manifest.json or manifest.webmanifest file",
     )
+    .option(
+      '--pwaNoAppleFetch',
+      'Whether to fetch the latest screen sizes for Apple devices from the official Apple site. Set to true if running offline to use local cached sizes (may be occasionally out of date)',
+    )
     .action(
       wrapAction(async (args = {}) => {
         setArguments(ctx, args);
