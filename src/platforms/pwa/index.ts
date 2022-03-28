@@ -14,6 +14,8 @@ import {
   Platform,
   OutputAssetTemplate,
   Format,
+  IosOutputAssetTemplateSplash,
+  Orientation,
 } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
@@ -182,10 +184,13 @@ export class PwaAssetGenerator extends AssetGenerator {
         .png()
         .toFile(lightDest);
 
-      const template: OutputAssetTemplate = {
+      const template: PwaOutputAssetTemplate = {
+        name: `apple-splash-${width}-${height}@${density}.png`,
         platform: Platform.Pwa,
         kind: AssetKind.Splash,
         format: Format.Png,
+        orientation: Orientation.Portrait,
+        density: density[0],
         width,
         height,
       };
@@ -228,10 +233,13 @@ export class PwaAssetGenerator extends AssetGenerator {
       .png()
       .toFile(darkDest);
 
-    const template: OutputAssetTemplate = {
+    const template: PwaOutputAssetTemplate = {
+      name: `apple-splash-${width}-${height}@${density}-dark.png`,
       platform: Platform.Pwa,
       kind: AssetKind.Splash,
       format: Format.Png,
+      orientation: Orientation.Portrait,
+      density: density[0],
       width,
       height,
     };
@@ -479,10 +487,13 @@ export class PwaAssetGenerator extends AssetGenerator {
     const targetWidth = Math.floor(width * targetLogoWidthPercent);
     const outputInfo = await pipe.resize(width, height).png().toFile(dest);
 
-    const template: OutputAssetTemplate = {
+    const template: PwaOutputAssetTemplate = {
+      name,
       platform: Platform.Pwa,
       kind: AssetKind.Splash,
       format: Format.Png,
+      orientation: Orientation.Portrait,
+      density: density[0],
       width,
       height,
     };
@@ -526,6 +537,18 @@ Add the following tags to your index.html to support PWA icons:
       const h = g.template.height;
       const path = Object.values(g.destFilenames)[0] ?? '';
       log(`<link rel="apple-touch-icon" sizes="${w}x${h}" href="${path}">`);
+    }
+
+    for (const g of pwaAssets.filter(
+      a => a.template.kind === AssetKind.Splash,
+    )) {
+      const template = g.template as PwaOutputAssetTemplate;
+      const w = g.template.width;
+      const h = g.template.height;
+      const path = Object.values(g.destFilenames)[0] ?? '';
+      log(
+        `<link rel="apple-touch-startup-image" href="${path}" media="(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${template.orientation})>`,
+      );
     }
 
     /*

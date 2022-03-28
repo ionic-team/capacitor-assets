@@ -108,6 +108,8 @@ export interface IosOutputAssetTemplateSplash extends IosOutputAssetTemplate {
 }
 export interface PwaOutputAssetTemplate extends OutputAssetTemplate {
   name: string;
+  orientation?: Orientation;
+  density?: string;
 }
 
 export interface AndroidOutputAssetTemplate extends OutputAssetTemplate {
