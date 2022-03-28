@@ -105,7 +105,7 @@ describe('PWA Asset Test', () => {
   });
 });
 
-describe('PWA Asset Test - logo only', () => {
+describe.only('PWA Asset Test - logo only', () => {
   let ctx: Context;
   const fixtureDir = tempy.directory();
 
@@ -118,7 +118,8 @@ describe('PWA Asset Test - logo only', () => {
   });
 
   afterAll(async () => {
-    await rm(fixtureDir, { force: true, recursive: true });
+    console.log(fixtureDir);
+    // await rm(fixtureDir, { force: true, recursive: true });
   });
 
   it('Should update manifest with generated assets and colors from logo', async () => {
@@ -132,10 +133,14 @@ describe('PWA Asset Test - logo only', () => {
       splashBackgroundColor: '#dedbef',
     });
 
-    await assets.logo?.generate(strategy, ctx.project);
+    const generated = await assets.logo!.generate(strategy, ctx.project);
 
     const manifestPath = join(fixtureDir, 'public', 'manifest.webmanifest');
     const manifest = await readJSON(manifestPath);
     expect(manifest['background_color']).toBe('#dedbef');
+
+    console.log('Generated', generated.length, 'from source logo');
+
+    expect(generated.length).toBeGreaterThan(30);
   });
 });

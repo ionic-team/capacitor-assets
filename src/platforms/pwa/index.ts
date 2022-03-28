@@ -49,6 +49,39 @@ export class PwaAssetGenerator extends AssetGenerator {
     return JSON.parse(contents);
   }
 
+  async getSplashSizes() {
+    const appleInterfacePage = `https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/`;
+
+    let assetSizes = PWA_IOS_DEVICE_SIZES;
+    if (!this.options.pwaNoAppleFetch) {
+      try {
+        const res = await fetch(appleInterfacePage);
+
+        const html = await res.text();
+
+        const doc = parse(html);
+
+        const target = doc.querySelector('main > section .row > .column table');
+        const sizes = target?.querySelectorAll('tr > td:nth-child(2)') ?? [];
+        const sizeStrings = sizes.map(td => {
+          const t = td.innerText;
+          return t
+            .slice(t.indexOf('pt (') + 4)
+            .slice(0, -1)
+            .replace(' px ', '');
+        });
+
+        assetSizes = sizeStrings;
+      } catch (e) {
+        warn(
+          `Unable to load iOS HIG screen sizes to generate iOS PWA splash screens. Using local snapshot of device sizes. Use --pwaNoAppleFetch true to always use local sizes`,
+        );
+      }
+    }
+
+    return assetSizes;
+  }
+
   async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pwaDir = project.directory;
 
@@ -82,7 +115,143 @@ export class PwaAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    return this.generateIcons(asset, project);
+    // Generate logos
+    const logos = await this.generateIcons(asset, project);
+
+    let assetSizes = await this.getSplashSizes();
+
+    const generated: OutputAsset[] = [];
+
+    const splashes = await Promise.all(
+      assetSizes.map(a =>
+        this._generateSplashFromLogo(project, asset, a, pipe),
+      ),
+    );
+
+    generated.push(...splashes.flat());
+
+    return [...logos, ...generated];
+  }
+
+  private async _generateSplashFromLogo(
+    project: Project,
+    asset: InputAsset,
+    sizeString: string,
+    pipe: Sharp,
+  ): Promise<OutputAsset[]> {
+    const parts = sizeString.split('@');
+    const sizeParts = parts[0].split('x');
+    const width = parseFloat(sizeParts[0]);
+    const height = parseFloat(sizeParts[1]);
+    const density = parts[1];
+
+    console.log('Generating splash', asset.kind, width, height);
+
+    const generated: OutputAsset[] = [];
+
+    const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
+    const pwaAssetDir = await this.getPWAAssetsDirectory(pwaDir);
+    const destDir = join(pwaAssetDir, PWA_ASSET_PATH);
+    try {
+      await mkdirp(destDir);
+    } catch {}
+
+    // console.log(width, height);
+    const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
+    const targetWidth = Math.floor(width * targetLogoWidthPercent);
+
+    if (asset.kind === AssetKind.Logo) {
+      // Generate light splash
+      const lightDefaultBackground = '#ffffff';
+      const lightDest = join(
+        destDir,
+        `apple-splash-${width}-${height}@${density}.png`,
+      );
+
+      const canvas = sharp({
+        create: {
+          width,
+          height,
+          channels: 4,
+          background: lightDefaultBackground,
+        },
+      });
+
+      const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+
+      const lightOutputInfo = await canvas
+        .composite([{ input: resized, gravity: sharp.gravity.center }])
+        .png()
+        .toFile(lightDest);
+
+      const template: OutputAssetTemplate = {
+        platform: Platform.Pwa,
+        kind: AssetKind.Splash,
+        format: Format.Png,
+        width,
+        height,
+      };
+
+      const lightSplashOutput = new OutputAsset(
+        template,
+        asset,
+        project,
+        {
+          [lightDest]: lightDest,
+        },
+        {
+          [lightDest]: lightOutputInfo,
+        },
+      );
+
+      generated.push(lightSplashOutput);
+    }
+
+    // Generate dark splash
+    const darkDefaultBackground = '#111111';
+    const darkDest = join(
+      destDir,
+      `apple-splash-${width}-${height}@${density}-dark.png`,
+    );
+
+    const canvas = sharp({
+      create: {
+        width,
+        height,
+        channels: 4,
+        background: darkDefaultBackground,
+      },
+    });
+
+    const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+
+    const darkOutputInfo = await canvas
+      .composite([{ input: resized, gravity: sharp.gravity.center }])
+      .png()
+      .toFile(darkDest);
+
+    const template: OutputAssetTemplate = {
+      platform: Platform.Pwa,
+      kind: AssetKind.Splash,
+      format: Format.Png,
+      width,
+      height,
+    };
+    const darkSplashOutput = new OutputAsset(
+      template,
+      asset,
+      project,
+      {
+        [darkDest]: darkDest,
+      },
+      {
+        [darkDest]: darkOutputInfo,
+      },
+    );
+
+    generated.push(darkSplashOutput);
+
+    return generated;
   }
 
   private async generateIcons(
@@ -277,35 +446,7 @@ export class PwaAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    const appleInterfacePage = `https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/`;
-
-    let assetSizes = PWA_IOS_DEVICE_SIZES;
-    if (!this.options.pwaNoAppleFetch) {
-      try {
-        const res = await fetch(appleInterfacePage);
-
-        const html = await res.text();
-
-        const doc = parse(html);
-
-        const target = doc.querySelector('main > section .row > .column table');
-        const sizes = target?.querySelectorAll('tr > td:nth-child(2)') ?? [];
-        const sizeStrings = sizes.map(td => {
-          const t = td.innerText;
-          return t
-            .slice(t.indexOf('pt (') + 4)
-            .slice(0, -1)
-            .replace(' px ', '');
-        });
-
-        assetSizes = sizeStrings;
-      } catch (e) {
-        warn(
-          `Unable to load iOS HIG screen sizes to generate iOS PWA splash screens. Using local snapshot of device sizes. Use --pwaNoAppleFetch true to always use local sizes`,
-        );
-      }
-    }
-    console.log('Generating splashes');
+    let assetSizes = await this.getSplashSizes();
 
     return Promise.all(
       assetSizes.map(a => this.generateSplash(project, asset, a, pipe)),

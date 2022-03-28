@@ -24,4 +24,6 @@ export interface AssetGeneratorOptions {
   pwaManifestPath?: string;
   // Whether to fetch latest device sizes from official apple site
   pwaNoAppleFetch?: boolean;
+  // Scale amount for logo when generating splashes. Default: 0.2 (20%)
+  logoSplashScale?: number;
 }
