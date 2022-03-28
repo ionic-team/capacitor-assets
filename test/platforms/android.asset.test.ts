@@ -157,6 +157,26 @@ describe('Android Asset Test - Logo Only', () => {
     assets = await ctx.project.loadInputAssets();
   });
 
+  async function verifySizes(
+    generatedAssets: OutputAsset<AndroidOutputAssetTemplate>[],
+  ) {
+    const sizedSet = await Promise.all(
+      generatedAssets.map(async asset => {
+        const dest = Object.values(asset.destFilenames)[0];
+        const pipe = sharp(dest);
+        const metadata = await pipe.metadata();
+        console.log(metadata.width, asset.template.width);
+        console.log(metadata.height, asset.template.height);
+        return (
+          metadata.width === asset.template.width &&
+          metadata.height === asset.template.height
+        );
+      }),
+    );
+    console.log(sizedSet);
+    expect(sizedSet.every(e => !!e)).toBe(true);
+  }
+
   afterAll(async () => {
     /*
     console.log(
@@ -178,7 +198,8 @@ describe('Android Asset Test - Logo Only', () => {
     );
     */
     // console.log(await readFile(join(fixtureDir, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), { encoding: 'utf-8' }));
-    await rm(fixtureDir, { force: true, recursive: true });
+    console.log(fixtureDir);
+    // await rm(fixtureDir, { force: true, recursive: true });
   });
 
   it('Should generate icons and splashes from logo', async () => {
@@ -192,6 +213,7 @@ describe('Android Asset Test - Logo Only', () => {
     )) ?? []) as OutputAsset<AndroidOutputAssetTemplate>[];
 
     expect(generatedAssets.length).toBe(48);
+    await verifySizes(generatedAssets);
   });
 
   it('Should generate icons and splashes from logo-dark', async () => {
@@ -205,5 +227,6 @@ describe('Android Asset Test - Logo Only', () => {
     )) ?? []) as OutputAsset<AndroidOutputAssetTemplate>[];
 
     expect(generatedAssets.length).toBe(12);
+    await verifySizes(generatedAssets);
   });
 });

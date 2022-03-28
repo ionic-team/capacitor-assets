@@ -25,8 +25,7 @@ describe('PWA Asset Test', () => {
   });
 
   afterAll(async () => {
-    // await rm(fixtureDir, { force: true, recursive: true });
-    console.log(fixtureDir);
+    await rm(fixtureDir, { force: true, recursive: true });
   });
 
   it('Should generate PWA icons', async () => {
@@ -105,9 +104,26 @@ describe('PWA Asset Test', () => {
   });
 });
 
-describe.only('PWA Asset Test - logo only', () => {
+describe('PWA Asset Test - logo only', () => {
   let ctx: Context;
   const fixtureDir = tempy.directory();
+
+  async function verifySizes(
+    generatedAssets: OutputAsset<PwaOutputAssetTemplate>[],
+  ) {
+    const sizedSet = await Promise.all(
+      generatedAssets.map(async asset => {
+        const dest = Object.values(asset.destFilenames)[0];
+        const pipe = sharp(dest);
+        const metadata = await pipe.metadata();
+        return (
+          metadata.width === asset.template.width &&
+          metadata.height === asset.template.height
+        );
+      }),
+    );
+    expect(sizedSet.every(e => !!e)).toBe(true);
+  }
 
   beforeAll(async () => {
     await copy('test/fixtures/app-logo-only', fixtureDir);
@@ -118,8 +134,7 @@ describe.only('PWA Asset Test - logo only', () => {
   });
 
   afterAll(async () => {
-    console.log(fixtureDir);
-    // await rm(fixtureDir, { force: true, recursive: true });
+    await rm(fixtureDir, { force: true, recursive: true });
   });
 
   it('Should update manifest with generated assets and colors from logo', async () => {
@@ -139,8 +154,7 @@ describe.only('PWA Asset Test - logo only', () => {
     const manifest = await readJSON(manifestPath);
     expect(manifest['background_color']).toBe('#dedbef');
 
-    console.log('Generated', generated.length, 'from source logo');
-
     expect(generated.length).toBeGreaterThan(30);
+    await verifySizes(generated as OutputAsset<PwaOutputAssetTemplate>[]);
   });
 });

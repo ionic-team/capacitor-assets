@@ -196,8 +196,23 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     const targetLogoWidthPercent = 0.2;
     const targetWidth = Math.floor(splash.width * targetLogoWidthPercent);
-    const extend = splash.width - targetWidth; //(asset.width ?? 0);
-    const outputInfo = await pipe
+
+    const canvas = sharp({
+      create: {
+        width: splash.width ?? 0,
+        height: splash.height ?? 0,
+        channels: 4,
+        background: backgroundColor,
+      },
+    });
+
+    const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+
+    const outputInfo = await canvas
+      .composite([{ input: resized, gravity: sharp.gravity.center }])
+      .png()
+      .toFile(dest);
+    /*pipe
       .extend({
         top: extend,
         right: extend,
@@ -215,6 +230,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       })
       .png()
       .toFile(dest);
+    */
 
     const splashOutput = new OutputAsset(
       splash,

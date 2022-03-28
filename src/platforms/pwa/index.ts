@@ -145,8 +145,6 @@ export class PwaAssetGenerator extends AssetGenerator {
     const height = parseFloat(sizeParts[1]);
     const density = parts[1];
 
-    console.log('Generating splash', asset.kind, width, height);
-
     const generated: OutputAsset[] = [];
 
     const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
@@ -449,11 +447,11 @@ export class PwaAssetGenerator extends AssetGenerator {
     let assetSizes = await this.getSplashSizes();
 
     return Promise.all(
-      assetSizes.map(a => this.generateSplash(project, asset, a, pipe)),
+      assetSizes.map(a => this._generateSplash(project, asset, a, pipe)),
     );
   }
 
-  private async generateSplash(
+  private async _generateSplash(
     project: Project,
     asset: InputAsset,
     sizeString: string,
@@ -468,8 +466,6 @@ export class PwaAssetGenerator extends AssetGenerator {
       asset.kind === AssetKind.SplashDark ? '-dark' : ''
     }.png`;
 
-    console.log('Generating splash', asset.kind, width, height);
-
     const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
     const pwaAssetDir = await this.getPWAAssetsDirectory(pwaDir);
     const destDir = join(pwaAssetDir, PWA_ASSET_PATH);
@@ -479,7 +475,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     const dest = join(destDir, name);
 
     // console.log(width, height);
-    const targetLogoWidthPercent = 0.2;
+    const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
     const targetWidth = Math.floor(width * targetLogoWidthPercent);
     const outputInfo = await pipe.resize(width, height).png().toFile(dest);
 
