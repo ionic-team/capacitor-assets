@@ -70,6 +70,9 @@ export class IosAssetGenerator extends AssetGenerator {
 
     const generated: OutputAsset[] = [];
 
+    const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
+    const targetWidth = Math.floor((asset.width ?? 0) * targetLogoWidthPercent);
+
     if (asset.kind === AssetKind.Logo) {
       // Generate light splash
       const lightDefaultBackground = '#ffffff';
@@ -79,26 +82,19 @@ export class IosAssetGenerator extends AssetGenerator {
         IOS_SPLASH_IMAGE_SET_PATH,
         lightSplash.name,
       );
-      const lightExtend = lightSplash.width - (asset.width ?? 0);
-      const lightOutputInfo = await pipe
-        .extend({
-          top: lightExtend,
-          right: lightExtend,
-          bottom: lightExtend,
-          left: lightExtend,
+
+      const canvas = sharp({
+        create: {
+          width: lightSplash.width ?? 0,
+          height: lightSplash.height ?? 0,
+          channels: 4,
           background:
             this.options.splashBackgroundColor ?? lightDefaultBackground,
-        })
-        .flatten({
-          background:
-            this.options.splashBackgroundColor ?? lightDefaultBackground,
-        })
-        .resize(lightSplash.width, lightSplash.height, {
-          fit: sharp.fit.outside,
-          position: sharp.gravity.center,
-          background:
-            this.options.splashBackgroundColor ?? lightDefaultBackground,
-        })
+        },
+      });
+      const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+      const lightOutputInfo = await canvas
+        .composite([{ input: resized, gravity: sharp.gravity.center }])
         .png()
         .toFile(lightDest);
 
@@ -121,26 +117,18 @@ export class IosAssetGenerator extends AssetGenerator {
     const darkDefaultBackground = '#111111';
     const darkSplash = IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK;
     const darkDest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, darkSplash.name);
-    const darkExtend = darkSplash.width - (asset.width ?? 0);
-    const darkOutputInfo = await pipe
-      .extend({
-        top: darkExtend,
-        right: darkExtend,
-        bottom: darkExtend,
-        left: darkExtend,
+    const canvas = sharp({
+      create: {
+        width: darkSplash.width ?? 0,
+        height: darkSplash.height ?? 0,
+        channels: 4,
         background:
           this.options.splashBackgroundColorDark ?? darkDefaultBackground,
-      })
-      .flatten({
-        background:
-          this.options.splashBackgroundColorDark ?? darkDefaultBackground,
-      })
-      .resize(darkSplash.width, darkSplash.height, {
-        fit: sharp.fit.outside,
-        position: sharp.gravity.center,
-        background:
-          this.options.splashBackgroundColorDark ?? darkDefaultBackground,
-      })
+      },
+    });
+    const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+    const darkOutputInfo = await canvas
+      .composite([{ input: resized, gravity: sharp.gravity.center }])
       .png()
       .toFile(darkDest);
 

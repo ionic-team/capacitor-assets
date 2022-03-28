@@ -192,6 +192,23 @@ describe('iOS Asset Test - Logo Only', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
+  async function verifySizes(
+    generatedAssets: OutputAsset<IosOutputAssetTemplate>[],
+  ) {
+    const sizedSet = await Promise.all(
+      generatedAssets.map(async asset => {
+        const dest = Object.values(asset.destFilenames)[0];
+        const pipe = sharp(dest);
+        const metadata = await pipe.metadata();
+        return (
+          metadata.width === asset.template.width &&
+          metadata.height === asset.template.height
+        );
+      }),
+    );
+    expect(sizedSet.every(e => !!e)).toBe(true);
+  }
+
   it('Should generate icons and splashes from logo', async () => {
     const strategy = new IosAssetGenerator({
       splashBackgroundColor: '#999999',
@@ -226,6 +243,8 @@ describe('iOS Asset Test - Logo Only', () => {
         i => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name,
       ),
     );
+
+    await verifySizes(generatedAssets);
   });
 
   it('Should generate icons and splashes from logo-dark', async () => {
@@ -266,5 +285,7 @@ describe('iOS Asset Test - Logo Only', () => {
         i => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name,
       ),
     );
+
+    await verifySizes(generatedAssets);
   });
 });

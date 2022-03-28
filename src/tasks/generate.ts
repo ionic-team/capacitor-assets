@@ -78,7 +78,10 @@ async function generateAssets(
 
   async function generateAndCollect(asset: InputAsset) {
     const g = await Promise.all(
-      generators.map(g => asset.generate(g, project)),
+      generators.map(g => {
+        console.log('Generating', g);
+        return asset.generate(g, project);
+      }),
     );
     generated.push(...(g.flat().filter(f => !!f) as OutputAsset[]));
   }
