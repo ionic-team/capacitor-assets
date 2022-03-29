@@ -28,23 +28,23 @@ export function runProgram(ctx: Context) {
     .option('--android', 'Generate Android assets')
     .option('--pwa', 'Generate PWA/Web assets')
     .option(
-      '--iconBackgroundColor',
+      '--iconBackgroundColor <color>',
       'Background color used for icons when generating from a single logo file',
     )
     .option(
-      '--iconBackgroundColorDark',
+      '--iconBackgroundColorDark <color>',
       'Background color used for icon in dark mode when generating from a single logo file',
     )
     .option(
-      '--splashBackgroundColor',
+      '--splashBackgroundColor <color>',
       'Background color used for splash screens when generating from a single logo file',
     )
     .option(
-      '--splashBackgroundColorDark',
+      '--splashBackgroundColorDark <color>',
       'Background color used for splash screens in dark mode when generating from a single logo file',
     )
     .option(
-      '--pwaManifestPath',
+      '--pwaManifestPath <path>',
       "Path to the web app's manifest.json or manifest.webmanifest file",
     )
     .option(
@@ -52,13 +52,15 @@ export function runProgram(ctx: Context) {
       'Whether to fetch the latest screen sizes for Apple devices from the official Apple site. Set to true if running offline to use local cached sizes (may be occasionally out of date)',
     )
     .option(
-      '--assetPath',
+      '--assetPath <path>',
       'Path to the assets directory for your project. By default will check "assets" and "resources" directories, in that order.',
     )
+    /*
     .option(
       '--pwaTags',
       'Log tags necessary for including generated PWA assets in your index.html file',
     )
+    */
     .action(
       wrapAction(async (args = {}) => {
         setArguments(ctx, args);
