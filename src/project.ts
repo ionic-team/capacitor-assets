@@ -12,12 +12,24 @@ export class Project extends CapacitorProject {
 
   assetDir: string;
 
-  constructor(config: CapacitorConfig, assetPath: string = 'assets') {
+  constructor(config: CapacitorConfig, private assetPath: string = 'assets') {
     super(config);
 
     const projectRoot = join((config.android ?? config.ios)?.path ?? '', '../');
     this.directory = projectRoot;
     this.assetDir = join(projectRoot, assetPath);
+    this.detectAssetDir(projectRoot);
+  }
+
+  async detectAssetDir(projectRoot: string) {
+    if (this.assetPath === 'assets' && !(await pathExists(this.assetDir))) {
+      this.assetDir = join(projectRoot, 'resources');
+    }
+    if (!(await pathExists(this.assetDir))) {
+      error(
+        'Unable to find asset directory. Specify the --assetPath to the directory containing your assets, or create an assets folder in the top of your project',
+      );
+    }
   }
 
   assetDirectory() {

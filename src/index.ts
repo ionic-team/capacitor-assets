@@ -52,6 +52,10 @@ export function runProgram(ctx: Context) {
       'Whether to fetch the latest screen sizes for Apple devices from the official Apple site. Set to true if running offline to use local cached sizes (may be occasionally out of date)',
     )
     .option(
+      '--assetPath',
+      'Path to the assets directory for your project. By default will check "assets" and "resources" directories, in that order.',
+    )
+    .option(
       '--pwaTags',
       'Log tags necessary for including generated PWA assets in your index.html file',
     )

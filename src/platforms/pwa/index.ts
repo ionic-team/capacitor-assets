@@ -586,6 +586,12 @@ Add the following tags to your index.html to support PWA icons:
       );
     }
 
+    console.log(
+      'Generated',
+      pwaAssets.filter(a => a.template.kind === AssetKind.Splash).length,
+      pwaAssets.filter(a => a.template.kind === AssetKind.SplashDark).length,
+    );
+
     /*
     for (const g of pwaAssets.filter(a => a.template.kind === AssetKind.Splash)) {
       const w = g.template.width;
