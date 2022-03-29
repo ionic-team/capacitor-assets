@@ -58,10 +58,11 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
       logGenerated(generated);
     }
 
-    console.log('Generated, logging instructions?', ctx.args, platforms);
+    /*
     if (!ctx.args.silent && platforms.indexOf('pwa') >= 0 && ctx.args.pwaTags) {
       PwaAssetGenerator.logInstructions(generated);
     }
+    */
 
     return generated;
   } catch (e) {
