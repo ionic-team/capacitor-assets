@@ -6,7 +6,7 @@ import { PwaAssetGenerator } from '../platforms/pwa';
 import { AndroidAssetGenerator } from '../platforms/android';
 import { AssetGenerator, AssetGeneratorOptions } from '../asset-generator';
 import { OutputAsset } from '../output-asset';
-import { Assets } from '../definitions';
+import { AssetKind, Assets } from '../definitions';
 import { Project } from '../project';
 import { InputAsset } from '../input-asset';
 
@@ -80,9 +80,7 @@ async function generateAssets(
 
   async function generateAndCollect(asset: InputAsset) {
     const g = await Promise.all(
-      generators.map(g => {
-        return asset.generate(g, project);
-      }),
+      generators.map(g => asset.generate(g, project)),
     );
     generated.push(...(g.flat().filter(f => !!f) as OutputAsset[]));
   }
@@ -124,7 +122,9 @@ function logGenerated(generated: OutputAsset[]) {
       log(
         `${c.strong(c.success('CREATE'))} ${c.strong(
           c.extra(g.template.platform),
-        )} ${filename ?? ''}${outputInfo ? ` (${size(outputInfo.size)})` : ''}`,
+        )} ${c.weak(g.template.kind)} ${filename ?? ''}${
+          outputInfo ? ` (${size(outputInfo.size)})` : ''
+        }`,
       );
     });
   }
