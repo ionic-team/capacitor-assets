@@ -73,7 +73,9 @@ export class PwaAssetGenerator extends AssetGenerator {
             .replace(' px ', '');
         });
 
-        assetSizes = sizeStrings;
+        const deduped = new Set(sizeStrings);
+
+        assetSizes = Array.from(deduped);
       } catch (e) {
         warn(
           `Unable to load iOS HIG screen sizes to generate iOS PWA splash screens. Using local snapshot of device sizes. Use --pwaNoAppleFetch true to always use local sizes`,
@@ -236,7 +238,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     const template: PwaOutputAssetTemplate = {
       name: `apple-splash-${width}-${height}@${density}-dark.png`,
       platform: Platform.Pwa,
-      kind: AssetKind.Splash,
+      kind: AssetKind.SplashDark,
       format: Format.Png,
       orientation: Orientation.Portrait,
       density: density[0],
@@ -547,7 +549,40 @@ Add the following tags to your index.html to support PWA icons:
       const h = g.template.height;
       const path = Object.values(g.destFilenames)[0] ?? '';
       log(
-        `<link rel="apple-touch-startup-image" href="${path}" media="(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${template.orientation})>`,
+        `<link rel="apple-touch-startup-image" href="${path}" media="(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Portrait})>`,
+      );
+    }
+    for (const g of pwaAssets.filter(
+      a => a.template.kind === AssetKind.Splash,
+    )) {
+      const template = g.template as PwaOutputAssetTemplate;
+      const w = g.template.width;
+      const h = g.template.height;
+      const path = Object.values(g.destFilenames)[0] ?? '';
+      log(
+        `<link rel="apple-touch-startup-image" href="${path}" media="(device-width: ${h}px) and (device-height: ${w}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Landscape})>`,
+      );
+    }
+    for (const g of pwaAssets.filter(
+      a => a.template.kind === AssetKind.SplashDark,
+    )) {
+      const template = g.template as PwaOutputAssetTemplate;
+      const w = g.template.width;
+      const h = g.template.height;
+      const path = Object.values(g.destFilenames)[0] ?? '';
+      log(
+        `<link rel="apple-touch-startup-image" href="${path}" media="(prefers-color-scheme: dark) and (device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Portrait})>`,
+      );
+    }
+    for (const g of pwaAssets.filter(
+      a => a.template.kind === AssetKind.SplashDark,
+    )) {
+      const template = g.template as PwaOutputAssetTemplate;
+      const w = g.template.width;
+      const h = g.template.height;
+      const path = Object.values(g.destFilenames)[0] ?? '';
+      log(
+        `<link rel="apple-touch-startup-image" href="${path}" media="(prefers-color-scheme: dark) and (device-width: ${h}px) and (device-height: ${w}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Landscape})>`,
       );
     }
 

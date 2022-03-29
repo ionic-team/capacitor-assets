@@ -58,7 +58,8 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
       logGenerated(generated);
     }
 
-    if (!ctx.args.silent && platforms.indexOf('pwa') >= 0) {
+    console.log('Generated, logging instructions?', ctx.args, platforms);
+    if (!ctx.args.silent && platforms.indexOf('pwa') >= 0 && ctx.args.pwaTags) {
       PwaAssetGenerator.logInstructions(generated);
     }
 
@@ -79,7 +80,6 @@ async function generateAssets(
   async function generateAndCollect(asset: InputAsset) {
     const g = await Promise.all(
       generators.map(g => {
-        console.log('Generating', g);
         return asset.generate(g, project);
       }),
     );

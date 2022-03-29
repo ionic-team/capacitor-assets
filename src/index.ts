@@ -51,6 +51,10 @@ export function runProgram(ctx: Context) {
       '--pwaNoAppleFetch',
       'Whether to fetch the latest screen sizes for Apple devices from the official Apple site. Set to true if running offline to use local cached sizes (may be occasionally out of date)',
     )
+    .option(
+      '--pwaTags',
+      'Log tags necessary for including generated PWA assets in your index.html file',
+    )
     .action(
       wrapAction(async (args = {}) => {
         setArguments(ctx, args);
