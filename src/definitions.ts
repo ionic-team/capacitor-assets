@@ -87,6 +87,24 @@ export const enum AndroidDensity {
   PortXhdpi = 'port-xhdpi',
   PortXxhdpi = 'port-xxhdpi',
   PortXxxhdpi = 'port-xxxhdpi',
+  LdpiNight = 'night-ldpi',
+  MdpiNight = 'night-mdpi',
+  HdpiNight = 'night-hdpi',
+  XhdpiNight = 'night-xhdpi',
+  XxhdpiNight = 'night-xxhdpi',
+  XxxhdpiNight = 'night-xxxhdpi',
+  LandLdpiNight = 'land-night-ldpi',
+  LandMdpiNight = 'land-night-mdpi',
+  LandHdpiNight = 'land-night-hdpi',
+  LandXhdpiNight = 'land-night-xhdpi',
+  LandXxhdpiNight = 'land-night-xxhdpi',
+  LandXxxhdpiNight = 'land-night-xxxhdpi',
+  PortLdpiNight = 'port-night-ldpi',
+  PortMdpiNight = 'port-night-mdpi',
+  PortHdpiNight = 'port-night-hdpi',
+  PortXhdpiNight = 'port-night-xhdpi',
+  PortXxhdpiNight = 'port-night-xxhdpi',
+  PortXxxhdpiNight = 'port-night-xxxhdpi',
 }
 
 export interface OutputAssetTemplate {
@@ -118,10 +136,8 @@ export interface AndroidOutputAssetTemplate extends OutputAssetTemplate {
 export interface AndroidOutputAssetTemplateSplash extends OutputAssetTemplate {
   density: AndroidDensity;
   orientation: Orientation;
-  theme: Theme;
 }
-export interface AndroidOutputAssetTemplateAdaptiveIcon
-  extends OutputAssetTemplate {
+export interface AndroidOutputAssetTemplateAdaptiveIcon extends OutputAssetTemplate {
   density: AndroidDensity;
 }
 

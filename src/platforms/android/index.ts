@@ -52,10 +52,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
    * from a single asset source file. In this mode, a logo along with a background color
    * is used to generate all icons and splash screens (with dark mode where possible).
    */
-  private async generateFromLogo(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateFromLogo(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
     const generated: OutputAsset[] = [];
 
@@ -64,54 +61,43 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
 
     // Generate adaptive icons
-    const generatedAdaptiveIcons = await this._generateAdaptiveIconsFromLogo(
-      project,
-      asset,
-      pipe,
-    );
+    const generatedAdaptiveIcons = await this._generateAdaptiveIconsFromLogo(project, asset, pipe);
     generated.push(...generatedAdaptiveIcons);
 
     if (asset.kind === AssetKind.Logo) {
       // Generate legacy icons
-      const generatedLegacyIcons = await this.generateLegacyIcon(
-        asset,
-        project,
-      );
+      const generatedLegacyIcons = await this.generateLegacyIcon(asset, project);
       generated.push(...generatedLegacyIcons);
 
-      const splashes = Object.values(AndroidAssetTemplates).filter(
-        a => a.kind === AssetKind.Splash,
-      );
+      const splashes = Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.Splash);
 
       const generatedSplashes = await Promise.all(
-        splashes.map(async splash => {
+        splashes.map(async (splash) => {
           return this._generateSplashesFromLogo(
             project,
             asset,
             splash,
             pipe,
-            this.options.splashBackgroundColor ?? '#ffffff',
+            this.options.splashBackgroundColor ?? '#ffffff'
           );
-        }),
+        })
       );
 
       generated.push(...generatedSplashes);
     }
 
     // Generate dark splashes
-    const darkSplashes = Object.values(AndroidAssetTemplates).filter(
-      a => a.kind === AssetKind.SplashDark,
-    );
+    const darkSplashes = Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.SplashDark);
     const generatedSplashes = await Promise.all(
-      darkSplashes.map(async splash => {
+      darkSplashes.map(async (splash) => {
         return this._generateSplashesFromLogo(
           project,
           asset,
           splash,
           pipe,
-          this.options.splashBackgroundColorDark ?? '#111111',
+          this.options.splashBackgroundColorDark ?? '#111111'
         );
-      }),
+      })
     );
 
     generated.push(...generatedSplashes);
@@ -123,7 +109,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
   private async _generateAdaptiveIconsFromLogo(
     project: Project,
     asset: InputAsset,
-    pipe: Sharp,
+    pipe: Sharp
   ): Promise<OutputAsset[]> {
     // Current versions of Android don't appear to support night mode icons (13+ might?)
     // so, for now, we only generate light mode ones
@@ -145,29 +131,19 @@ export class AndroidAssetGenerator extends AssetGenerator {
     });
 
     const icons = Object.values(AndroidAssetTemplates).filter(
-      a => a.kind === AssetKind.Icon,
+      (a) => a.kind === AssetKind.Icon
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const backgroundImages = await Promise.all(
-      icons.map(async icon => {
-        return await this._generateAdaptiveIconBackground(
-          project,
-          asset,
-          icon,
-          backgroundPipe,
-        );
-      }),
+      icons.map(async (icon) => {
+        return await this._generateAdaptiveIconBackground(project, asset, icon, backgroundPipe);
+      })
     );
 
     const foregroundImages = await Promise.all(
-      icons.map(async icon => {
-        return await this._generateAdaptiveIconForeground(
-          project,
-          asset,
-          icon,
-          pipe,
-        );
-      }),
+      icons.map(async (icon) => {
+        return await this._generateAdaptiveIconForeground(project, asset, icon, pipe);
+      })
     );
 
     return [...foregroundImages, ...backgroundImages];
@@ -178,15 +154,13 @@ export class AndroidAssetGenerator extends AssetGenerator {
     asset: InputAsset,
     splash: AndroidOutputAssetTemplate,
     pipe: Sharp,
-    backgroundColor: string,
+    backgroundColor: string
   ): Promise<OutputAsset> {
     // Generate light splash
     const androidDir = project.config.android!.path!;
     const resPath = join(androidDir, 'app', 'src', 'main', 'res');
 
-    const drawableDir = `drawable${
-      splash.kind === AssetKind.SplashDark ? `-night` : ''
-    }-${splash.density}`;
+    const drawableDir = `drawable-${splash.density}`;
 
     const parentDir = join(resPath, drawableDir);
     if (!(await pathExists(parentDir))) {
@@ -241,18 +215,15 @@ export class AndroidAssetGenerator extends AssetGenerator {
       },
       {
         [dest]: outputInfo,
-      },
+      }
     );
 
     return splashOutput;
   }
 
-  private async generateLegacyIcon(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateLegacyIcon(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
-      a => a.kind === AssetKind.Icon,
+      (a) => a.kind === AssetKind.Icon
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const pipe = asset.pipeline();
@@ -262,43 +233,33 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
 
     const collected = await Promise.all(
-      icons.map(async icon => {
-        const [dest, outputInfo] = await this.generateLegacyLauncherIcon(
-          project,
-          asset,
-          icon,
-          pipe,
-        );
+      icons.map(async (icon) => {
+        const [dest, outputInfo] = await this.generateLegacyLauncherIcon(project, asset, icon, pipe);
 
         return new OutputAsset(
           icon,
           asset,
           project,
           { [`mipmap-${icon.density}/ic_launcher.png`]: dest },
-          { [`mipmap-${icon.density}/ic_launcher.png`]: outputInfo },
+          { [`mipmap-${icon.density}/ic_launcher.png`]: outputInfo }
         );
-      }),
+      })
     );
 
     collected.push(
       ...(await Promise.all(
-        icons.map(async icon => {
-          const [dest, outputInfo] = await this.generateRoundLauncherIcon(
-            project,
-            asset,
-            icon,
-            pipe,
-          );
+        icons.map(async (icon) => {
+          const [dest, outputInfo] = await this.generateRoundLauncherIcon(project, asset, icon, pipe);
 
           return new OutputAsset(
             icon,
             asset,
             project,
             { [`mipmap-${icon.density}/ic_launcher_round.png`]: dest },
-            { [`mipmap-${icon.density}/ic_launcher_round.png`]: outputInfo },
+            { [`mipmap-${icon.density}/ic_launcher_round.png`]: outputInfo }
           );
-        }),
-      )),
+        })
+      ))
     );
 
     await this.updateManifest(project);
@@ -310,7 +271,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     template: AndroidOutputAssetTemplate,
-    pipe: Sharp,
+    pipe: Sharp
   ): Promise<[string, OutputInfo]> {
     const radius = 18; //template.width * 0.0833;
     const svg = `<svg width="${template.width}" height="${template.height}" viewBox="0 0 100 100"><rect x="0" y="0" width="100%" height="100%" rx="${radius}" fill="#ffffff"/></svg>`;
@@ -322,17 +283,11 @@ export class AndroidAssetGenerator extends AssetGenerator {
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
-    const destRound = join(
-      resPath,
-      `mipmap-${template.density}`,
-      'ic_launcher.png',
-    );
+    const destRound = join(resPath, `mipmap-${template.density}`, 'ic_launcher.png');
 
     // This pipeline is trick, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const resized = await sharp(asset.path)
-      .resize(template.width, template.height)
-      .toBuffer();
+    const resized = await sharp(asset.path).resize(template.width, template.height).toBuffer();
     const composited = await sharp(resized)
       .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .toBuffer();
@@ -345,28 +300,20 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     template: AndroidOutputAssetTemplate,
-    pipe: Sharp,
+    pipe: Sharp
   ): Promise<[string, OutputInfo]> {
-    const svg = `<svg width="${template.width}" height="${
-      template.height
-    }"><circle cx="${template.width / 2}" cy="${template.height / 2}" r="${
-      template.width / 2
-    }" fill="#ffffff"/></svg>`;
+    const svg = `<svg width="${template.width}" height="${template.height}"><circle cx="${template.width / 2}" cy="${
+      template.height / 2
+    }" r="${template.width / 2}" fill="#ffffff"/></svg>`;
 
     const androidDir = project.config.android!.path!;
 
     const resPath = join(androidDir, 'app', 'src', 'main', 'res');
-    const destRound = join(
-      resPath,
-      `mipmap-${template.density}`,
-      'ic_launcher_round.png',
-    );
+    const destRound = join(resPath, `mipmap-${template.density}`, 'ic_launcher_round.png');
 
     // This pipeline is trick, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const resized = await sharp(asset.path)
-      .resize(template.width, template.height)
-      .toBuffer();
+    const resized = await sharp(asset.path).resize(template.width, template.height).toBuffer();
     const composited = await sharp(resized)
       .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .toBuffer();
@@ -375,12 +322,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
     return [destRound, outputInfo];
   }
 
-  private async generateAdaptiveIconForeground(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateAdaptiveIconForeground(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
-      a => a.kind === AssetKind.Icon,
+      (a) => a.kind === AssetKind.Icon
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const pipe = asset.pipeline();
@@ -390,14 +334,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
 
     return Promise.all(
-      icons.map(async icon => {
-        return await this._generateAdaptiveIconForeground(
-          project,
-          asset,
-          icon,
-          pipe,
-        );
-      }),
+      icons.map(async (icon) => {
+        return await this._generateAdaptiveIconForeground(project, asset, icon, pipe);
+      })
     );
   }
 
@@ -405,26 +344,19 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     icon: AndroidOutputAssetTemplateAdaptiveIcon,
-    pipe: Sharp,
+    pipe: Sharp
   ) {
     const androidDir = project.config.android!.path!;
 
     const resPath = join(androidDir, 'app', 'src', 'main', 'res');
 
     // Create the foreground and background images
-    const destForeground = join(
-      resPath,
-      `mipmap-${icon.density}`,
-      'ic_launcher_foreground.png',
-    );
+    const destForeground = join(resPath, `mipmap-${icon.density}`, 'ic_launcher_foreground.png');
     let parentDir = dirname(destForeground);
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
-    const outputInfoForeground = await pipe
-      .resize(icon.width, icon.height)
-      .png()
-      .toFile(destForeground);
+    const outputInfoForeground = await pipe.resize(icon.width, icon.height).png().toFile(destForeground);
 
     // Create the adaptive icon XML
     const icLauncherXml = `
@@ -455,18 +387,14 @@ export class AndroidAssetGenerator extends AssetGenerator {
         'mipmap-anydpi-v26/ic_launcher_round.xml': destIcLauncherRound,
       },
       {
-        [`mipmap-${icon.density}/ic_launcher_foreground.png`]:
-          outputInfoForeground,
-      },
+        [`mipmap-${icon.density}/ic_launcher_foreground.png`]: outputInfoForeground,
+      }
     );
   }
 
-  private async generateAdaptiveIconBackground(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateAdaptiveIconBackground(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
-      a => a.kind === AssetKind.Icon,
+      (a) => a.kind === AssetKind.Icon
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const pipe = asset.pipeline();
@@ -476,40 +404,28 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
 
     return Promise.all(
-      icons.map(async icon => {
-        return await this._generateAdaptiveIconBackground(
-          project,
-          asset,
-          icon,
-          pipe,
-        );
-      }),
+      icons.map(async (icon) => {
+        return await this._generateAdaptiveIconBackground(project, asset, icon, pipe);
+      })
     );
   }
   private async _generateAdaptiveIconBackground(
     project: Project,
     asset: InputAsset,
     icon: AndroidOutputAssetTemplateAdaptiveIcon,
-    pipe: Sharp,
+    pipe: Sharp
   ) {
     const androidDir = project.config.android!.path!;
 
     const resPath = join(androidDir, 'app', 'src', 'main', 'res');
 
-    const destBackground = join(
-      resPath,
-      `mipmap-${icon.density}`,
-      'ic_launcher_background.png',
-    );
+    const destBackground = join(resPath, `mipmap-${icon.density}`, 'ic_launcher_background.png');
     const parentDir = dirname(destBackground);
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
 
-    const outputInfoBackground = await pipe
-      .resize(icon.width, icon.height)
-      .png()
-      .toFile(destBackground);
+    const outputInfoBackground = await pipe.resize(icon.width, icon.height).png().toFile(destBackground);
 
     // Create the adaptive icon XML
     const icLauncherXml = `
@@ -540,9 +456,8 @@ export class AndroidAssetGenerator extends AssetGenerator {
         'mipmap-anydpi-v26/ic_launcher_round.xml': destIcLauncherRound,
       },
       {
-        [`mipmap-${icon.density}/ic_launcher_background.png`]:
-          outputInfoBackground,
-      },
+        [`mipmap-${icon.density}/ic_launcher_background.png`]: outputInfoBackground,
+      }
     );
   }
 
@@ -555,10 +470,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     await project.commit();
   }
 
-  private async generateSplashes(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateSplashes(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -567,35 +479,20 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     const splashes = (
       asset.kind === AssetKind.Splash
-        ? Object.values(AndroidAssetTemplates).filter(
-            a => a.kind === AssetKind.Splash,
-          )
-        : Object.values(AndroidAssetTemplates).filter(
-            a => a.kind === AssetKind.SplashDark,
-          )
+        ? Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.Splash)
+        : Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.SplashDark)
     ) as AndroidOutputAssetTemplateSplash[];
 
     const androidDir = project.config.android!.path!;
     const resPath = join(androidDir, 'app', 'src', 'main', 'res');
 
     const collected = await Promise.all(
-      splashes.map(async splash => {
-        const [dest, outputInfo] = await this.generateSplash(
-          project,
-          asset,
-          splash,
-          pipe,
-        );
+      splashes.map(async (splash) => {
+        const [dest, outputInfo] = await this.generateSplash(project, asset, splash, pipe);
 
         const relPath = relative(resPath, dest);
-        return new OutputAsset(
-          splash,
-          asset,
-          project,
-          { [relPath]: dest },
-          { [relPath]: outputInfo },
-        );
-      }),
+        return new OutputAsset(splash, asset, project, { [relPath]: dest }, { [relPath]: outputInfo });
+      })
     );
 
     return collected;
@@ -605,13 +502,11 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     template: AndroidOutputAssetTemplateSplash,
-    pipe: Sharp,
+    pipe: Sharp
   ): Promise<[string, OutputInfo]> {
     const androidDir = project.config.android!.path!;
 
-    const drawableDir = `drawable${
-      template.kind === AssetKind.SplashDark ? `-night` : ''
-    }-${template.density}`;
+    const drawableDir = `drawable-${template.density}`;
 
     const resPath = join(androidDir, 'app', 'src', 'main', 'res');
     const parentDir = join(resPath, drawableDir);
@@ -620,10 +515,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
     const dest = join(resPath, drawableDir, 'splash.png');
 
-    const outputInfo = await pipe
-      .resize(template.width, template.height)
-      .png()
-      .toFile(dest);
+    const outputInfo = await pipe.resize(template.width, template.height).png().toFile(dest);
 
     return [dest, outputInfo];
   }
