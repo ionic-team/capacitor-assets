@@ -77,7 +77,7 @@ $ npm run capacitor-assets generate
 `capacitor-assets` accepts a platform for the first argument (`ios`, `android`, or `pwa` currently). If specified, resources are generated only for that platform:
 
 ```bash
-$ npm run capacitor-assets generate ios
+$ npm run capacitor-assets generate -- --ios
 ```
 
 Otherwise `capacitor-assets` will use all detected Capacitor platforms.
