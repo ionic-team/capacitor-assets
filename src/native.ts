@@ -45,6 +45,7 @@ import {
 
 export interface NativeProjectConfig {
   readonly directory: string;
+  readonly flavor?: string;
 }
 
 export const enum NativeResourceType {
@@ -75,7 +76,7 @@ const IOS_APP_ICON_SET_PATH = `App/App/Assets.xcassets/${IOS_APP_ICON_SET_NAME}.
 const IOS_SPLASH_IMAGE_SET_NAME = 'Splash';
 const IOS_SPLASH_IMAGE_SET_PATH = `App/App/Assets.xcassets/${IOS_SPLASH_IMAGE_SET_NAME}.imageset`;
 
-const ANDROID_RES_PATH = 'app/src/main/res';
+const ANDROID_RES_PATH = 'app/src/{FLAVOR}/res';
 
 const IOS_ICONS: readonly NativeResource[] = [
   {
@@ -405,10 +406,14 @@ export async function copyToNativeProject(
     }
   } else if (platform === Platform.ANDROID) {
     const androidProjectDirectory = nativeProject.directory || 'android';
+    const resPath = ANDROID_RES_PATH.replace(
+      '{FLAVOR}',
+      nativeProject.flavor || 'main',
+    );
     if (shouldCopyIcons) {
       count += await copyImages(
         path.join(resourcesDirectory, SOURCE_ANDROID_ICON),
-        path.join(androidProjectDirectory, ANDROID_RES_PATH),
+        path.join(androidProjectDirectory, resPath),
         ANDROID_ICONS,
         errstream,
       );
@@ -416,7 +421,7 @@ export async function copyToNativeProject(
     if (shouldCopySplash) {
       count += await copyImages(
         path.join(resourcesDirectory, SOURCE_ANDROID_SPLASH),
-        path.join(androidProjectDirectory, ANDROID_RES_PATH),
+        path.join(androidProjectDirectory, resPath),
         ANDROID_SPLASHES,
         errstream,
       );

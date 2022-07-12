@@ -35,6 +35,8 @@ export const DEFAULT_RESOURCES_DIRECTORY = 'resources';
 export const DEFAULT_FIT = 'cover';
 export const DEFAULT_POSITION = 'center';
 
+export const ANDROID_DEFAULT_FLAVOR = 'main';
+
 export function getDirectory(): string {
   return process.cwd();
 }
@@ -171,8 +173,13 @@ export function generateNativeProjectConfig(
   args: readonly string[],
 ): NativeProjectConfig {
   const directory = getOptionValue(args, `--${platform}-project`, platform);
+  const flavor = getOptionValue(
+    args,
+    `--${platform}-flavor`,
+    platform === Platform.ANDROID ? ANDROID_DEFAULT_FLAVOR : undefined,
+  );
 
-  return { directory };
+  return { directory, flavor };
 }
 
 export function parseCopyOption(args: readonly string[]): boolean {

@@ -111,7 +111,7 @@ describe('cordova-res', () => {
         resourcesDirectory: 'resources',
         platforms: generatePlatformsConfig('resources'),
         projectConfig: {
-          android: { directory: 'android' },
+          android: { directory: 'android', flavor: 'main' },
           ios: { directory: 'ios' },
           windows: { directory: 'windows' },
         },
@@ -136,7 +136,7 @@ describe('cordova-res', () => {
           platforms: {
             android: generateRunOptions(Platform.ANDROID, 'resources', args),
           },
-          projectConfig: { android: { directory: 'android' } },
+          projectConfig: { android: { directory: 'android', flavor: 'main' } },
         });
       });
 
@@ -155,6 +155,18 @@ describe('cordova-res', () => {
           ...DEFAULT_OPTIONS,
           platforms,
           resourcesDirectory,
+        });
+      });
+
+      it('should accept --android-flavor flag', () => {
+        const args = ['android', '--android-flavor', 'demo'];
+        const result = parseOptions(args);
+        expect(result).toEqual({
+          ...DEFAULT_OPTIONS,
+          platforms: {
+            android: generateRunOptions(Platform.ANDROID, 'resources', args),
+          },
+          projectConfig: { android: { directory: 'android', flavor: 'demo' } },
         });
       });
 

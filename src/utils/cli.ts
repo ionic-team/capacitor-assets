@@ -5,12 +5,12 @@ export function getOptionValue(
 export function getOptionValue(
   args: readonly string[],
   arg: string,
-  defaultValue: string,
+  defaultValue: string | undefined,
 ): string;
 export function getOptionValue(
   args: readonly string[],
   arg: string,
-  defaultValue?: string,
+  defaultValue?: string | undefined,
 ): string | undefined {
   const i = args.indexOf(arg);
 
