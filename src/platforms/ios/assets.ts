@@ -279,7 +279,7 @@ export const IOS_83_5_PT_2X_ICON: IosOutputAssetTemplate = {
 export const IOS_1024_ICON: IosOutputAssetTemplate = {
   platform: Platform.Ios,
   kind: AssetKind.Icon,
-  name: 'AppIcon-1024x1024.png',
+  name: 'AppIcon-512@2x.png',
   format: Format.Png,
   width: 1024,
   height: 1024,
