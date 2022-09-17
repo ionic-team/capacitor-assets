@@ -227,4 +227,21 @@ describe('Android Asset Test - Logo Only', () => {
     expect(generatedAssets.length).toBe(12);
     await verifySizes(generatedAssets);
   });
+
+  it('Should generate icons in the given flavor folder', async () => {
+    const strategy = new AndroidAssetGenerator({
+      androidFlavor: 'demo',
+    });
+    let generatedAssets = ((await assets.logo?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<AndroidOutputAssetTemplate>[];
+
+    generatedAssets.forEach((asset) => {
+      Object.keys(asset.destFilenames).forEach(async (name) => {
+        let filename = asset.getDestFilename(name);
+
+        expect(filename).toEqual(expect.stringContaining('/app/src/demo/res/'));
+        expect(await pathExists(filename)).toBe(true);
+      });
+    });
+  });
 });

@@ -26,4 +26,6 @@ export interface AssetGeneratorOptions {
   pwaNoAppleFetch?: boolean;
   // Scale amount for logo when generating splashes. Default: 0.2 (20%)
   logoSplashScale?: number;
+  // Android product flavor name where generated assets will be created. Default: main
+  androidFlavor?: string;
 }
