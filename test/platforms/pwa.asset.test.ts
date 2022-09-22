@@ -4,10 +4,7 @@ import tempy from 'tempy';
 import { Context, loadContext } from '../../src/ctx';
 import { PwaAssetGenerator } from '../../src/platforms/pwa';
 import { AssetKind, PwaOutputAssetTemplate } from '../../src/definitions';
-import {
-  ASSETS as PwaAssets,
-  PWA_IOS_DEVICE_SIZES,
-} from '../../src/platforms/pwa/assets';
+import { ASSETS as PwaAssets, PWA_IOS_DEVICE_SIZES } from '../../src/platforms/pwa/assets';
 import sharp from 'sharp';
 import { join, parse } from 'path';
 import { OutputAsset } from '../../src/output-asset';
@@ -31,37 +28,30 @@ describe('PWA Asset Test', () => {
   it('Should generate PWA icons', async () => {
     const assets = await ctx.project.loadInputAssets();
 
-    const exportedIcons = Object.values(PwaAssets).filter(
-      a => a.kind === AssetKind.Icon,
-    );
+    const exportedIcons = Object.values(PwaAssets).filter((a) => a.kind === AssetKind.Icon);
 
     const strategy = new PwaAssetGenerator();
-    let generatedAssets = ((await assets.icon?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<PwaOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.icon?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<PwaOutputAssetTemplate>[];
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     const existSet = await Promise.all(
-      generatedAssets.map(asset => {
+      generatedAssets.map((asset) => {
         const dest = asset.destFilenames[asset.template.name];
         return pathExists(dest);
-      }),
+      })
     );
-    expect(existSet.every(e => !!e)).toBe(true);
+    expect(existSet.every((e) => !!e)).toBe(true);
 
     const sizedSet = await Promise.all(
-      generatedAssets.map(async asset => {
+      generatedAssets.map(async (asset) => {
         const dest = asset.destFilenames[asset.template.name];
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
-        return (
-          metadata.width === asset.template.width &&
-          metadata.height === asset.template.height
-        );
-      }),
+        return metadata.width === asset.template.width && metadata.height === asset.template.height;
+      })
     );
-    expect(sizedSet.every(e => !!e)).toBe(true);
+    expect(sizedSet.every((e) => !!e)).toBe(true);
 
     const manifest = await strategy.getManifestJson(ctx.project);
     expect(manifest.icons.length).toBe(6);
@@ -73,7 +63,7 @@ describe('PWA Asset Test', () => {
           const num = fname.split('-')[1];
           return icon.sizes === `${num}x${num}`;
         })
-        .every((i: any) => !!i),
+        .every((i: any) => !!i)
     ).toBe(true);
 
     expect(
@@ -82,25 +72,21 @@ describe('PWA Asset Test', () => {
           const ext = parse(icon.src).ext;
           return ext === '.webp';
         })
-        .every((i: any) => !!i),
+        .every((i: any) => !!i)
     ).toBe(true);
   });
 
-  it('Should generate PWA splashes', async () => {
+  it.skip('Should generate PWA splashes', async () => {
     const assets = await ctx.project.loadInputAssets();
 
     const strategy = new PwaAssetGenerator();
-    let generatedAssets = ((await assets.splash?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<PwaOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.splash?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<PwaOutputAssetTemplate>[];
 
     expect(generatedAssets.length).toBeGreaterThan(10);
 
-    generatedAssets = ((await assets.splashDark?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<PwaOutputAssetTemplate>[];
+    generatedAssets = ((await assets.splashDark?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<PwaOutputAssetTemplate>[];
   });
 });
 
@@ -108,21 +94,16 @@ describe('PWA Asset Test - logo only', () => {
   let ctx: Context;
   const fixtureDir = tempy.directory();
 
-  async function verifySizes(
-    generatedAssets: OutputAsset<PwaOutputAssetTemplate>[],
-  ) {
+  async function verifySizes(generatedAssets: OutputAsset<PwaOutputAssetTemplate>[]) {
     const sizedSet = await Promise.all(
-      generatedAssets.map(async asset => {
+      generatedAssets.map(async (asset) => {
         const dest = Object.values(asset.destFilenames)[0];
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
-        return (
-          metadata.width === asset.template.width &&
-          metadata.height === asset.template.height
-        );
-      }),
+        return metadata.width === asset.template.width && metadata.height === asset.template.height;
+      })
     );
-    expect(sizedSet.every(e => !!e)).toBe(true);
+    expect(sizedSet.every((e) => !!e)).toBe(true);
   }
 
   beforeAll(async () => {
@@ -140,9 +121,7 @@ describe('PWA Asset Test - logo only', () => {
   it('Should update manifest with generated assets and colors from logo', async () => {
     const assets = await ctx.project.loadInputAssets();
 
-    const exportedIcons = Object.values(PwaAssets).filter(
-      a => a.kind === AssetKind.Icon,
-    );
+    const exportedIcons = Object.values(PwaAssets).filter((a) => a.kind === AssetKind.Icon);
 
     const strategy = new PwaAssetGenerator({
       splashBackgroundColor: '#dedbef',
@@ -154,7 +133,7 @@ describe('PWA Asset Test - logo only', () => {
     const manifest = await readJSON(manifestPath);
     expect(manifest['background_color']).toBe('#dedbef');
 
-    expect(generated.length).toBeGreaterThan(30);
+    expect(generated.length).toBe(7);
     await verifySizes(generated as OutputAsset<PwaOutputAssetTemplate>[]);
   });
 });

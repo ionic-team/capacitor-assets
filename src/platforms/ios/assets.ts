@@ -286,96 +286,6 @@ export const IOS_1024_ICON: IosOutputAssetTemplate = {
   scale: 1,
 };
 
-/**
- * 24pt Icon
- *
- * - Apple Watch Notification Center
- */
-export const IOS_24_PT_ICON: IosOutputAssetTemplate = {
-  platform: Platform.Ios,
-  kind: AssetKind.Icon,
-  name: 'AppIcon-24x24@2x.png',
-  format: Format.Png,
-  width: 48,
-  height: 48,
-  scale: 2,
-};
-
-/**
- * 27.5pt Icon
- *
- * - Apple Watch Notification Center
- */
-export const IOS_27_5_PT_ICON: IosOutputAssetTemplate = {
-  platform: Platform.Ios,
-  kind: AssetKind.Icon,
-  name: 'AppIcon-27.5x27.5@2x.png',
-  format: Format.Png,
-  width: 55,
-  height: 55,
-  scale: 2,
-};
-
-/**
- * 44pt Icon
- *
- * - Apple Watch Home Screen
- */
-export const IOS_44_PT_2X_ICON: IosOutputAssetTemplate = {
-  platform: Platform.Ios,
-  kind: AssetKind.Icon,
-  name: 'AppIcon-44x44@2x.png',
-  format: Format.Png,
-  width: 88,
-  height: 88,
-  scale: 2,
-};
-
-/**
- * 86pt Icon
- *
- * - Apple Watch Short Look
- */
-export const IOS_86_PT_2X_ICON: IosOutputAssetTemplate = {
-  platform: Platform.Ios,
-  kind: AssetKind.Icon,
-  name: 'AppIcon-86x86@2x.png',
-  format: Format.Png,
-  width: 172,
-  height: 172,
-  scale: 2,
-};
-
-/**
- * 98pt Icon
- *
- * - Apple Watch Short Look
- */
-export const IOS_98_PT_2X_ICON: IosOutputAssetTemplate = {
-  platform: Platform.Ios,
-  kind: AssetKind.Icon,
-  name: 'AppIcon-98x98@2x.png',
-  format: Format.Png,
-  width: 196,
-  height: 196,
-  scale: 2,
-};
-
-/**
- * 108pt Icon
- *
- * - Apple Watch Short Look
- */
-export const IOS_108_PT_2X_ICON: IosOutputAssetTemplate = {
-  platform: Platform.Ios,
-  kind: AssetKind.Icon,
-  name: 'AppIcon-108x108@2x.png',
-  format: Format.Png,
-  width: 216,
-  height: 216,
-  scale: 2,
-};
-
 export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {
   platform: Platform.Ios,
   kind: AssetKind.Splash,
@@ -388,15 +298,14 @@ export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {
   theme: Theme.Any,
 };
 
-export const IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK: IosOutputAssetTemplateSplash =
-  {
-    platform: Platform.Ios,
-    kind: AssetKind.SplashDark,
-    name: 'Default@2x~universal~anyany-dark.png',
-    format: Format.Png,
-    width: 2732,
-    height: 2732,
-    orientation: Orientation.Portrait,
-    scale: 2,
-    theme: Theme.Dark,
-  };
+export const IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK: IosOutputAssetTemplateSplash = {
+  platform: Platform.Ios,
+  kind: AssetKind.SplashDark,
+  name: 'Default@2x~universal~anyany-dark.png',
+  format: Format.Png,
+  width: 2732,
+  height: 2732,
+  orientation: Orientation.Portrait,
+  scale: 2,
+  theme: Theme.Dark,
+};
