@@ -3,8 +3,8 @@ import { join } from 'path';
 import { hideBin } from 'yargs/helpers';
 import { Project } from './project';
 
-import { CapacitorConfig } from '@capacitor/cli';
 import { AssetGeneratorOptions } from './asset-generator';
+import { MobileProjectConfig } from '@trapezedev/project';
 
 export interface Context {
   // Path the to the root of the capacitor project, if needed
@@ -22,10 +22,7 @@ export async function loadContext(projectRootPath?: string): Promise<Context> {
 
   let project: Project;
   try {
-    project = await loadProject(
-      projectRootPath,
-      (argv.assetPath as string) ?? 'assets',
-    );
+    project = await loadProject(projectRootPath, (argv.assetPath as string) ?? 'assets');
   } catch (e) {
     throw new Error(`Unable to load Capacitor project: ${(e as any).message}`);
   }
@@ -45,24 +42,22 @@ export function setArguments(ctx: Context, args: any) {
   process.env.VERBOSE = '' + !!args.verbose;
 }
 
-async function loadProject(
-  projectRootPath?: string,
-  projectAssetPath?: string,
-): Promise<Project> {
-  const config = await loadCapacitorConfig(projectRootPath);
-  const project = new Project(config, projectAssetPath);
+async function loadProject(projectRootPath?: string, projectAssetPath?: string): Promise<Project> {
+  const config = await loadMobileProjectConfig(projectRootPath);
+  console.log('Loading project', projectRootPath, projectAssetPath, config);
+  const project = new Project(projectRootPath, config, projectAssetPath);
   await project.load();
   return project;
 }
 
 // TODO: Use the config loading stuff from @capacitor/configure
-function loadCapacitorConfig(projectRootPath?: string): CapacitorConfig {
+function loadMobileProjectConfig(projectRootPath?: string): MobileProjectConfig {
   return {
     ios: {
-      path: projectRootPath ? join(projectRootPath, 'ios') : 'ios',
+      path: 'ios/App',
     },
     android: {
-      path: projectRootPath ? join(projectRootPath, 'android') : 'android',
+      path: 'android',
     },
   };
 }

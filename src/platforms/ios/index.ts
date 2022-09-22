@@ -7,17 +7,14 @@ import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
 import { AssetGenerator, AssetGeneratorOptions } from '../../asset-generator';
-import {
-  IOS_2X_UNIVERSAL_ANYANY_SPLASH,
-  IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK,
-} from './assets';
+import { IOS_2X_UNIVERSAL_ANYANY_SPLASH, IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK } from './assets';
 import * as IosAssetTemplates from './assets';
 import sharp from 'sharp';
 
 export const IOS_APP_ICON_SET_NAME = 'AppIcon';
-export const IOS_APP_ICON_SET_PATH = `App/App/Assets.xcassets/${IOS_APP_ICON_SET_NAME}.appiconset`;
+export const IOS_APP_ICON_SET_PATH = `App/Assets.xcassets/${IOS_APP_ICON_SET_NAME}.appiconset`;
 export const IOS_SPLASH_IMAGE_SET_NAME = 'Splash';
-export const IOS_SPLASH_IMAGE_SET_PATH = `App/App/Assets.xcassets/${IOS_SPLASH_IMAGE_SET_NAME}.imageset`;
+export const IOS_SPLASH_IMAGE_SET_PATH = `App/Assets.xcassets/${IOS_SPLASH_IMAGE_SET_NAME}.imageset`;
 
 export class IosAssetGenerator extends AssetGenerator {
   constructor(options: AssetGeneratorOptions = {}) {
@@ -53,10 +50,7 @@ export class IosAssetGenerator extends AssetGenerator {
     return [];
   }
 
-  private async generateFromLogo(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateFromLogo(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -67,6 +61,7 @@ export class IosAssetGenerator extends AssetGenerator {
 
     // Generate logos
     const logos = await this.generateIcons(asset, project);
+    console.log(logos);
 
     const generated: OutputAsset[] = [];
 
@@ -77,19 +72,14 @@ export class IosAssetGenerator extends AssetGenerator {
       // Generate light splash
       const lightDefaultBackground = '#ffffff';
       const lightSplash = IOS_2X_UNIVERSAL_ANYANY_SPLASH;
-      const lightDest = join(
-        iosDir,
-        IOS_SPLASH_IMAGE_SET_PATH,
-        lightSplash.name,
-      );
+      const lightDest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, lightSplash.name);
 
       const canvas = sharp({
         create: {
           width: lightSplash.width ?? 0,
           height: lightSplash.height ?? 0,
           channels: 4,
-          background:
-            this.options.splashBackgroundColor ?? lightDefaultBackground,
+          background: this.options.splashBackgroundColor ?? lightDefaultBackground,
         },
       });
       const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
@@ -107,7 +97,7 @@ export class IosAssetGenerator extends AssetGenerator {
         },
         {
           [lightDest]: lightOutputInfo,
-        },
+        }
       );
 
       generated.push(lightSplashOutput);
@@ -122,8 +112,7 @@ export class IosAssetGenerator extends AssetGenerator {
         width: darkSplash.width ?? 0,
         height: darkSplash.height ?? 0,
         channels: 4,
-        background:
-          this.options.splashBackgroundColorDark ?? darkDefaultBackground,
+        background: this.options.splashBackgroundColorDark ?? darkDefaultBackground,
       },
     });
     const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
@@ -141,7 +130,7 @@ export class IosAssetGenerator extends AssetGenerator {
       },
       {
         [darkDest]: darkOutputInfo,
-      },
+      }
     );
 
     generated.push(darkSplashOutput);
@@ -154,7 +143,7 @@ export class IosAssetGenerator extends AssetGenerator {
   private async _generateIcons(
     asset: InputAsset,
     project: Project,
-    icons: IosOutputAssetTemplate[],
+    icons: IosOutputAssetTemplate[]
   ): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
@@ -164,13 +153,10 @@ export class IosAssetGenerator extends AssetGenerator {
 
     const iosDir = project.config.ios!.path!;
     return Promise.all(
-      icons.map(async icon => {
+      icons.map(async (icon) => {
         const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
 
-        const outputInfo = await pipe
-          .resize(icon.width, icon.height)
-          .png()
-          .toFile(dest);
+        const outputInfo = await pipe.resize(icon.width, icon.height).png().toFile(dest);
 
         return new OutputAsset(
           icon,
@@ -181,76 +167,37 @@ export class IosAssetGenerator extends AssetGenerator {
           },
           {
             [icon.name]: outputInfo,
-          },
+          }
         );
-      }),
+      })
     );
   }
 
-  private async generateIcons(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter(
-      a => a.kind === AssetKind.Icon,
-    );
+  private async generateIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
+    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.Icon);
 
-    return this._generateIcons(
-      asset,
-      project,
-      icons as IosOutputAssetTemplate[],
-    );
+    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
   }
 
-  private async generateNotificationIcons(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter(
-      a => a.kind === AssetKind.NotificationIcon,
-    );
+  private async generateNotificationIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
+    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.NotificationIcon);
 
-    return this._generateIcons(
-      asset,
-      project,
-      icons as IosOutputAssetTemplate[],
-    );
+    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
   }
 
-  private async generateSettingsIcons(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter(
-      a => a.kind === AssetKind.SettingsIcon,
-    );
+  private async generateSettingsIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
+    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.SettingsIcon);
 
-    return this._generateIcons(
-      asset,
-      project,
-      icons as IosOutputAssetTemplate[],
-    );
+    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
   }
 
-  private async generateSpotlightIcons(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter(
-      a => a.kind === AssetKind.SpotlightIcon,
-    );
+  private async generateSpotlightIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
+    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.SpotlightIcon);
 
-    return this._generateIcons(
-      asset,
-      project,
-      icons as IosOutputAssetTemplate[],
-    );
+    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
   }
 
-  private async generateSplashes(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateSplashes(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -258,17 +205,12 @@ export class IosAssetGenerator extends AssetGenerator {
     }
 
     const assetMeta =
-      asset.kind === AssetKind.Splash
-        ? IOS_2X_UNIVERSAL_ANYANY_SPLASH
-        : IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK;
+      asset.kind === AssetKind.Splash ? IOS_2X_UNIVERSAL_ANYANY_SPLASH : IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK;
 
     const iosDir = project.config.ios!.path!;
     const dest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, assetMeta.name);
 
-    const outputInfo = await pipe
-      .resize(assetMeta.width, assetMeta.height)
-      .png()
-      .toFile(dest);
+    const outputInfo = await pipe.resize(assetMeta.width, assetMeta.height).png().toFile(dest);
 
     const generated = new OutputAsset(
       assetMeta,
@@ -279,7 +221,7 @@ export class IosAssetGenerator extends AssetGenerator {
       },
       {
         [assetMeta.name]: outputInfo,
-      },
+      }
     );
 
     if (asset.kind === AssetKind.SplashDark) {
@@ -290,15 +232,8 @@ export class IosAssetGenerator extends AssetGenerator {
     return [generated];
   }
 
-  private async updateContentsJsonDark(
-    generated: OutputAsset,
-    project: Project,
-  ) {
-    const contentsJsonPath = join(
-      project.config.ios!.path!,
-      IOS_SPLASH_IMAGE_SET_PATH,
-      'Contents.json',
-    );
+  private async updateContentsJsonDark(generated: OutputAsset, project: Project) {
+    const contentsJsonPath = join(project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
     const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
 
     const parsed = JSON.parse(json);
