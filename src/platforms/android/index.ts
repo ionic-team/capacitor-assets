@@ -157,8 +157,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     backgroundColor: string
   ): Promise<OutputAsset> {
     // Generate light splash
-    const androidDir = project.config.android!.path!;
-    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const resPath = this.getResPath(project);
 
     const drawableDir = `drawable-${splash.density}`;
 
@@ -276,9 +275,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     const radius = 18; //template.width * 0.0833;
     const svg = `<svg width="${template.width}" height="${template.height}" viewBox="0 0 100 100"><rect x="0" y="0" width="100%" height="100%" rx="${radius}" fill="#ffffff"/></svg>`;
 
-    const androidDir = project.config.android!.path!;
-
-    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const resPath = this.getResPath(project);
     const parentDir = join(resPath, `mipmap-${template.density}`);
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
@@ -306,9 +303,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       template.height / 2
     }" r="${template.width / 2}" fill="#ffffff"/></svg>`;
 
-    const androidDir = project.config.android!.path!;
-
-    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const resPath = this.getResPath(project);
     const destRound = join(resPath, `mipmap-${template.density}`, 'ic_launcher_round.png');
 
     // This pipeline is trick, but we need two separate pipelines
@@ -346,9 +341,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     icon: AndroidOutputAssetTemplateAdaptiveIcon,
     pipe: Sharp
   ) {
-    const androidDir = project.config.android!.path!;
-
-    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const resPath = this.getResPath(project);
 
     // Create the foreground and background images
     const destForeground = join(resPath, `mipmap-${icon.density}`, 'ic_launcher_foreground.png');
@@ -415,9 +408,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     icon: AndroidOutputAssetTemplateAdaptiveIcon,
     pipe: Sharp
   ) {
-    const androidDir = project.config.android!.path!;
-
-    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const resPath = this.getResPath(project);
 
     const destBackground = join(resPath, `mipmap-${icon.density}`, 'ic_launcher_background.png');
     const parentDir = dirname(destBackground);
@@ -483,8 +474,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
         : Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.SplashDark)
     ) as AndroidOutputAssetTemplateSplash[];
 
-    const androidDir = project.config.android!.path!;
-    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const resPath = this.getResPath(project);
 
     const collected = await Promise.all(
       splashes.map(async (splash) => {
@@ -504,11 +494,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
     template: AndroidOutputAssetTemplateSplash,
     pipe: Sharp
   ): Promise<[string, OutputInfo]> {
-    const androidDir = project.config.android!.path!;
-
     const drawableDir = `drawable-${template.density}`;
 
-    const resPath = join(androidDir, 'app', 'src', 'main', 'res');
+    const resPath = this.getResPath(project);
     const parentDir = join(resPath, drawableDir);
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
@@ -518,5 +506,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
     const outputInfo = await pipe.resize(template.width, template.height).png().toFile(dest);
 
     return [dest, outputInfo];
+  }
+
+  private getResPath(project: Project): string {
+    return join(project.config.android!.path!, 'app', 'src', this.options.androidFlavor ?? 'main', 'res');
   }
 }
