@@ -1,6 +1,6 @@
 {
   "name": "@capacitor/assets",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Generate icon and splash screen images for Capacitor apps",
   "homepage": "https://ionicframework.com",
   "author": "Ionic Team <hi@ionicframework.com>",
@@ -57,7 +57,7 @@
     "@capacitor/cli": "^3.2.5",
     "@ionic/utils-array": "^2.1.5",
     "@ionic/utils-fs": "^3.1.5",
-    "@trapezedev/project": "^5.0.4",
+    "@trapezedev/project": "^5.0.5",
     "@types/fs-extra": "^9.0.13",
     "@types/slice-ansi": "^5.0.0",
     "commander": "^8.3.0",

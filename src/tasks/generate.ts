@@ -14,15 +14,11 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
   try {
     const assets = await ctx.project.loadInputAssets();
 
-    if (
-      [assets.logo, assets.icon, assets.splash, assets.splashDark].every(
-        a => !a,
-      )
-    ) {
+    if ([assets.logo, assets.icon, assets.splash, assets.splashDark].every((a) => !a)) {
       error(
         `No assets found in the asset path ${c.ancillary(
-          ctx.project.assetDir,
-        )}. See capacitor-assets documentation to learn how to use this tool.`,
+          ctx.project.assetDir
+        )}. See capacitor-assets documentation to learn how to use this tool.`
       );
       return [];
     }
@@ -43,11 +39,7 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
     }
 
     if (!ctx.args.silent) {
-      log(
-        `Generating assets for ${platforms
-          .map(p => c.strong(c.success(p)))
-          .join(', ')}`,
-      );
+      log(`Generating assets for ${platforms.map((p) => c.strong(c.success(p))).join(', ')}`);
     }
 
     const generators = getGenerators(ctx, platforms);
@@ -66,26 +58,21 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
 
     return generated;
   } catch (e) {
-    error('Unable to generate assets', e as Error);
+    error('Unable to generate assets', (e as Error).message);
+    error(e);
   }
   return [];
 }
 
-async function generateAssets(
-  assets: Assets,
-  generators: AssetGenerator[],
-  project: Project,
-) {
+async function generateAssets(assets: Assets, generators: AssetGenerator[], project: Project) {
   const generated: OutputAsset[] = [];
 
   async function generateAndCollect(asset: InputAsset) {
-    const g = await Promise.all(
-      generators.map(g => asset.generate(g, project)),
-    );
-    generated.push(...(g.flat().filter(f => !!f) as OutputAsset[]));
+    const g = await Promise.all(generators.map((g) => asset.generate(g, project)));
+    generated.push(...(g.flat().filter((f) => !!f) as OutputAsset[]));
   }
 
-  const assetTypes = Object.values(assets).filter(v => !!v);
+  const assetTypes = Object.values(assets).filter((v) => !!v);
 
   for (const asset of assetTypes) {
     await generateAndCollect(asset);
@@ -95,7 +82,7 @@ async function generateAssets(
 }
 
 function getGenerators(ctx: Context, platforms: string[]): AssetGenerator[] {
-  return platforms.map(p => {
+  return platforms.map((p) => {
     if (p === 'ios') {
       return new IosAssetGenerator(ctx.args as AssetGeneratorOptions);
     }
@@ -116,15 +103,13 @@ function logGenerated(generated: OutputAsset[]) {
   });
 
   for (const g of sorted) {
-    Object.keys(g.destFilenames).forEach(name => {
+    Object.keys(g.destFilenames).forEach((name) => {
       const filename = g.getDestFilename(name);
       const outputInfo = g.getOutputInfo(name);
       log(
-        `${c.strong(c.success('CREATE'))} ${c.strong(
-          c.extra(g.template.platform),
-        )} ${c.weak(g.template.kind)} ${filename ?? ''}${
-          outputInfo ? ` (${size(outputInfo.size)})` : ''
-        }`,
+        `${c.strong(c.success('CREATE'))} ${c.strong(c.extra(g.template.platform))} ${c.weak(g.template.kind)} ${
+          filename ?? ''
+        }${outputInfo ? ` (${size(outputInfo.size)})` : ''}`
       );
     });
   }
@@ -143,11 +128,8 @@ function logGenerated(generated: OutputAsset[]) {
 
       const entry = totals[g.template.platform];
 
-      const count = Object.values(g.destFilenames).reduce(v => v + 1, 0);
-      const size = Object.values(g.outputInfoMap).reduce(
-        (v, c) => v + c.size,
-        0,
-      );
+      const count = Object.values(g.destFilenames).reduce((v) => v + 1, 0);
+      const size = Object.values(g.outputInfoMap).reduce((v, c) => v + c.size, 0);
 
       totals[g.template.platform] = {
         count: entry.count + count,
@@ -161,25 +143,19 @@ function logGenerated(generated: OutputAsset[]) {
         count: number;
         size: number;
       };
-    },
+    }
   );
 
   log('Totals:');
   for (const platformName of Object.keys(totals).sort()) {
     const e = totals[platformName];
     log(
-      `${c.strong(c.success(platformName))}: ${c.strong(
-        c.extra(e.count),
-      )} generated, ${c.strong(size(e.size))} total`,
+      `${c.strong(c.success(platformName))}: ${c.strong(c.extra(e.count))} generated, ${c.strong(size(e.size))} total`
     );
   }
 }
 
 function size(bytes: number) {
   var i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return (
-    Number((bytes / Math.pow(1024, i)).toFixed(2)) * 1 +
-    ' ' +
-    ['B', 'KB', 'MB', 'GB', 'TB'][i]
-  );
+  return Number((bytes / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
 }

@@ -43,15 +43,14 @@ export function setArguments(ctx: Context, args: any) {
 }
 
 async function loadProject(projectRootPath?: string, projectAssetPath?: string): Promise<Project> {
-  const config = await loadMobileProjectConfig(projectRootPath);
-  console.log('Loading project', projectRootPath, projectAssetPath, config);
+  const config = await loadMobileProjectConfig();
   const project = new Project(projectRootPath, config, projectAssetPath);
   await project.load();
   return project;
 }
 
 // TODO: Use the config loading stuff from @capacitor/configure
-function loadMobileProjectConfig(projectRootPath?: string): MobileProjectConfig {
+function loadMobileProjectConfig(): MobileProjectConfig {
   return {
     ios: {
       path: 'ios/App',

@@ -13,9 +13,7 @@ const options = {
   stream: process.argv.includes('--json') ? process.stderr : process.stdout,
 };
 
-export const output = isInteractive()
-  ? new TTYOutputStrategy(options)
-  : new StreamOutputStrategy(options);
+export const output = isInteractive() ? new TTYOutputStrategy(options) : new StreamOutputStrategy(options);
 
 export const logger = createDefaultLogger({
   output,
@@ -44,7 +42,7 @@ export function warn(...args: any[]) {
 }
 
 export function error(...args: any[]) {
-  console.warn(...args);
+  console.error(...args);
 }
 
 export function fatal(msg: string, exc?: Error): never {

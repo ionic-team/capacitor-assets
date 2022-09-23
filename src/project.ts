@@ -11,10 +11,12 @@ export class Project extends MobileProject {
 
   assetDir: string;
 
-  constructor(projectRoot: string = '', config: MobileProjectConfig, private assetPath: string = 'assets') {
+  constructor(projectRoot: string = process.cwd(), config: MobileProjectConfig, private assetPath: string = 'assets') {
     super(projectRoot, config);
 
     // const projectRoot = join((config.android ?? config.ios)?.path ?? '', '../');
+    console.log('Project', projectRoot);
+
     this.directory = projectRoot;
     this.assetDir = join(projectRoot, assetPath);
     this.detectAssetDir(projectRoot);
