@@ -60,7 +60,7 @@
     "@trapezedev/project": "^5.0.4",
     "@types/fs-extra": "^9.0.13",
     "@types/slice-ansi": "^5.0.0",
-    "commander": "^8.3.0",
+    "commander": "^9.4.0",
     "debug": "^4.2.0",
     "fs-extra": "^10.0.1",
     "node-fetch": "^2.6.7",
