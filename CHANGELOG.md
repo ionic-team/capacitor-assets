@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 1.0.3
+
+### Patch Changes
+
+- Fixed iOS image sizes
+
 ## 1.0.2
 
 ### Patch Changes
