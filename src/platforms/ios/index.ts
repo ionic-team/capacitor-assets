@@ -60,7 +60,7 @@ export class IosAssetGenerator extends AssetGenerator {
     const iosDir = project.config.ios!.path!;
 
     // Generate logos
-    const logos = await this.generateIcons(asset, project);
+    const logos = await this.generateIconsForLogo(asset, project);
 
     const generated: OutputAsset[] = [];
 
@@ -170,6 +170,17 @@ export class IosAssetGenerator extends AssetGenerator {
         );
       })
     );
+  }
+
+  // Generate ALL the icons when only given a logo
+  private async generateIconsForLogo(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
+    const icons = Object.values(IosAssetTemplates).filter((a) =>
+      [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].find(
+        (i) => i === a.kind
+      )
+    );
+
+    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
   }
 
   private async generateIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {

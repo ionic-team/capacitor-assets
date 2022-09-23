@@ -15,7 +15,6 @@ export class Project extends MobileProject {
     super(projectRoot, config);
 
     // const projectRoot = join((config.android ?? config.ios)?.path ?? '', '../');
-    console.log('Project', projectRoot);
 
     this.directory = projectRoot;
     this.assetDir = join(projectRoot, assetPath);
