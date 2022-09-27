@@ -88,7 +88,7 @@ Otherwise `capacitor-assets` will use all detected Capacitor platforms.
 
 This tool will create and/or update the web app manifest used in your project, and supports both the older `manifest.json` file and the newer `manifest.webmanifest` files, preferring `manifest.webmanifest` when no existing manifest is found.
 
-By default, the tool will look for the manifest file in `public`, `src`, and `www` in that order. Use the flag `--webManifestPath` to specify the exact path to your web app manifest.
+By default, the tool will look for the manifest file in `public`, `src`, and `www` in that order. Use the flag `--pwaManifestPath` to specify the exact path to your web app manifest.
 
 ### Help
 
