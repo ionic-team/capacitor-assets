@@ -2,17 +2,8 @@ import { copy, pathExists, readFile, rm } from '@ionic/utils-fs';
 import tempy from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';
-import {
-  IosAssetGenerator,
-  IOS_SPLASH_IMAGE_SET_PATH,
-} from '../../src/platforms/ios';
-import {
-  AssetKind,
-  Assets,
-  Format,
-  IosContents,
-  IosOutputAssetTemplate,
-} from '../../src/definitions';
+import { IosAssetGenerator, IOS_SPLASH_IMAGE_SET_PATH } from '../../src/platforms/ios';
+import { AssetKind, Assets, Format, IosContents, IosOutputAssetTemplate } from '../../src/definitions';
 import * as IosAssets from '../../src/platforms/ios/assets';
 import sharp from 'sharp';
 import { join } from 'path';
@@ -36,86 +27,58 @@ describe('iOS Asset Test', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
-  async function verifyExists(
-    generatedAssets: OutputAsset<IosOutputAssetTemplate>[],
-  ) {
+  async function verifyExists(generatedAssets: OutputAsset<IosOutputAssetTemplate>[]) {
     const existSet = await Promise.all(
-      generatedAssets.map(asset => {
+      generatedAssets.map((asset) => {
         const dest = asset.destFilenames[asset.template.name];
         return pathExists(dest);
-      }),
+      })
     );
-    expect(existSet.every(e => !!e)).toBe(true);
+    expect(existSet.every((e) => !!e)).toBe(true);
   }
 
-  async function verifySizes(
-    generatedAssets: OutputAsset<IosOutputAssetTemplate>[],
-  ) {
+  async function verifySizes(generatedAssets: OutputAsset<IosOutputAssetTemplate>[]) {
     const sizedSet = await Promise.all(
-      generatedAssets.map(async asset => {
+      generatedAssets.map(async (asset) => {
         const dest = asset.destFilenames[asset.template.name];
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
-        return (
-          metadata.width === asset.template.width &&
-          metadata.height === asset.template.height
-        );
-      }),
+        return metadata.width === asset.template.width && metadata.height === asset.template.height;
+      })
     );
-    expect(sizedSet.every(e => !!e)).toBe(true);
+    expect(sizedSet.every((e) => !!e)).toBe(true);
   }
 
   it('Should generate ios splashes', async () => {
     const strategy = new IosAssetGenerator();
-    let generatedAssets = ((await assets.splash?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.splash?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<IosOutputAssetTemplate>[];
 
-    let dest = generatedAssets[0].getDestFilename(
-      generatedAssets[0]?.template.name,
-    );
+    let dest = generatedAssets[0].getDestFilename(generatedAssets[0]?.template.name);
     expect(generatedAssets.length).toBe(3);
     expect(await pathExists(dest ?? '')).toBe(true);
 
-    generatedAssets = ((await assets.splashDark?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+    generatedAssets = ((await assets.splashDark?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<IosOutputAssetTemplate>[];
 
-    dest = generatedAssets[0].getDestFilename(
-      generatedAssets[0]?.template.name,
-    );
+    dest = generatedAssets[0].getDestFilename(generatedAssets[0]?.template.name);
     expect(generatedAssets.length).toBe(3);
     expect(await pathExists(dest ?? '')).toBe(true);
 
     const contentsJson = JSON.parse(
-      await readFile(
-        join(
-          ctx.project.config.ios!.path!,
-          IOS_SPLASH_IMAGE_SET_PATH,
-          'Contents.json',
-        ),
-        { encoding: 'utf-8' },
-      ),
+      await readFile(join(ctx.project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json'), {
+        encoding: 'utf-8',
+      })
     ) as IosContents;
-    expect(
-      contentsJson.images.find(
-        i => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name,
-      ),
-    );
+    expect(contentsJson.images.find((i) => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name));
   });
 
   it('Should generate ios icons', async () => {
-    const exportedIcons = Object.values(IosAssets).filter(
-      a => a.kind === AssetKind.Icon,
-    );
+    const exportedIcons = Object.values(IosAssets).filter((a) => a.kind === AssetKind.Icon);
 
     const strategy = new IosAssetGenerator();
-    let generatedAssets = ((await assets.icon?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.icon?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<IosOutputAssetTemplate>[];
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     await verifyExists(generatedAssets);
@@ -123,15 +86,11 @@ describe('iOS Asset Test', () => {
   });
 
   it('Should generate ios notification icons', async () => {
-    const exportedIcons = Object.values(IosAssets).filter(
-      a => a.kind === AssetKind.NotificationIcon,
-    );
+    const exportedIcons = Object.values(IosAssets).filter((a) => a.kind === AssetKind.NotificationIcon);
 
     const strategy = new IosAssetGenerator();
-    let generatedAssets = ((await assets.iosNotificationIcon?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.iosNotificationIcon?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<IosOutputAssetTemplate>[];
     expect(generatedAssets.length).toBeGreaterThan(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
@@ -140,15 +99,11 @@ describe('iOS Asset Test', () => {
   });
 
   it('Should generate ios settings icons', async () => {
-    const exportedIcons = Object.values(IosAssets).filter(
-      a => a.kind === AssetKind.SettingsIcon,
-    );
+    const exportedIcons = Object.values(IosAssets).filter((a) => a.kind === AssetKind.SettingsIcon);
 
     const strategy = new IosAssetGenerator();
-    let generatedAssets = ((await assets.iosSettingsIcon?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.iosSettingsIcon?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<IosOutputAssetTemplate>[];
     expect(generatedAssets.length).toBeGreaterThan(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
@@ -157,15 +112,11 @@ describe('iOS Asset Test', () => {
   });
 
   it('Should generate ios spotlight icons', async () => {
-    const exportedIcons = Object.values(IosAssets).filter(
-      a => a.kind === AssetKind.SpotlightIcon,
-    );
+    const exportedIcons = Object.values(IosAssets).filter((a) => a.kind === AssetKind.SpotlightIcon);
 
     const strategy = new IosAssetGenerator();
-    let generatedAssets = ((await assets.iosSpotlightIcon?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.iosSpotlightIcon?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<IosOutputAssetTemplate>[];
     expect(generatedAssets.length).toBeGreaterThan(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
@@ -192,21 +143,16 @@ describe('iOS Asset Test - Logo Only', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
-  async function verifySizes(
-    generatedAssets: OutputAsset<IosOutputAssetTemplate>[],
-  ) {
+  async function verifySizes(generatedAssets: OutputAsset<IosOutputAssetTemplate>[]) {
     const sizedSet = await Promise.all(
-      generatedAssets.map(async asset => {
+      generatedAssets.map(async (asset) => {
         const dest = Object.values(asset.destFilenames)[0];
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
-        return (
-          metadata.width === asset.template.width &&
-          metadata.height === asset.template.height
-        );
-      }),
+        return metadata.width === asset.template.width && metadata.height === asset.template.height;
+      })
     );
-    expect(sizedSet.every(e => !!e)).toBe(true);
+    expect(sizedSet.every((e) => !!e)).toBe(true);
   }
 
   it('Should generate icons and splashes from logo', async () => {
@@ -214,35 +160,29 @@ describe('iOS Asset Test - Logo Only', () => {
       splashBackgroundColor: '#999999',
       splashBackgroundColorDark: '#122140',
     });
-    let generatedAssets = ((await assets.logo?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.logo?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<IosOutputAssetTemplate>[];
 
     const assetTemplates = Object.values(IosAssets).filter(
-      a =>
-        [AssetKind.Icon, AssetKind.SettingsIcon, AssetKind.NotificationIcon, AssetKind.SpotlightIcon, AssetKind.Splash, AssetKind.SplashDark].indexOf(
-          a.kind,
-        ) >= 0,
+      (a) =>
+        [
+          AssetKind.Icon,
+          AssetKind.SettingsIcon,
+          AssetKind.NotificationIcon,
+          AssetKind.SpotlightIcon,
+          AssetKind.Splash,
+          AssetKind.SplashDark,
+        ].indexOf(a.kind) >= 0
     );
 
     expect(generatedAssets.length).toBe(assetTemplates.length);
 
     const contentsJson = JSON.parse(
-      await readFile(
-        join(
-          ctx.project.config.ios!.path!,
-          IOS_SPLASH_IMAGE_SET_PATH,
-          'Contents.json',
-        ),
-        { encoding: 'utf-8' },
-      ),
+      await readFile(join(ctx.project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json'), {
+        encoding: 'utf-8',
+      })
     ) as IosContents;
-    expect(
-      contentsJson.images.find(
-        i => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name,
-      ),
-    );
+    expect(contentsJson.images.find((i) => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name));
 
     await verifySizes(generatedAssets);
   });
@@ -252,41 +192,33 @@ describe('iOS Asset Test - Logo Only', () => {
       splashBackgroundColor: '#999999',
       splashBackgroundColorDark: '#122140',
     });
-    let generatedAssets = ((await assets.logoDark?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<IosOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.logoDark?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<IosOutputAssetTemplate>[];
 
     const assetTemplates = Object.values(IosAssets).filter(
-      a =>
-        [AssetKind.Icon, AssetKind.Splash, AssetKind.SettingsIcon, AssetKind.NotificationIcon, AssetKind.SpotlightIcon, AssetKind.SplashDark].indexOf(
-          a.kind,
-        ) >= 0,
+      (a) =>
+        [
+          AssetKind.Icon,
+          AssetKind.Splash,
+          AssetKind.SettingsIcon,
+          AssetKind.NotificationIcon,
+          AssetKind.SpotlightIcon,
+          AssetKind.SplashDark,
+        ].indexOf(a.kind) >= 0
     );
 
-    expect(
-      generatedAssets.find(f => f.asset.kind === AssetKind.Splash),
-    ).toBeUndefined();
+    // Shouldn't generate standard splash
+    expect(generatedAssets.find((f) => f.asset.kind === AssetKind.Splash)).toBeUndefined();
     expect(generatedAssets.length).toBeGreaterThan(0);
-    console.log('Generated', generatedAssets.length, 'but should have', Object.values(IosAssets).length);
-    console.log(generatedAssets);
-    expect(generatedAssets.length).toBe(Object.values(IosAssets).length);
+    // Should be all the assets minus the light mode splashes
+    expect(generatedAssets.length).toBe(Object.values(IosAssets).length - 3);
 
     const contentsJson = JSON.parse(
-      await readFile(
-        join(
-          ctx.project.config.ios!.path!,
-          IOS_SPLASH_IMAGE_SET_PATH,
-          'Contents.json',
-        ),
-        { encoding: 'utf-8' },
-      ),
+      await readFile(join(ctx.project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json'), {
+        encoding: 'utf-8',
+      })
     ) as IosContents;
-    expect(
-      contentsJson.images.find(
-        i => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name,
-      ),
-    );
+    expect(contentsJson.images.find((i) => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name));
 
     await verifySizes(generatedAssets);
   });
