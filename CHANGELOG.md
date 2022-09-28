@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 1.0.4
+
+### Patch Changes
+
+- Fixed iOS asset generation #325
+
 ## 1.0.3
 
 ### Patch Changes
