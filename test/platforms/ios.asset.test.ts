@@ -268,9 +268,9 @@ describe('iOS Asset Test - Logo Only', () => {
       generatedAssets.find(f => f.asset.kind === AssetKind.Splash),
     ).toBeUndefined();
     expect(generatedAssets.length).toBeGreaterThan(0);
-    console.log('Generated', generatedAssets.length, 'but should have', IosAssets.length);
+    console.log('Generated', generatedAssets.length, 'but should have', Object.values(IosAssets).length);
     console.log(generatedAssets);
-    expect(generatedAssets.length).toBe(IosAssets.length);
+    expect(generatedAssets.length).toBe(Object.values(IosAssets).length);
 
     const contentsJson = JSON.parse(
       await readFile(
