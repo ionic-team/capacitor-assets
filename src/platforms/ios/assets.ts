@@ -231,6 +231,18 @@ export const IOS_1024_ICON: IosOutputAssetTemplate = {
   scale: 1,
 };
 
+export const IOS_1X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {
+  platform: Platform.Ios,
+  kind: AssetKind.Splash,
+  name: 'Default@1x~universal~anyany.png',
+  format: Format.Png,
+  width: 2732,
+  height: 2732,
+  orientation: Orientation.Portrait,
+  scale: 1,
+  theme: Theme.Any,
+};
+
 export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {
   platform: Platform.Ios,
   kind: AssetKind.Splash,
@@ -243,6 +255,30 @@ export const IOS_2X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {
   theme: Theme.Any,
 };
 
+export const IOS_3X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {
+  platform: Platform.Ios,
+  kind: AssetKind.Splash,
+  name: 'Default@3x~universal~anyany.png',
+  format: Format.Png,
+  width: 2732,
+  height: 2732,
+  orientation: Orientation.Portrait,
+  scale: 3,
+  theme: Theme.Any,
+};
+
+export const IOS_1X_UNIVERSAL_ANYANY_SPLASH_DARK: IosOutputAssetTemplateSplash = {
+  platform: Platform.Ios,
+  kind: AssetKind.SplashDark,
+  name: 'Default@1x~universal~anyany-dark.png',
+  format: Format.Png,
+  width: 2732,
+  height: 2732,
+  orientation: Orientation.Portrait,
+  scale: 1,
+  theme: Theme.Dark,
+};
+
 export const IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK: IosOutputAssetTemplateSplash = {
   platform: Platform.Ios,
   kind: AssetKind.SplashDark,
@@ -252,5 +288,17 @@ export const IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK: IosOutputAssetTemplateSplash =
   height: 2732,
   orientation: Orientation.Portrait,
   scale: 2,
+  theme: Theme.Dark,
+};
+
+export const IOS_3X_UNIVERSAL_ANYANY_SPLASH_DARK: IosOutputAssetTemplateSplash = {
+  platform: Platform.Ios,
+  kind: AssetKind.SplashDark,
+  name: 'Default@3x~universal~anyany-dark.png',
+  format: Format.Png,
+  width: 2732,
+  height: 2732,
+  orientation: Orientation.Portrait,
+  scale: 3,
   theme: Theme.Dark,
 };

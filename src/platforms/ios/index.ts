@@ -7,7 +7,14 @@ import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
 import { AssetGenerator, AssetGeneratorOptions } from '../../asset-generator';
-import { IOS_2X_UNIVERSAL_ANYANY_SPLASH, IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK } from './assets';
+import {
+  IOS_1X_UNIVERSAL_ANYANY_SPLASH,
+  IOS_2X_UNIVERSAL_ANYANY_SPLASH,
+  IOS_3X_UNIVERSAL_ANYANY_SPLASH,
+  IOS_1X_UNIVERSAL_ANYANY_SPLASH_DARK,
+  IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK,
+  IOS_3X_UNIVERSAL_ANYANY_SPLASH_DARK,
+} from './assets';
 import * as IosAssetTemplates from './assets';
 import sharp from 'sharp';
 
@@ -70,71 +77,91 @@ export class IosAssetGenerator extends AssetGenerator {
     if (asset.kind === AssetKind.Logo) {
       // Generate light splash
       const lightDefaultBackground = '#ffffff';
-      const lightSplash = IOS_2X_UNIVERSAL_ANYANY_SPLASH;
-      const lightDest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, lightSplash.name);
+      const lightSplashes = [
+        IOS_1X_UNIVERSAL_ANYANY_SPLASH,
+        IOS_2X_UNIVERSAL_ANYANY_SPLASH,
+        IOS_3X_UNIVERSAL_ANYANY_SPLASH,
+      ];
+      const lightSplashesGenerated: OutputAsset[] = [];
 
-      const canvas = sharp({
-        create: {
-          width: lightSplash.width ?? 0,
-          height: lightSplash.height ?? 0,
-          channels: 4,
-          background: this.options.splashBackgroundColor ?? lightDefaultBackground,
-        },
-      });
-      const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
-      const lightOutputInfo = await canvas
-        .composite([{ input: resized, gravity: sharp.gravity.center }])
-        .png()
-        .toFile(lightDest);
+      for (const lightSplash of lightSplashes) {
+        const lightDest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, lightSplash.name);
 
-      const lightSplashOutput = new OutputAsset(
-        lightSplash,
-        asset,
-        project,
-        {
-          [lightDest]: lightDest,
-        },
-        {
-          [lightDest]: lightOutputInfo,
-        }
-      );
+        const canvas = sharp({
+          create: {
+            width: lightSplash.width ?? 0,
+            height: lightSplash.height ?? 0,
+            channels: 4,
+            background: this.options.splashBackgroundColor ?? lightDefaultBackground,
+          },
+        });
+        const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+        const lightOutputInfo = await canvas
+          .composite([{ input: resized, gravity: sharp.gravity.center }])
+          .png()
+          .toFile(lightDest);
 
-      generated.push(lightSplashOutput);
+        const lightSplashOutput = new OutputAsset(
+          lightSplash,
+          asset,
+          project,
+          {
+            [lightDest]: lightDest,
+          },
+          {
+            [lightDest]: lightOutputInfo,
+          }
+        );
+
+        generated.push(lightSplashOutput);
+        lightSplashesGenerated.push(lightSplashOutput);
+      }
+
+      await this.updateContentsJson(lightSplashesGenerated, project);
     }
 
     // Generate dark splash
     const darkDefaultBackground = '#111111';
-    const darkSplash = IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK;
-    const darkDest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, darkSplash.name);
-    const canvas = sharp({
-      create: {
-        width: darkSplash.width ?? 0,
-        height: darkSplash.height ?? 0,
-        channels: 4,
-        background: this.options.splashBackgroundColorDark ?? darkDefaultBackground,
-      },
-    });
-    const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
-    const darkOutputInfo = await canvas
-      .composite([{ input: resized, gravity: sharp.gravity.center }])
-      .png()
-      .toFile(darkDest);
+    const darkSplashes = [
+      IOS_1X_UNIVERSAL_ANYANY_SPLASH_DARK,
+      IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK,
+      IOS_3X_UNIVERSAL_ANYANY_SPLASH_DARK,
+    ];
+    const darkSplashesGenerated: OutputAsset[] = [];
 
-    const darkSplashOutput = new OutputAsset(
-      darkSplash,
-      asset,
-      project,
-      {
-        [darkDest]: darkDest,
-      },
-      {
-        [darkDest]: darkOutputInfo,
-      }
-    );
+    for (const darkSplash of darkSplashes) {
+      const darkDest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, darkSplash.name);
+      const canvas = sharp({
+        create: {
+          width: darkSplash.width ?? 0,
+          height: darkSplash.height ?? 0,
+          channels: 4,
+          background: this.options.splashBackgroundColorDark ?? darkDefaultBackground,
+        },
+      });
+      const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+      const darkOutputInfo = await canvas
+        .composite([{ input: resized, gravity: sharp.gravity.center }])
+        .png()
+        .toFile(darkDest);
 
-    generated.push(darkSplashOutput);
+      const darkSplashOutput = new OutputAsset(
+        darkSplash,
+        asset,
+        project,
+        {
+          [darkDest]: darkDest,
+        },
+        {
+          [darkDest]: darkOutputInfo,
+        }
+      );
 
-    await this.updateContentsJsonDark(darkSplashOutput, project);
+      generated.push(darkSplashOutput);
+      darkSplashesGenerated.push(darkSplashOutput);
+    }
+
+    await this.updateContentsJsonDark(darkSplashesGenerated, project);
 
     return [...logos, ...generated];
   }
@@ -214,54 +241,112 @@ export class IosAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    const assetMeta =
-      asset.kind === AssetKind.Splash ? IOS_2X_UNIVERSAL_ANYANY_SPLASH : IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK;
+    const assetMetas =
+      asset.kind === AssetKind.Splash
+        ? [IOS_1X_UNIVERSAL_ANYANY_SPLASH, IOS_2X_UNIVERSAL_ANYANY_SPLASH, IOS_3X_UNIVERSAL_ANYANY_SPLASH]
+        : [
+            IOS_1X_UNIVERSAL_ANYANY_SPLASH_DARK,
+            IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK,
+            IOS_3X_UNIVERSAL_ANYANY_SPLASH_DARK,
+          ];
 
-    const iosDir = project.config.ios!.path!;
-    const dest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, assetMeta.name);
+    const generated: OutputAsset[] = [];
 
-    const outputInfo = await pipe.resize(assetMeta.width, assetMeta.height).png().toFile(dest);
+    for (const assetMeta of assetMetas) {
+      const iosDir = project.config.ios!.path!;
+      const dest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, assetMeta.name);
 
-    const generated = new OutputAsset(
-      assetMeta,
-      asset,
-      project,
-      {
-        [assetMeta.name]: dest,
-      },
-      {
-        [assetMeta.name]: outputInfo,
-      }
-    );
+      const outputInfo = await pipe.resize(assetMeta.width, assetMeta.height).png().toFile(dest);
 
-    if (asset.kind === AssetKind.SplashDark) {
+      const g = new OutputAsset(
+        assetMeta,
+        asset,
+        project,
+        {
+          [assetMeta.name]: dest,
+        },
+        {
+          [assetMeta.name]: outputInfo,
+        }
+      );
+
+      generated.push(g);
+    }
+
+    if (asset.kind === AssetKind.Splash) {
+      await this.updateContentsJson(generated, project);
+    } else if (asset.kind === AssetKind.SplashDark) {
       // Need to register this as a dark-mode splash
       await this.updateContentsJsonDark(generated, project);
     }
 
-    return [generated];
+    return generated;
   }
 
-  private async updateContentsJsonDark(generated: OutputAsset, project: Project) {
+  private async updateContentsJson(generated: OutputAsset[], project: Project) {
     const contentsJsonPath = join(project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
     const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
 
     const parsed = JSON.parse(json);
 
     const withoutMissing = parsed.images.filter((i: any) => !!i.filename);
-    withoutMissing.push({
-      appearances: [
-        {
-          appearance: 'luminosity',
-          value: 'dark',
-        },
-      ],
-      idiom: 'universal',
-      scale: `${generated.template.scale ?? 1}x`,
-      filename: (generated.template as IosOutputAssetTemplate).name,
-    });
+
+    for (const g of generated) {
+      const existing = withoutMissing.find(
+        (f: any) =>
+          f.scale === `${g.template.scale}x` && f.idiom === 'universal' && typeof f.appearances === 'undefined'
+      );
+
+      if (existing) {
+        existing.filename = (g.template as IosOutputAssetTemplate).name;
+      } else {
+        withoutMissing.push({
+          idiom: 'universal',
+          scale: `${g.template.scale ?? 1}x`,
+          filename: (g.template as IosOutputAssetTemplate).name,
+        });
+      }
+    }
 
     parsed.images = withoutMissing;
+
+    await writeFile(contentsJsonPath, JSON.stringify(parsed, null, 2));
+  }
+
+  private async updateContentsJsonDark(generated: OutputAsset[], project: Project) {
+    const contentsJsonPath = join(project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
+    const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
+
+    const parsed = JSON.parse(json);
+
+    const withoutMissing = parsed.images.filter((i: any) => !!i.filename);
+
+    for (const g of generated) {
+      const existing = withoutMissing.find(
+        (f: any) =>
+          f.scale === `${g.template.scale}x` && f.idiom === 'universal' && typeof f.appearances !== 'undefined'
+      );
+
+      if (existing) {
+        existing.filename = (g.template as IosOutputAssetTemplate).name;
+      } else {
+        withoutMissing.push({
+          appearances: [
+            {
+              appearance: 'luminosity',
+              value: 'dark',
+            },
+          ],
+          idiom: 'universal',
+          scale: `${g.template.scale ?? 1}x`,
+          filename: (g.template as IosOutputAssetTemplate).name,
+        });
+      }
+    }
+
+    parsed.images = withoutMissing;
+
+    console.log('Writing new contents json', contentsJsonPath, parsed);
 
     await writeFile(contentsJsonPath, JSON.stringify(parsed, null, 2));
   }
