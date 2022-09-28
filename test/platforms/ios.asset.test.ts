@@ -75,7 +75,7 @@ describe('iOS Asset Test', () => {
     let dest = generatedAssets[0].getDestFilename(
       generatedAssets[0]?.template.name,
     );
-    expect(generatedAssets.length).toBe(1);
+    expect(generatedAssets.length).toBe(3);
     expect(await pathExists(dest ?? '')).toBe(true);
 
     generatedAssets = ((await assets.splashDark?.generate(
@@ -86,7 +86,7 @@ describe('iOS Asset Test', () => {
     dest = generatedAssets[0].getDestFilename(
       generatedAssets[0]?.template.name,
     );
-    expect(generatedAssets.length).toBe(1);
+    expect(generatedAssets.length).toBe(3);
     expect(await pathExists(dest ?? '')).toBe(true);
 
     const contentsJson = JSON.parse(
@@ -221,7 +221,7 @@ describe('iOS Asset Test - Logo Only', () => {
 
     const assetTemplates = Object.values(IosAssets).filter(
       a =>
-        [AssetKind.Icon, AssetKind.Splash, AssetKind.SplashDark].indexOf(
+        [AssetKind.Icon, AssetKind.SettingsIcon, AssetKind.NotificationIcon, AssetKind.SpotlightIcon, AssetKind.Splash, AssetKind.SplashDark].indexOf(
           a.kind,
         ) >= 0,
     );
@@ -259,7 +259,7 @@ describe('iOS Asset Test - Logo Only', () => {
 
     const assetTemplates = Object.values(IosAssets).filter(
       a =>
-        [AssetKind.Icon, AssetKind.Splash, AssetKind.SplashDark].indexOf(
+        [AssetKind.Icon, AssetKind.Splash, AssetKind.SettingsIcon, AssetKind.NotificationIcon, AssetKind.SpotlightIcon, AssetKind.SplashDark].indexOf(
           a.kind,
         ) >= 0,
     );
