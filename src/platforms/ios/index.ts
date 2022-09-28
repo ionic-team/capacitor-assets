@@ -346,8 +346,6 @@ export class IosAssetGenerator extends AssetGenerator {
 
     parsed.images = withoutMissing;
 
-    console.log('Writing new contents json', contentsJsonPath, parsed);
-
     await writeFile(contentsJsonPath, JSON.stringify(parsed, null, 2));
   }
 }
