@@ -7,7 +7,7 @@ Note: previous versions of this tool supported Cordova but Cordova support has b
 ## Install
 
 ```bash
-$ npm install @capacitor/assets@next
+$ npm install @capacitor/assets
 ```
 
 Then add this script to your `package.json`:
