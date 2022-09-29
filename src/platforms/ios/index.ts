@@ -117,7 +117,7 @@ export class IosAssetGenerator extends AssetGenerator {
         lightSplashesGenerated.push(lightSplashOutput);
       }
 
-      await this.updateContentsJson(lightSplashesGenerated, project);
+      await this.updateSplashContentsJson(lightSplashesGenerated, project);
     }
 
     // Generate dark splash
@@ -161,7 +161,7 @@ export class IosAssetGenerator extends AssetGenerator {
       darkSplashesGenerated.push(darkSplashOutput);
     }
 
-    await this.updateContentsJsonDark(darkSplashesGenerated, project);
+    await this.updateSplashContentsJsonDark(darkSplashesGenerated, project);
 
     return [...logos, ...generated];
   }
@@ -178,11 +178,11 @@ export class IosAssetGenerator extends AssetGenerator {
     }
 
     const iosDir = project.config.ios!.path!;
-    return Promise.all(
+    const generated = await Promise.all(
       icons.map(async (icon) => {
         const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
 
-        const outputInfo = await pipe.resize(icon.width, icon.height).png().toFile(dest);
+        const outputInfo = await pipe.resize(icon.width, icon.height).png().removeAlpha().toFile(dest);
 
         return new OutputAsset(
           icon,
@@ -197,6 +197,10 @@ export class IosAssetGenerator extends AssetGenerator {
         );
       })
     );
+
+    await this.updateIconsContentsJson(generated, project);
+
+    return generated;
   }
 
   // Generate ALL the icons when only given a logo
@@ -274,16 +278,50 @@ export class IosAssetGenerator extends AssetGenerator {
     }
 
     if (asset.kind === AssetKind.Splash) {
-      await this.updateContentsJson(generated, project);
+      await this.updateSplashContentsJson(generated, project);
     } else if (asset.kind === AssetKind.SplashDark) {
       // Need to register this as a dark-mode splash
-      await this.updateContentsJsonDark(generated, project);
+      await this.updateSplashContentsJsonDark(generated, project);
     }
 
     return generated;
   }
 
-  private async updateContentsJson(generated: OutputAsset[], project: Project) {
+  private async updateIconsContentsJson(generated: OutputAsset[], project: Project) {
+    const contentsJsonPath = join(project.config.ios!.path!, IOS_APP_ICON_SET_PATH, 'Contents.json');
+    const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
+
+    const parsed = JSON.parse(json);
+
+    const withoutMissing = parsed.images.filter((i: any) => !!i.filename);
+
+    for (const g of generated) {
+      const existing = withoutMissing.find(
+        (f: any) =>
+          f.scale === `${g.template.scale}x` &&
+          f.size === `${g.template.width / (g.template.scale ?? 1)}x${g.template.height / (g.template.scale ?? 1)}` &&
+          f.idiom === (g.template as IosOutputAssetTemplate).idiom &&
+          typeof f.appearances === 'undefined'
+      );
+
+      if (existing) {
+        existing.filename = (g.template as IosOutputAssetTemplate).name;
+      } else {
+        withoutMissing.push({
+          idiom: (g.template as IosOutputAssetTemplate).idiom,
+          size: `${g.template.width}x${g.template.height}`,
+          scale: `${g.template.scale ?? 1}x`,
+          filename: (g.template as IosOutputAssetTemplate).name,
+        });
+      }
+    }
+
+    parsed.images = withoutMissing;
+
+    await writeFile(contentsJsonPath, JSON.stringify(parsed, null, 2));
+  }
+
+  private async updateSplashContentsJson(generated: OutputAsset[], project: Project) {
     const contentsJsonPath = join(project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
     const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
 
@@ -313,7 +351,7 @@ export class IosAssetGenerator extends AssetGenerator {
     await writeFile(contentsJsonPath, JSON.stringify(parsed, null, 2));
   }
 
-  private async updateContentsJsonDark(generated: OutputAsset[], project: Project) {
+  private async updateSplashContentsJsonDark(generated: OutputAsset[], project: Project) {
     const contentsJsonPath = join(project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
     const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
 

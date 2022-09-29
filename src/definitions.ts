@@ -118,7 +118,19 @@ export interface OutputAssetTemplate {
 
 export interface IosOutputAssetTemplate extends OutputAssetTemplate {
   name: string;
+  idiom: IosIdiom;
 }
+
+// https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_ref-Asset_Catalog_Format/ImageSetType.html#//apple_ref/doc/uid/TP40015170-CH25-SW2
+export const enum IosIdiom {
+  Universal = 'universal',
+  iOSMarketing = 'ios-marketing',
+  iPhone = 'iphone',
+  iPad = 'ipad',
+  Watch = 'watch',
+  TV = 'tv',
+}
+
 export interface IosOutputAssetTemplateIcon extends IosOutputAssetTemplate {}
 export interface IosOutputAssetTemplateSplash extends IosOutputAssetTemplate {
   orientation: Orientation;
