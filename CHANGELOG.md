@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 1.0.6
+
+### Patch Changes
+
+- Fixed Contents.json for iOS icons
+
 ## 1.0.5
 
 ### Patch Changes
