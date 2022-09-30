@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 1.0.7
+
+### Patch Changes
+
+- Fixed icon backgrounds for iOS
+
 ## 1.0.6
 
 ### Patch Changes
