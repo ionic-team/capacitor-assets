@@ -10,16 +10,6 @@ Note: previous versions of this tool supported Cordova but Cordova support has b
 $ npm install @capacitor/assets
 ```
 
-Then add this script to your `package.json`:
-
-```
-{
-  "scripts": {
-    "capacitor-assets": "capacitor-assets"
-  }
-}
-```
-
 ## Usage
 
 The tool expects a `assets` folder to exist in the root of the project with the following structure:
@@ -41,7 +31,7 @@ assets/
 Then, generate the assets and provide the background colors that will be used to generate background layers for icons:
 
 ```bash
-$ npm run capacitor-assets generate -- --iconBackgroundColor '#eeeeee' --iconBackgroundColorDark '#222222' --splashBackgroundColor '#eeeeee' --splashBackgroundColorDark '#111111'
+$ npx capacitor-assets generate -- --iconBackgroundColor '#eeeeee' --iconBackgroundColorDark '#222222' --splashBackgroundColor '#eeeeee' --splashBackgroundColorDark '#111111'
 ```
 
 Where the provided flags are:
@@ -71,13 +61,13 @@ assets/
 To generate resources with all the default options, just run:
 
 ```bash
-$ npm run capacitor-assets generate
+$ npx capacitor-assets generate
 ```
 
 `capacitor-assets` accepts a platform for the first argument (`ios`, `android`, or `pwa` currently). If specified, resources are generated only for that platform:
 
 ```bash
-$ npm run capacitor-assets generate -- --ios
+$ npx capacitor-assets generate -- --ios
 ```
 
 Otherwise `capacitor-assets` will use all detected Capacitor platforms.
@@ -95,5 +85,5 @@ By default, the tool will look for the manifest file in `public`, `src`, and `ww
 See the help instructions on the command line with the `--help` flag.
 
 ```bash
-$ npm run capacitor-assets generate --help
+$ npx capacitor-assets generate --help
 ```
