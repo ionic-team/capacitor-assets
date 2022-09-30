@@ -31,7 +31,7 @@ assets/
 Then, generate the assets and provide the background colors that will be used to generate background layers for icons:
 
 ```shell
-npx capacitor-assets generate -- --iconBackgroundColor '#eeeeee' --iconBackgroundColorDark '#222222' --splashBackgroundColor '#eeeeee' --splashBackgroundColorDark '#111111'
+npx capacitor-assets generate --iconBackgroundColor '#eeeeee' --iconBackgroundColorDark '#222222' --splashBackgroundColor '#eeeeee' --splashBackgroundColorDark '#111111'
 ```
 
 Where the provided flags are:
@@ -67,7 +67,7 @@ npx capacitor-assets generate
 `capacitor-assets` accepts a platform for the first argument (`ios`, `android`, or `pwa` currently). If specified, resources are generated only for that platform:
 
 ```shell
-npx capacitor-assets generate -- --ios
+npx capacitor-assets generate --ios
 ```
 
 Otherwise `capacitor-assets` will use all detected Capacitor platforms.
