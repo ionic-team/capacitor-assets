@@ -178,11 +178,16 @@ export class IosAssetGenerator extends AssetGenerator {
     }
 
     const iosDir = project.config.ios!.path!;
+    const lightDefaultBackground = '#ffffff';
     const generated = await Promise.all(
       icons.map(async (icon) => {
         const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
 
-        const outputInfo = await pipe.resize(icon.width, icon.height).png().removeAlpha().toFile(dest);
+        const outputInfo = await pipe
+          .resize(icon.width, icon.height)
+          .png()
+          .flatten({ background: this.options.iconBackgroundColor ?? lightDefaultBackground })
+          .toFile(dest);
 
         return new OutputAsset(
           icon,
