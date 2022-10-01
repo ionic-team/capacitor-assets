@@ -72,7 +72,7 @@ export class IosAssetGenerator extends AssetGenerator {
     const generated: OutputAsset[] = [];
 
     const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
-    const targetWidth = Math.floor((asset.width ?? 0) * targetLogoWidthPercent);
+    const targetWidth = this.options.logoSplashTargetWidth ?? Math.floor((asset.width ?? 0) * targetLogoWidthPercent);
 
     if (asset.kind === AssetKind.Logo) {
       // Generate light splash
