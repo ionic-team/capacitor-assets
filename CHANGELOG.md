@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 1.0.8
+
+### Patch Changes
+
+- Add --logoSplashTargetWidth and --logoSplashScale
+
 ## 1.0.7
 
 ### Patch Changes
