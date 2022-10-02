@@ -210,8 +210,8 @@ describe('iOS Asset Test - Logo Only', () => {
     // Shouldn't generate standard splash
     expect(generatedAssets.find((f) => f.asset.kind === AssetKind.Splash)).toBeUndefined();
     expect(generatedAssets.length).toBeGreaterThan(0);
-    // Should be all the assets minus the light mode splashes
-    expect(generatedAssets.length).toBe(Object.values(IosAssets).length - 3);
+    // Should be just the dark splashes
+    expect(generatedAssets.length).toBe(3);
 
     const contentsJson = JSON.parse(
       await readFile(join(ctx.project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json'), {
