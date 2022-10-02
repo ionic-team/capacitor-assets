@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 1.0.9
+
+### Patch Changes
+
+- Fixed iOS and Android logo generation
+
 ## 1.0.8
 
 ### Patch Changes
