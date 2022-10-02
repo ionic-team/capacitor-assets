@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 1.0.10
+
+### Patch Changes
+
+- Support loading icon.png for easy mode
+
 ## 1.0.9
 
 ### Patch Changes
