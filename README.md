@@ -12,7 +12,7 @@ npm install @capacitor/assets
 
 ## Usage
 
-The tool expects a `assets` folder to exist in the root of the project with the following structure:
+The tool expects a `assets` or `resources` folder to exist in the root of the project.
 
 There are two modes this tool can be used in: Easy Mode, and Full Control mode.
 
