@@ -21,7 +21,7 @@ export class InputAsset {
   }
 
   pipeline() {
-    return this._sharp;
+    return this._sharp?.clone();
   }
 
   format() {
@@ -48,10 +48,7 @@ export class InputAsset {
     this.height = metadata.height;
   }
 
-  async generate(
-    strategy: AssetGenerator,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  async generate(strategy: AssetGenerator, project: Project): Promise<OutputAsset[]> {
     return strategy.generate(this, project);
   }
 }

@@ -67,7 +67,10 @@ export class IosAssetGenerator extends AssetGenerator {
     const iosDir = project.config.ios!.path!;
 
     // Generate logos
-    const logos = await this.generateIconsForLogo(asset, project);
+    let logos: OutputAsset[] = [];
+    if (asset.kind === AssetKind.Logo) {
+      logos = await this.generateIconsForLogo(asset, project);
+    }
 
     const generated: OutputAsset[] = [];
 
