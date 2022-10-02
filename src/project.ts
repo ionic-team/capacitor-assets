@@ -38,9 +38,9 @@ export class Project extends MobileProject {
 
   async loadInputAssets(): Promise<Assets> {
     this.assets = {
-      logo: await this.loadInputAsset('logo', AssetKind.Logo),
+      logo: await this.loadLogoInputAsset(),
       logoDark: await this.loadInputAsset('logo-dark', AssetKind.LogoDark),
-      icon: await this.loadInputAsset('icon', AssetKind.Icon),
+      icon: await this.loadInputAsset('icon-only', AssetKind.Icon),
       iconForeground: await this.loadInputAsset('icon-foreground', AssetKind.IconForeground),
       iconBackground: await this.loadInputAsset('icon-background', AssetKind.IconBackground),
       splash: await this.loadInputAsset('splash', AssetKind.Splash),
@@ -62,6 +62,14 @@ export class Project extends MobileProject {
       androidNotificationIcon: await this.loadInputAsset('android/notification', AssetKind.NotificationIcon),
     };
     return this.assets;
+  }
+
+  private async loadLogoInputAsset() {
+    let logo = await this.loadInputAsset('logo', AssetKind.Logo);
+    if (!logo) {
+      logo = await this.loadInputAsset('icon', AssetKind.Logo);
+    }
+    return logo;
   }
 
   private async loadInputAsset(path: string, kind: AssetKind) {
