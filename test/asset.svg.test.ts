@@ -28,8 +28,8 @@ describe('Asset test - SVGs', () => {
 </svg>
       `;
 
-    await rm(join(fixtureDir, 'assets', 'icon.png'));
-    await writeFile(join(fixtureDir, 'assets', 'icon.svg'), svg);
+    await rm(join(fixtureDir, 'assets', 'icon-only.png'));
+    await writeFile(join(fixtureDir, 'assets', 'icon-only.svg'), svg);
 
     const assets = await ctx.project.loadInputAssets();
 
