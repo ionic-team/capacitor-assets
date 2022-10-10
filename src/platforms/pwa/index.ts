@@ -52,7 +52,7 @@ export class PwaAssetGenerator extends AssetGenerator {
   }
 
   async getSplashSizes() {
-    const appleInterfacePage = `https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/`;
+    const appleInterfacePage = `https://developer.apple.com/design/human-interface-guidelines/foundations/layout/`;
 
     let assetSizes = PWA_IOS_DEVICE_SIZES;
     if (!this.options.pwaNoAppleFetch) {
