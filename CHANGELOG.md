@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 1.0.11
+
+### Patch Changes
+
+- Added flags to support custom iOS and Android folders
+
 ## 1.0.10
 
 ### Patch Changes
