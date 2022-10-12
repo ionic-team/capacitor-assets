@@ -25,7 +25,7 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
       error(
         `No assets found in the asset path ${c.ancillary(
           ctx.project.assetDir
-        )}. See capacitor-assets documentation to learn how to use this tool.`
+        )}. See https://github.com/ionic-team/capacitor-assets to learn how to use this tool.`
       );
       return [];
     }
