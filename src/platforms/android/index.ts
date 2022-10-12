@@ -306,7 +306,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     const resPath = this.getResPath(project);
     const destRound = join(resPath, `mipmap-${template.density}`, 'ic_launcher_round.png');
 
-    // This pipeline is trick, but we need two separate pipelines
+    // This pipeline is tricky, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
     const resized = await sharp(asset.path).resize(template.width, template.height).toBuffer();
     const composited = await sharp(resized)

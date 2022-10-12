@@ -1,6 +1,6 @@
 import { Context } from '../ctx';
 import * as c from '../colors';
-import { error, log } from '../util/log';
+import { error, log, logger, warn } from '../util/log';
 import { IosAssetGenerator } from '../platforms/ios';
 import { PwaAssetGenerator } from '../platforms/pwa';
 import { AndroidAssetGenerator } from '../platforms/android';
@@ -38,30 +38,48 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
       platforms.push('pwa');
     }
 
-    if (!ctx.args.silent) {
-      log(`Generating assets for ${platforms.map((p) => c.strong(c.success(p))).join(', ')}`);
+    await verifyPlatformFolders(/* mut */ platforms, ctx.project);
+
+    if (platforms.length > 0) {
+      if (!ctx.args.silent) {
+        log(`Generating assets for ${platforms.map((p) => c.strong(c.success(p))).join(', ')}`);
+      }
+
+      const generators = getGenerators(ctx, platforms);
+
+      const generated = await generateAssets(assets, generators, ctx.project);
+
+      if (!ctx.args.silent) {
+        logGenerated(generated);
+      }
+
+      /*
+      if (!ctx.args.silent && platforms.indexOf('pwa') >= 0 && ctx.args.pwaTags) {
+        PwaAssetGenerator.logInstructions(generated);
+      }
+      */
+
+      return generated;
+    } else {
+      logger.warn('No platforms found, exiting');
+      return [];
     }
-
-    const generators = getGenerators(ctx, platforms);
-
-    const generated = await generateAssets(assets, generators, ctx.project);
-
-    if (!ctx.args.silent) {
-      logGenerated(generated);
-    }
-
-    /*
-    if (!ctx.args.silent && platforms.indexOf('pwa') >= 0 && ctx.args.pwaTags) {
-      PwaAssetGenerator.logInstructions(generated);
-    }
-    */
-
-    return generated;
   } catch (e) {
     error('Unable to generate assets', (e as Error).message);
     error(e);
   }
   return [];
+}
+
+async function verifyPlatformFolders(platforms: string[], project: Project) {
+  if (platforms.indexOf('ios') >= 0 && !(await project.iosExists())) {
+    platforms.splice(platforms.indexOf('ios'), 1);
+    logger.warn(`iOS platform not found at ${project.config.ios?.path || ''}, skipping iOS generation`);
+  }
+  if (platforms.indexOf('android') >= 0 && !(await project.androidExists())) {
+    platforms.splice(platforms.indexOf('android'), 1);
+    logger.warn(`Android platform not found at ${project.config.android?.path || ''}, skipping android generation`);
+  }
 }
 
 async function generateAssets(assets: Assets, generators: AssetGenerator[], project: Project) {

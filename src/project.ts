@@ -21,6 +21,14 @@ export class Project extends MobileProject {
     this.detectAssetDir(projectRoot);
   }
 
+  async androidExists() {
+    return this.config.android?.path && (await pathExists(this.config.android?.path));
+  }
+
+  async iosExists() {
+    return this.config.ios?.path && (await pathExists(this.config.ios?.path));
+  }
+
   async detectAssetDir(projectRoot: string) {
     if (this.assetPath === 'assets' && !(await pathExists(this.assetDir))) {
       this.assetDir = join(projectRoot, 'resources');

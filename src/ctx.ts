@@ -22,9 +22,9 @@ export async function loadContext(projectRootPath?: string): Promise<Context> {
 
   let project: Project;
   try {
-    project = await loadProject(projectRootPath, (argv.assetPath as string) ?? 'assets');
+    project = await loadProject(argv, projectRootPath, (argv.assetPath as string) ?? 'assets');
   } catch (e) {
-    throw new Error(`Unable to load Capacitor project: ${(e as any).message}`);
+    throw new Error(`Unable to load project: ${(e as any).message}`);
   }
 
   return {
@@ -42,21 +42,21 @@ export function setArguments(ctx: Context, args: any) {
   process.env.VERBOSE = '' + !!args.verbose;
 }
 
-async function loadProject(projectRootPath?: string, projectAssetPath?: string): Promise<Project> {
-  const config = await loadMobileProjectConfig();
+async function loadProject(args: any, projectRootPath?: string, projectAssetPath?: string): Promise<Project> {
+  const config = await loadMobileProjectConfig(args);
   const project = new Project(projectRootPath, config, projectAssetPath);
   await project.load();
   return project;
 }
 
 // TODO: Use the config loading stuff from @capacitor/configure
-function loadMobileProjectConfig(): MobileProjectConfig {
+function loadMobileProjectConfig(args: any): MobileProjectConfig {
   return {
     ios: {
-      path: 'ios/App',
+      path: args.iosProject ?? 'ios/App',
     },
     android: {
-      path: 'android',
+      path: args.androidProject ?? 'android',
     },
   };
 }

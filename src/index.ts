@@ -71,6 +71,8 @@ export function runProgram(ctx: Context) {
       '--android-flavor <name>',
       'Android product flavor name where generated assets will be created. Defaults to "main".'
     )
+    .option('--ios-project <dir>', 'Path to iOS project (defaults to "ios/App")')
+    .option('--android-project <dir>', 'Path to Android project (defaults to "android")')
     /*
     .option(
       '--pwaTags',
