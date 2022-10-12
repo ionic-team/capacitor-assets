@@ -1,11 +1,5 @@
-import { basename, extname, join } from 'path';
-import {
-  mkdirp,
-  pathExists,
-  readFile,
-  readJSON,
-  writeJSON,
-} from '@ionic/utils-fs';
+import { basename, extname, join, relative } from 'path';
+import { mkdirp, pathExists, readFile, readJSON, writeJSON } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
 import {
@@ -65,7 +59,7 @@ export class PwaAssetGenerator extends AssetGenerator {
 
         const target = doc.querySelector('main > section .row > .column table');
         const sizes = target?.querySelectorAll('tr > td:nth-child(2)') ?? [];
-        const sizeStrings = sizes.map(td => {
+        const sizeStrings = sizes.map((td) => {
           const t = td.innerText;
           return t
             .slice(t.indexOf('pt (') + 4)
@@ -78,7 +72,7 @@ export class PwaAssetGenerator extends AssetGenerator {
         assetSizes = Array.from(deduped);
       } catch (e) {
         warn(
-          `Unable to load iOS HIG screen sizes to generate iOS PWA splash screens. Using local snapshot of device sizes. Use --pwaNoAppleFetch true to always use local sizes`,
+          `Unable to load iOS HIG screen sizes to generate iOS PWA splash screens. Using local snapshot of device sizes. Use --pwaNoAppleFetch true to always use local sizes`
         );
       }
     }
@@ -109,10 +103,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     return [];
   }
 
-  private async generateFromLogo(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateFromLogo(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -126,11 +117,7 @@ export class PwaAssetGenerator extends AssetGenerator {
 
     const generated: OutputAsset[] = [];
 
-    const splashes = await Promise.all(
-      assetSizes.map(a =>
-        this._generateSplashFromLogo(project, asset, a, pipe),
-      ),
-    );
+    const splashes = await Promise.all(assetSizes.map((a) => this._generateSplashFromLogo(project, asset, a, pipe)));
 
     generated.push(...splashes.flat());
 
@@ -141,7 +128,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     sizeString: string,
-    pipe: Sharp,
+    pipe: Sharp
   ): Promise<OutputAsset[]> {
     const parts = sizeString.split('@');
     const sizeParts = parts[0].split('x');
@@ -165,10 +152,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     if (asset.kind === AssetKind.Logo) {
       // Generate light splash
       const lightDefaultBackground = '#ffffff';
-      const lightDest = join(
-        destDir,
-        `apple-splash-${width}-${height}@${density}.png`,
-      );
+      const lightDest = join(destDir, `apple-splash-${width}-${height}@${density}.png`);
 
       const canvas = sharp({
         create: {
@@ -206,7 +190,7 @@ export class PwaAssetGenerator extends AssetGenerator {
         },
         {
           [lightDest]: lightOutputInfo,
-        },
+        }
       );
 
       generated.push(lightSplashOutput);
@@ -214,10 +198,7 @@ export class PwaAssetGenerator extends AssetGenerator {
 
     // Generate dark splash
     const darkDefaultBackground = '#111111';
-    const darkDest = join(
-      destDir,
-      `apple-splash-${width}-${height}@${density}-dark.png`,
-    );
+    const darkDest = join(destDir, `apple-splash-${width}-${height}@${density}-dark.png`);
 
     const canvas = sharp({
       create: {
@@ -254,7 +235,7 @@ export class PwaAssetGenerator extends AssetGenerator {
       },
       {
         [darkDest]: darkOutputInfo,
-      },
+      }
     );
 
     generated.push(darkSplashOutput);
@@ -262,10 +243,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     return generated;
   }
 
-  private async generateIcons(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -273,25 +251,17 @@ export class PwaAssetGenerator extends AssetGenerator {
     }
 
     const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
-    const icons = Object.values(PwaAssets).filter(
-      a => a.kind === AssetKind.Icon,
-    ) as PwaOutputAssetTemplate[];
+    const icons = Object.values(PwaAssets).filter((a) => a.kind === AssetKind.Icon) as PwaOutputAssetTemplate[];
 
     const generatedAssets = await Promise.all(
-      icons.map(async icon => {
-        const destDir = join(
-          await this.getPWAAssetsDirectory(pwaDir),
-          PWA_ASSET_PATH,
-        );
+      icons.map(async (icon) => {
+        const destDir = join(await this.getPWAAssetsDirectory(pwaDir), PWA_ASSET_PATH);
         try {
           await mkdirp(destDir);
         } catch {}
         const dest = join(destDir, icon.name);
 
-        const outputInfo = await pipe
-          .resize(icon.width, icon.height)
-          .png()
-          .toFile(dest);
+        const outputInfo = await pipe.resize(icon.width, icon.height).png().toFile(dest);
 
         return new OutputAsset(
           icon,
@@ -302,9 +272,9 @@ export class PwaAssetGenerator extends AssetGenerator {
           },
           {
             [icon.name]: outputInfo,
-          },
+          }
         );
-      }),
+      })
     );
 
     await this.updateManifest(project, generatedAssets);
@@ -315,11 +285,7 @@ export class PwaAssetGenerator extends AssetGenerator {
   private async getPWADirectory(projectRoot?: string): Promise<string> {
     if (await pathExists(join(projectRoot ?? '', 'public')) /* React */) {
       return join(projectRoot ?? '', 'public');
-    } else if (
-      await pathExists(
-        join(projectRoot ?? '', 'src/assets'),
-      ) /* Angular and Vue */
-    ) {
+    } else if (await pathExists(join(projectRoot ?? '', 'src/assets')) /* Angular and Vue */) {
       return join(projectRoot ?? '', 'src/assets');
     } else if (await pathExists(join(projectRoot ?? '', 'www'))) {
       return join(projectRoot ?? '', 'www');
@@ -369,17 +335,12 @@ export class PwaAssetGenerator extends AssetGenerator {
     }
   }
 
-  private async updateManifest(
-    project: Project,
-    assets: OutputAsset<PwaOutputAssetTemplate>[],
-  ) {
+  private async updateManifest(project: Project, assets: OutputAsset<PwaOutputAssetTemplate>[]) {
     const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
     const pwaAssetDir = await this.getPWAAssetsDirectory(pwaDir);
 
-    const manifestPath = await this.getManifestJsonPath(
-      project.directory ?? undefined,
-    );
-    const pwaAssets = assets.filter(a => a.template.platform === Platform.Pwa);
+    const manifestPath = await this.getManifestJsonPath(project.directory ?? undefined);
+    const pwaAssets = assets.filter((a) => a.template.platform === Platform.Pwa);
 
     let manifestJson: any = {};
     if (await pathExists(manifestPath)) {
@@ -391,7 +352,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     for (let asset of pwaAssets) {
       const src = asset.template.name;
       const fname = basename(src);
-      const relativePath = join(pwaAssetDir, PWA_ASSET_PATH, fname);
+      const relativePath = relative(pwaDir, join(pwaAssetDir, PWA_ASSET_PATH, fname));
 
       const existing = !!icons.find((i: any) => i.src === relativePath);
       if (!existing) {
@@ -415,10 +376,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     });
   }
 
-  private makeIconManifestEntry(
-    asset: PwaOutputAssetTemplate,
-    relativePath: string,
-  ): ManifestIcon {
+  private makeIconManifestEntry(asset: PwaOutputAssetTemplate, relativePath: string): ManifestIcon {
     const ext = extname(relativePath);
 
     const type =
@@ -444,10 +402,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     return entry;
   }
 
-  private async generateSplashes(
-    asset: InputAsset,
-    project: Project,
-  ): Promise<OutputAsset[]> {
+  private async generateSplashes(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
     if (!pipe) {
@@ -456,25 +411,21 @@ export class PwaAssetGenerator extends AssetGenerator {
 
     let assetSizes = await this.getSplashSizes();
 
-    return Promise.all(
-      assetSizes.map(a => this._generateSplash(project, asset, a, pipe)),
-    );
+    return Promise.all(assetSizes.map((a) => this._generateSplash(project, asset, a, pipe)));
   }
 
   private async _generateSplash(
     project: Project,
     asset: InputAsset,
     sizeString: string,
-    pipe: Sharp,
+    pipe: Sharp
   ): Promise<OutputAsset> {
     const parts = sizeString.split('@');
     const sizeParts = parts[0].split('x');
     const width = parseFloat(sizeParts[0]);
     const height = parseFloat(sizeParts[1]);
     const density = parts[1];
-    const name = `apple-splash-${width}-${height}@${density}${
-      asset.kind === AssetKind.SplashDark ? '-dark' : ''
-    }.png`;
+    const name = `apple-splash-${width}-${height}@${density}${asset.kind === AssetKind.SplashDark ? '-dark' : ''}.png`;
 
     const pwaDir = await this.getPWADirectory(project.directory ?? undefined);
     const pwaAssetDir = await this.getPWAAssetsDirectory(pwaDir);
@@ -509,7 +460,7 @@ export class PwaAssetGenerator extends AssetGenerator {
       },
       {
         [dest]: outputInfo,
-      },
+      }
     );
 
     return splashOutput;
@@ -520,76 +471,60 @@ export class PwaAssetGenerator extends AssetGenerator {
 
 Add the following tags to your index.html to support PWA icons:
 `);
-    const pwaAssets = generated.filter(
-      g => g.template.platform === Platform.Pwa,
-    );
+    const pwaAssets = generated.filter((g) => g.template.platform === Platform.Pwa);
 
-    const mainIcon = pwaAssets.find(
-      g => g.template.width == 512 && g.template.kind === AssetKind.Icon,
-    );
+    const mainIcon = pwaAssets.find((g) => g.template.width == 512 && g.template.kind === AssetKind.Icon);
 
-    log(
-      `<link rel="apple-touch-icon" href="${
-        Object.values(mainIcon?.destFilenames ?? {})[0]
-      }">`,
-    );
+    log(`<link rel="apple-touch-icon" href="${Object.values(mainIcon?.destFilenames ?? {})[0]}">`);
 
-    for (const g of pwaAssets.filter(a => a.template.kind === AssetKind.Icon)) {
+    for (const g of pwaAssets.filter((a) => a.template.kind === AssetKind.Icon)) {
       const w = g.template.width;
       const h = g.template.height;
       const path = Object.values(g.destFilenames)[0] ?? '';
       log(`<link rel="apple-touch-icon" sizes="${w}x${h}" href="${path}">`);
     }
 
-    for (const g of pwaAssets.filter(
-      a => a.template.kind === AssetKind.Splash,
-    )) {
+    for (const g of pwaAssets.filter((a) => a.template.kind === AssetKind.Splash)) {
       const template = g.template as PwaOutputAssetTemplate;
       const w = g.template.width;
       const h = g.template.height;
       const path = Object.values(g.destFilenames)[0] ?? '';
       log(
-        `<link rel="apple-touch-startup-image" href="${path}" media="(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Portrait})>`,
+        `<link rel="apple-touch-startup-image" href="${path}" media="(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Portrait})>`
       );
     }
-    for (const g of pwaAssets.filter(
-      a => a.template.kind === AssetKind.Splash,
-    )) {
+    for (const g of pwaAssets.filter((a) => a.template.kind === AssetKind.Splash)) {
       const template = g.template as PwaOutputAssetTemplate;
       const w = g.template.width;
       const h = g.template.height;
       const path = Object.values(g.destFilenames)[0] ?? '';
       log(
-        `<link rel="apple-touch-startup-image" href="${path}" media="(device-width: ${h}px) and (device-height: ${w}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Landscape})>`,
+        `<link rel="apple-touch-startup-image" href="${path}" media="(device-width: ${h}px) and (device-height: ${w}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Landscape})>`
       );
     }
-    for (const g of pwaAssets.filter(
-      a => a.template.kind === AssetKind.SplashDark,
-    )) {
+    for (const g of pwaAssets.filter((a) => a.template.kind === AssetKind.SplashDark)) {
       const template = g.template as PwaOutputAssetTemplate;
       const w = g.template.width;
       const h = g.template.height;
       const path = Object.values(g.destFilenames)[0] ?? '';
       log(
-        `<link rel="apple-touch-startup-image" href="${path}" media="(prefers-color-scheme: dark) and (device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Portrait})>`,
+        `<link rel="apple-touch-startup-image" href="${path}" media="(prefers-color-scheme: dark) and (device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Portrait})>`
       );
     }
-    for (const g of pwaAssets.filter(
-      a => a.template.kind === AssetKind.SplashDark,
-    )) {
+    for (const g of pwaAssets.filter((a) => a.template.kind === AssetKind.SplashDark)) {
       const template = g.template as PwaOutputAssetTemplate;
       const w = g.template.width;
       const h = g.template.height;
       const path = Object.values(g.destFilenames)[0] ?? '';
       log(
-        `<link rel="apple-touch-startup-image" href="${path}" media="(prefers-color-scheme: dark) and (device-width: ${h}px) and (device-height: ${w}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Landscape})>`,
+        `<link rel="apple-touch-startup-image" href="${path}" media="(prefers-color-scheme: dark) and (device-width: ${h}px) and (device-height: ${w}px) and (-webkit-device-pixel-ratio: ${template.density}) and (orientation: ${Orientation.Landscape})>`
       );
     }
 
     console.log(
       'Generated',
-      pwaAssets.filter(a => a.template.kind === AssetKind.Splash).length,
-      pwaAssets.filter(a => a.template.kind === AssetKind.SplashDark).length,
+      pwaAssets.filter((a) => a.template.kind === AssetKind.Splash).length,
+      pwaAssets.filter((a) => a.template.kind === AssetKind.SplashDark).length
     );
 
     /*

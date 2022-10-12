@@ -1,4 +1,4 @@
-import { MobileProject, MobileProjectConfig } from '@trapezedev/project';
+import { Framework, MobileProject, MobileProjectConfig } from '@trapezedev/project';
 import { AssetKind, Assets } from './definitions';
 import { join } from 'path';
 import { pathExists } from '@ionic/utils-fs';
@@ -18,7 +18,14 @@ export class Project extends MobileProject {
 
     this.directory = projectRoot;
     this.assetDir = join(projectRoot, assetPath);
-    this.detectAssetDir(projectRoot);
+
+    this.detectAssetDir();
+  }
+
+  async detectAssetDir() {
+    if (this.assetPath === 'assets' && !(await pathExists(this.assetDir))) {
+      this.assetDir = join(this.projectRoot, 'resources');
+    }
   }
 
   async androidExists() {
@@ -29,15 +36,8 @@ export class Project extends MobileProject {
     return this.config.ios?.path && (await pathExists(this.config.ios?.path));
   }
 
-  async detectAssetDir(projectRoot: string) {
-    if (this.assetPath === 'assets' && !(await pathExists(this.assetDir))) {
-      this.assetDir = join(projectRoot, 'resources');
-    }
-    if (!(await pathExists(this.assetDir))) {
-      error(
-        'Unable to find asset directory. Specify the --assetPath to the directory containing your assets, or create an assets folder in the top of your project'
-      );
-    }
+  async assetDirExists() {
+    return pathExists(this.assetDir);
   }
 
   assetDirectory() {

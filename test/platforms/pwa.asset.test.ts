@@ -6,7 +6,7 @@ import { PwaAssetGenerator } from '../../src/platforms/pwa';
 import { AssetKind, PwaOutputAssetTemplate } from '../../src/definitions';
 import { ASSETS as PwaAssets, PWA_IOS_DEVICE_SIZES } from '../../src/platforms/pwa/assets';
 import sharp from 'sharp';
-import { join, parse } from 'path';
+import { isAbsolute, join, parse } from 'path';
 import { OutputAsset } from '../../src/output-asset';
 
 describe('PWA Asset Test', () => {
@@ -66,11 +66,12 @@ describe('PWA Asset Test', () => {
         .every((i: any) => !!i)
     ).toBe(true);
 
+    // Make sure the file extensions are correct and the paths are relative
     expect(
       manifest.icons
         .map((icon: any) => {
           const ext = parse(icon.src).ext;
-          return ext === '.webp';
+          return ext === '.webp' && !isAbsolute(icon.src);
         })
         .every((i: any) => !!i)
     ).toBe(true);

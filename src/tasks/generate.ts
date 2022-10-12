@@ -12,6 +12,13 @@ import { InputAsset } from '../input-asset';
 
 export async function run(ctx: Context): Promise<OutputAsset[]> {
   try {
+    if (!(await ctx.project.assetDirExists())) {
+      error(
+        `Asset directory not found at ${ctx.project.projectRoot}. Use --asset-path to specify a specific directory containing assets`
+      );
+      return [];
+    }
+
     const assets = await ctx.project.loadInputAssets();
 
     if ([assets.logo, assets.icon, assets.splash, assets.splashDark].every((a) => !a)) {
