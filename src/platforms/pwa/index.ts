@@ -1,4 +1,4 @@
-import { basename, extname, join, relative } from 'path';
+import { basename, extname, join, posix, relative, sep } from 'path';
 import { mkdirp, pathExists, readFile, readJSON, writeJSON } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
@@ -378,6 +378,7 @@ export class PwaAssetGenerator extends AssetGenerator {
 
   private makeIconManifestEntry(asset: PwaOutputAssetTemplate, relativePath: string): ManifestIcon {
     const ext = extname(relativePath);
+    const posixPath = relativePath.split(sep).join(posix.sep);
 
     const type =
       (
@@ -390,7 +391,7 @@ export class PwaAssetGenerator extends AssetGenerator {
       )[ext] || 'image/png';
 
     let entry: ManifestIcon = {
-      src: relativePath,
+      src: posixPath,
       type,
       sizes: `${asset.width}x${asset.height}`,
     };
