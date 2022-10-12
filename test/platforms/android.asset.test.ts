@@ -1,11 +1,4 @@
-import {
-  copy,
-  pathExists,
-  readdirp,
-  readFile,
-  rm,
-  statSync,
-} from '@ionic/utils-fs';
+import { copy, pathExists, readdirp, readFile, rm, statSync } from '@ionic/utils-fs';
 import tempy from 'tempy';
 import sharp from 'sharp';
 import { join } from 'path';
@@ -59,40 +52,31 @@ describe('Android asset test', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
-  async function verifySizes(
-    generatedAssets: OutputAsset<AndroidOutputAssetTemplate>[],
-  ) {
+  async function verifySizes(generatedAssets: OutputAsset<AndroidOutputAssetTemplate>[]) {
     const sizedSet = await Promise.all(
-      generatedAssets.map(async asset => {
+      generatedAssets.map(async (asset) => {
         const dest = Object.values(asset.destFilenames)[0];
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
-        return (
-          metadata.width === asset.template.width &&
-          metadata.height === asset.template.height
-        );
-      }),
+        return metadata.width === asset.template.width && metadata.height === asset.template.height;
+      })
     );
-    expect(sizedSet.every(e => !!e)).toBe(true);
+    expect(sizedSet.every((e) => !!e)).toBe(true);
   }
 
   it('Should generate android legacy icons', async () => {
     const assets = await ctx.project.loadInputAssets();
 
     const strategy = new AndroidAssetGenerator();
-    let generatedAssets = ((await assets.icon?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
+    let generatedAssets = ((await assets.icon?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
 
     // Expect legacy main icons and rounded to be generated
     expect(generatedAssets.length).toBe(12);
 
     const template = generatedAssets[0].template;
 
-    Object.values(generatedAssets[0].destFilenames).map(async f =>
-      expect(await pathExists(f)).toBe(true),
-    );
+    Object.values(generatedAssets[0].destFilenames).map(async (f) => expect(await pathExists(f)).toBe(true));
 
     await verifySizes(generatedAssets);
   });
@@ -101,27 +85,19 @@ describe('Android asset test', () => {
     const assets = await ctx.project.loadInputAssets();
 
     const strategy = new AndroidAssetGenerator();
-    let generatedAssets = ((await assets.iconForeground?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
+    let generatedAssets = ((await assets.iconForeground?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
 
     expect(generatedAssets.length).toBe(6);
 
-    Object.values(generatedAssets[0].destFilenames).map(async f =>
-      expect(await pathExists(f)).toBe(true),
-    );
+    Object.values(generatedAssets[0].destFilenames).map(async (f) => expect(await pathExists(f)).toBe(true));
 
-    generatedAssets = ((await assets.iconBackground?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
+    generatedAssets = ((await assets.iconBackground?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<AndroidOutputAssetTemplateAdaptiveIcon>[];
 
     expect(generatedAssets.length).toBe(6);
 
-    Object.values(generatedAssets[0].destFilenames).map(async f =>
-      expect(await pathExists(f)).toBe(true),
-    );
+    Object.values(generatedAssets[0].destFilenames).map(async (f) => expect(await pathExists(f)).toBe(true));
 
     await verifySizes(generatedAssets);
   });
@@ -130,18 +106,14 @@ describe('Android asset test', () => {
     const assets = await ctx.project.loadInputAssets();
 
     const strategy = new AndroidAssetGenerator();
-    let generatedAssets =
-      (await assets.splash?.generate(strategy, ctx.project)) ?? [];
+    let generatedAssets = (await assets.splash?.generate(strategy, ctx.project)) ?? [];
 
     expect(generatedAssets.length).toBe(12);
 
-    generatedAssets =
-      (await assets.splashDark?.generate(strategy, ctx.project)) ?? [];
+    generatedAssets = (await assets.splashDark?.generate(strategy, ctx.project)) ?? [];
 
     expect(generatedAssets.length).toBe(12);
-    await verifySizes(
-      generatedAssets as OutputAsset<AndroidOutputAssetTemplate>[],
-    );
+    await verifySizes(generatedAssets as OutputAsset<AndroidOutputAssetTemplate>[]);
   });
 });
 
@@ -159,21 +131,16 @@ describe('Android Asset Test - Logo Only', () => {
     assets = await ctx.project.loadInputAssets();
   });
 
-  async function verifySizes(
-    generatedAssets: OutputAsset<AndroidOutputAssetTemplate>[],
-  ) {
+  async function verifySizes(generatedAssets: OutputAsset<AndroidOutputAssetTemplate>[]) {
     const sizedSet = await Promise.all(
-      generatedAssets.map(async asset => {
+      generatedAssets.map(async (asset) => {
         const dest = Object.values(asset.destFilenames)[0];
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
-        return (
-          metadata.width === asset.template.width &&
-          metadata.height === asset.template.height
-        );
-      }),
+        return metadata.width === asset.template.width && metadata.height === asset.template.height;
+      })
     );
-    expect(sizedSet.every(e => !!e)).toBe(true);
+    expect(sizedSet.every((e) => !!e)).toBe(true);
   }
 
   afterAll(async () => {
@@ -205,10 +172,8 @@ describe('Android Asset Test - Logo Only', () => {
       splashBackgroundColor: '#999999',
       splashBackgroundColorDark: '#122140',
     });
-    let generatedAssets = ((await assets.logo?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<AndroidOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.logo?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<AndroidOutputAssetTemplate>[];
 
     expect(generatedAssets.length).toBe(48);
     await verifySizes(generatedAssets);
@@ -219,10 +184,8 @@ describe('Android Asset Test - Logo Only', () => {
       splashBackgroundColor: '#999999',
       splashBackgroundColorDark: '#122140',
     });
-    let generatedAssets = ((await assets.logoDark?.generate(
-      strategy,
-      ctx.project,
-    )) ?? []) as OutputAsset<AndroidOutputAssetTemplate>[];
+    let generatedAssets = ((await assets.logoDark?.generate(strategy, ctx.project)) ??
+      []) as OutputAsset<AndroidOutputAssetTemplate>[];
 
     expect(generatedAssets.length).toBe(12);
     await verifySizes(generatedAssets);
@@ -239,7 +202,7 @@ describe('Android Asset Test - Logo Only', () => {
       Object.keys(asset.destFilenames).forEach(async (name) => {
         let filename = asset.getDestFilename(name);
 
-        expect(filename).toEqual(expect.stringContaining('/app/src/demo/res/'));
+        expect(filename).toEqual(expect.stringContaining(join('app', 'src', 'demo', 'res')));
         expect(await pathExists(filename)).toBe(true);
       });
     });

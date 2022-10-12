@@ -14,8 +14,6 @@ export class Project extends MobileProject {
   constructor(projectRoot: string = process.cwd(), config: MobileProjectConfig, private assetPath: string = 'assets') {
     super(projectRoot, config);
 
-    // const projectRoot = join((config.android ?? config.ios)?.path ?? '', '../');
-
     this.directory = projectRoot;
     this.assetDir = join(projectRoot, assetPath);
 
