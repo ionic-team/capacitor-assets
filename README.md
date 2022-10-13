@@ -20,7 +20,7 @@ There are two modes this tool can be used in: Easy Mode, and Full Control mode.
 
 With Easy Mode, the tool supports generating all the icon and splash assets you need for iOS, Android, and PWA from a single logo file along with an optional dark mode logo, and background colors. This is the easiest way to generate all your assets, but it trades customizability for convenience.
 
-To use this mode, create a single `logo.png` or `icon.png` with an optional `logo-dark.png` in `assets/`:
+To use this mode, create a single `logo.png` or `icon.png` with an optional `logo-dark.png` in `assets/` (the tool also supports using SVG files as source images, substitue `.svg` as needed):
 
 ```
 assets/
