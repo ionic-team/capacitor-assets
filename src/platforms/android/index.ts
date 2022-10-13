@@ -16,6 +16,7 @@ import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
 
 import * as AndroidAssetTemplates from './assets';
+import { warn } from '../../util/log';
 
 export class AndroidAssetGenerator extends AssetGenerator {
   constructor(options: AssetGeneratorOptions = {}) {
@@ -167,8 +168,17 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
     const dest = join(resPath, drawableDir, 'splash.png');
 
-    const targetLogoWidthPercent = 0.2;
-    const targetWidth = Math.floor(splash.width * targetLogoWidthPercent);
+    const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
+    let targetWidth = this.options.logoSplashTargetWidth ?? Math.floor((splash.width ?? 0) * targetLogoWidthPercent);
+
+    if (targetWidth > splash.width || targetWidth > splash.height) {
+      targetWidth = Math.floor((splash.width ?? 0) * targetLogoWidthPercent);
+    }
+
+    if (targetWidth > splash.width || targetWidth > splash.height) {
+      warn(`Logo dimensions exceed dimensions of splash ${splash.width}x${splash.height}, using default logo size`);
+      targetWidth = Math.floor((splash.width ?? 0) * 0.2);
+    }
 
     const canvas = sharp({
       create: {
@@ -185,25 +195,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
       .composite([{ input: resized, gravity: sharp.gravity.center }])
       .png()
       .toFile(dest);
-    /*pipe
-      .extend({
-        top: extend,
-        right: extend,
-        bottom: extend,
-        left: extend,
-        background: backgroundColor,
-      })
-      .flatten({
-        background: backgroundColor,
-      })
-      .resize(splash.width, splash.height, {
-        fit: sharp.fit.outside,
-        position: sharp.gravity.center,
-        background: backgroundColor,
-      })
-      .png()
-      .toFile(dest);
-    */
 
     const splashOutput = new OutputAsset(
       splash,

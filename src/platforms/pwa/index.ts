@@ -145,9 +145,10 @@ export class PwaAssetGenerator extends AssetGenerator {
       await mkdirp(destDir);
     } catch {}
 
-    // console.log(width, height);
+    // TODO: In the future, add size checks to ensure canvas image
+    // is not exceeded (see Android splash generation)
     const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
-    const targetWidth = Math.floor(width * targetLogoWidthPercent);
+    const targetWidth = this.options.logoSplashTargetWidth ?? Math.floor(width * targetLogoWidthPercent);
 
     if (asset.kind === AssetKind.Logo) {
       // Generate light splash
