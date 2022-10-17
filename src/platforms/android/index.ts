@@ -278,7 +278,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     const padding = 8;
     const resized = await sharp(asset.path)
       .resize(template.width, template.height)
-      .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
+      // .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .toBuffer();
     const composited = await sharp(resized)
       .resize(Math.max(0, template.width - padding * 2), Math.max(0, template.height - padding * 2))
