@@ -32,6 +32,7 @@ export interface Assets {
 export const enum AssetKind {
   Logo = 'logo',
   LogoDark = 'logo-dark',
+  AdaptiveIcon = 'adaptive-icon',
   Icon = 'icon',
   IconForeground = 'icon-foreground',
   IconBackground = 'icon-background',

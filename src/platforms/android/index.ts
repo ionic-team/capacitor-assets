@@ -132,7 +132,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     });
 
     const icons = Object.values(AndroidAssetTemplates).filter(
-      (a) => a.kind === AssetKind.Icon
+      (a) => a.kind === AssetKind.AdaptiveIcon
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const backgroundImages = await Promise.all(
@@ -214,7 +214,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
   private async generateLegacyIcon(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
       (a) => a.kind === AssetKind.Icon
-    ) as AndroidOutputAssetTemplateAdaptiveIcon[];
+    ) as AndroidOutputAssetTemplate[];
 
     const pipe = asset.pipeline();
 
@@ -263,8 +263,8 @@ export class AndroidAssetGenerator extends AssetGenerator {
     template: AndroidOutputAssetTemplate,
     pipe: Sharp
   ): Promise<[string, OutputInfo]> {
-    const radius = 18; //template.width * 0.0833;
-    const svg = `<svg width="${template.width}" height="${template.height}" viewBox="0 0 100 100"><rect x="0" y="0" width="100%" height="100%" rx="${radius}" fill="#ffffff"/></svg>`;
+    const radius = 4;
+    const svg = `<svg width="${template.width}" height="${template.height}"><rect x="0" y="0" width="${template.width}" height="${template.height}" rx="${radius}" fill="#ffffff"/></svg>`;
 
     const resPath = this.getResPath(project);
     const parentDir = join(resPath, `mipmap-${template.density}`);
@@ -275,9 +275,20 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is trick, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const resized = await sharp(asset.path).resize(template.width, template.height).toBuffer();
-    const composited = await sharp(resized)
+    const padding = 8;
+    const resized = await sharp(asset.path)
+      .resize(template.width, template.height)
       .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
+      .toBuffer();
+    const composited = await sharp(resized)
+      .resize(Math.max(0, template.width - padding * 2), Math.max(0, template.height - padding * 2))
+      .extend({
+        top: padding,
+        bottom: padding,
+        left: padding,
+        right: padding,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
       .toBuffer();
     const outputInfo = await sharp(composited).png().toFile(destRound);
 
