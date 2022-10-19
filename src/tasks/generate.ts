@@ -14,7 +14,7 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
   try {
     if (!(await ctx.project.assetDirExists())) {
       error(
-        `Asset directory not found at ${ctx.project.projectRoot}. Use --asset-path to specify a specific directory containing assets`
+        `Asset directory not found at ${ctx.project.projectRoot}. Use --assetPath to specify a specific directory containing assets`
       );
       return [];
     }
