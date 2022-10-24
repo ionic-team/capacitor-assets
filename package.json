@@ -79,7 +79,7 @@
     "@types/node-fetch": "^2.6.1",
     "@types/rimraf": "^3.0.2",
     "@types/sharp": "^0.29.2",
-    "eslint": "^7.32.0",
+    "eslint": "^8.26.0",
     "husky": "^4.3.0",
     "jest": "^27.5.1",
     "np": "^7.0.0",
