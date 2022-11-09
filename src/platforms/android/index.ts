@@ -9,7 +9,7 @@ import {
   AndroidOutputAssetTemplateAdaptiveIcon,
   AndroidOutputAssetTemplateSplash,
   AssetKind,
-  OutputAssetTemplate,
+  Platform,
 } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
@@ -28,6 +28,10 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     if (!androidDir) {
       throw new BadProjectError('No android project found');
+    }
+
+    if (asset.platform !== Platform.Any && asset.platform !== Platform.Android) {
+      return [];
     }
 
     switch (asset.kind) {

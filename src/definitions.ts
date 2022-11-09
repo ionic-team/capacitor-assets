@@ -44,6 +44,7 @@ export const enum AssetKind {
 }
 
 export const enum Platform {
+  Any = 'any',
   Ios = 'ios',
   Android = 'android',
   Pwa = 'pwa',

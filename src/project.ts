@@ -1,5 +1,5 @@
 import { Framework, MobileProject, MobileProjectConfig } from '@trapezedev/project';
-import { AssetKind, Assets } from './definitions';
+import { AssetKind, Assets, Platform } from './definitions';
 import { join } from 'path';
 import { pathExists } from '@ionic/utils-fs';
 import { InputAsset } from './input-asset';
@@ -45,40 +45,44 @@ export class Project extends MobileProject {
   async loadInputAssets(): Promise<Assets> {
     this.assets = {
       logo: await this.loadLogoInputAsset(),
-      logoDark: await this.loadInputAsset('logo-dark', AssetKind.LogoDark),
-      icon: await this.loadInputAsset('icon-only', AssetKind.Icon),
-      iconForeground: await this.loadInputAsset('icon-foreground', AssetKind.IconForeground),
-      iconBackground: await this.loadInputAsset('icon-background', AssetKind.IconBackground),
-      splash: await this.loadInputAsset('splash', AssetKind.Splash),
-      splashDark: await this.loadInputAsset('splash-dark', AssetKind.SplashDark),
+      logoDark: await this.loadInputAsset('logo-dark', AssetKind.LogoDark, Platform.Any),
+      icon: await this.loadInputAsset('icon-only', AssetKind.Icon, Platform.Any),
+      iconForeground: await this.loadInputAsset('icon-foreground', AssetKind.IconForeground, Platform.Any),
+      iconBackground: await this.loadInputAsset('icon-background', AssetKind.IconBackground, Platform.Any),
+      splash: await this.loadInputAsset('splash', AssetKind.Splash, Platform.Any),
+      splashDark: await this.loadInputAsset('splash-dark', AssetKind.SplashDark, Platform.Any),
 
-      iosIcon: await this.loadInputAsset('ios/icon', AssetKind.Icon),
-      iosSplash: await this.loadInputAsset('ios/splash', AssetKind.Splash),
-      iosSplashDark: await this.loadInputAsset('ios/splash-dark', AssetKind.SplashDark),
-      iosNotificationIcon: await this.loadInputAsset('ios/notification-icon', AssetKind.NotificationIcon),
-      iosSettingsIcon: await this.loadInputAsset('ios/settings-icon', AssetKind.SettingsIcon),
-      iosSpotlightIcon: await this.loadInputAsset('ios/spotlight-icon', AssetKind.SpotlightIcon),
+      iosIcon: await this.loadInputAsset('ios/icon', AssetKind.Icon, Platform.Ios),
+      iosSplash: await this.loadInputAsset('ios/splash', AssetKind.Splash, Platform.Ios),
+      iosSplashDark: await this.loadInputAsset('ios/splash-dark', AssetKind.SplashDark, Platform.Ios),
+      iosNotificationIcon: await this.loadInputAsset('ios/notification-icon', AssetKind.NotificationIcon, Platform.Ios),
+      iosSettingsIcon: await this.loadInputAsset('ios/settings-icon', AssetKind.SettingsIcon, Platform.Ios),
+      iosSpotlightIcon: await this.loadInputAsset('ios/spotlight-icon', AssetKind.SpotlightIcon, Platform.Ios),
 
-      androidIcon: await this.loadInputAsset('android/icon', AssetKind.Icon),
-      androidIconForeground: await this.loadInputAsset('android/icon-foreground', AssetKind.Icon),
-      androidIconBackground: await this.loadInputAsset('android/icon-background', AssetKind.Icon),
+      androidIcon: await this.loadInputAsset('android/icon', AssetKind.Icon, Platform.Android),
+      androidIconForeground: await this.loadInputAsset('android/icon-foreground', AssetKind.Icon, Platform.Android),
+      androidIconBackground: await this.loadInputAsset('android/icon-background', AssetKind.Icon, Platform.Android),
 
-      androidSplash: await this.loadInputAsset('android/splash', AssetKind.Splash),
-      androidSplashDark: await this.loadInputAsset('android/splash-dark', AssetKind.SplashDark),
-      androidNotificationIcon: await this.loadInputAsset('android/notification', AssetKind.NotificationIcon),
+      androidSplash: await this.loadInputAsset('android/splash', AssetKind.Splash, Platform.Android),
+      androidSplashDark: await this.loadInputAsset('android/splash-dark', AssetKind.SplashDark, Platform.Android),
+      androidNotificationIcon: await this.loadInputAsset(
+        'android/notification',
+        AssetKind.NotificationIcon,
+        Platform.Android
+      ),
     };
     return this.assets;
   }
 
   private async loadLogoInputAsset() {
-    let logo = await this.loadInputAsset('logo', AssetKind.Logo);
+    let logo = await this.loadInputAsset('logo', AssetKind.Logo, Platform.Any);
     if (!logo) {
-      logo = await this.loadInputAsset('icon', AssetKind.Logo);
+      logo = await this.loadInputAsset('icon', AssetKind.Logo, Platform.Any);
     }
     return logo;
   }
 
-  private async loadInputAsset(path: string, kind: AssetKind) {
+  private async loadInputAsset(path: string, kind: AssetKind, platform: Platform) {
     let imagePath: string | null = null;
 
     const extensions = ['.png', '.webp', '.jpg', '.jpeg', '.svg'];
@@ -95,7 +99,7 @@ export class Project extends MobileProject {
       return null;
     }
 
-    const asset = new InputAsset(imagePath, kind);
+    const asset = new InputAsset(imagePath, kind, platform);
 
     try {
       await asset.load();

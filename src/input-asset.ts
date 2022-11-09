@@ -1,6 +1,6 @@
 import { basename, extname, join } from 'path';
 import sharp from 'sharp';
-import { AssetKind, Format } from './definitions';
+import { AssetKind, Format, Platform } from './definitions';
 import { OutputAsset } from './output-asset';
 import { Project } from './project';
 import { AssetGenerator } from './asset-generator';
@@ -16,7 +16,7 @@ export class InputAsset {
 
   private _sharp: sharp.Sharp | null = null;
 
-  constructor(public path: string, public kind: AssetKind) {
+  constructor(public path: string, public kind: AssetKind, public platform: Platform) {
     this.filename = basename(path);
   }
 
