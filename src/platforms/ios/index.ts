@@ -306,10 +306,11 @@ export class IosAssetGenerator extends AssetGenerator {
     for (const g of generated) {
       const width = g.template.width / (g.template.scale ?? 1);
       const height = g.template.height / (g.template.scale ?? 1);
+      const scale = g.template.scale ?? 1;
 
       const existing = withoutMissing.find(
         (f: any) =>
-          f.scale === `${g.template.scale}x` &&
+          f.scale === `${scale}x` &&
           f.size === `${width}x${height}` &&
           f.idiom === (g.template as IosOutputAssetTemplate).idiom &&
           typeof f.appearances === 'undefined'
@@ -321,7 +322,7 @@ export class IosAssetGenerator extends AssetGenerator {
         withoutMissing.push({
           idiom: (g.template as IosOutputAssetTemplate).idiom,
           size: `${width}x${height}`,
-          scale: `${g.template.scale ?? 1}x`,
+          scale: `${scale}x`,
           filename: (g.template as IosOutputAssetTemplate).name,
         });
       }
