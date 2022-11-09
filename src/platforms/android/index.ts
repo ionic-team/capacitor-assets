@@ -19,8 +19,12 @@ import * as AndroidAssetTemplates from './assets';
 import { warn } from '../../util/log';
 
 export class AndroidAssetGenerator extends AssetGenerator {
+  padding: number;
+
   constructor(options: AssetGeneratorOptions = {}) {
     super(options);
+
+    this.padding = options.androidPadding ?? 8;
   }
 
   async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
@@ -275,7 +279,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is trick, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const padding = 8;
+    const padding = this.padding;
     const resized = await sharp(asset.path)
       .resize(template.width, template.height)
       // .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
@@ -310,7 +314,17 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is tricky, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const resized = await sharp(asset.path).resize(template.width, template.height).toBuffer();
+    const padding = this.padding;
+    const resized = await sharp(asset.path)
+      .resize(Math.max(0, template.width - this.padding * 2), Math.max(0, template.height - padding * 2))
+      .extend({
+        top: padding,
+        bottom: padding,
+        left: padding,
+        right: padding,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .toBuffer();
     const composited = await sharp(resized)
       .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .toBuffer();
@@ -351,7 +365,18 @@ export class AndroidAssetGenerator extends AssetGenerator {
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
-    const outputInfoForeground = await pipe.resize(icon.width, icon.height).png().toFile(destForeground);
+    const padding = this.padding;
+    const outputInfoForeground = await pipe
+      .resize(Math.max(0, icon.width - padding * 2), Math.max(0, icon.height - padding * 2))
+      .extend({
+        top: padding,
+        bottom: padding,
+        left: padding,
+        right: padding,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toFile(destForeground);
 
     // Create the adaptive icon XML
     const icLauncherXml = `
@@ -417,8 +442,18 @@ export class AndroidAssetGenerator extends AssetGenerator {
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
-
-    const outputInfoBackground = await pipe.resize(icon.width, icon.height).png().toFile(destBackground);
+    const padding = this.padding;
+    const outputInfoBackground = await pipe
+      .resize(Math.max(0, icon.width - padding * 2), Math.max(0, icon.height - padding * 2))
+      .extend({
+        top: padding,
+        bottom: padding,
+        left: padding,
+        right: padding,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toFile(destBackground);
 
     // Create the adaptive icon XML
     const icLauncherXml = `
