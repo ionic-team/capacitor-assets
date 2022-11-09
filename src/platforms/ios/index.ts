@@ -2,7 +2,7 @@ import { join } from 'path';
 import { readFile, writeFile } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
-import { AssetKind, IosOutputAssetTemplate } from '../../definitions';
+import { AssetKind, IosOutputAssetTemplate, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
@@ -33,6 +33,10 @@ export class IosAssetGenerator extends AssetGenerator {
 
     if (!iosDir) {
       throw new BadProjectError('No ios project found');
+    }
+
+    if (asset.platform !== Platform.Any && asset.platform !== Platform.Ios) {
+      return [];
     }
 
     switch (asset.kind) {

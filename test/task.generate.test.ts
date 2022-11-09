@@ -4,6 +4,7 @@ import tempy from 'tempy';
 
 import { Context, loadContext } from '../src/ctx';
 import { Format } from '../src/definitions';
+import { OutputAsset } from '../src/output-asset';
 
 describe('Task: Generate test', () => {
   let ctx: Context;
@@ -22,15 +23,30 @@ describe('Task: Generate test', () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
 
+  function log(target: string, generated: OutputAsset[]) {
+    console.log('-'.repeat(10), target.toUpperCase(), '-'.repeat(10));
+    console.log(
+      generated
+        .filter((g) => {
+          return Object.values(g.destFilenames)[0].includes(target);
+        })
+        .map((g) => Object.values(g.destFilenames).map((f) => f.replace(fixtureDir, '')))
+        .flat()
+        .sort()
+    );
+  }
+
   it('Should generate all project assets', async () => {
     const { run } = await import('../src/tasks/generate');
 
     const generated = await run(ctx);
 
-    // console.log(generated.map(g => Object.values(g.destFilenames)).flat());
+    // log('ios', generated);
+    // log('android', generated);
+    // log('public', generated);
 
     // TODO: Make this more specific instead of "it generated a lot of assets"
-    expect(generated.length).toBeGreaterThan(100);
+    expect(generated.length).toBeGreaterThan(97);
   });
 
   it('Should support custom pwa manifest dir', async () => {
