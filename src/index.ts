@@ -59,6 +59,7 @@ export function runProgram(ctx: Context) {
       'Background color used for splash screens in dark mode when generating from a single logo file'
     )
     .option('--pwaManifestPath <path>', "Path to the web app's manifest.json or manifest.webmanifest file")
+    .option('--pwaPath <path>', "Path to the web app's manifest.json or manifest.webmanifest file")
     .option(
       '--pwaNoAppleFetch',
       'Whether to fetch the latest screen sizes for Apple devices from the official Apple site. Set to true if running offline to use local cached sizes (may be occasionally out of date)'

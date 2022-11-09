@@ -306,6 +306,10 @@ export class PwaAssetGenerator extends AssetGenerator {
     return '';
   }
 
+  private async getPWAAssetsOutputDirectory(projectRoot?: string): Promise<string> {
+    return this.options.pwaOutputPath ?? this.getPWAAssetsDirectory(await this.getPWADirectory(projectRoot));
+  }
+
   private async getManifestJsonPath(projectRoot?: string): Promise<string> {
     const r = (p: string) => join(projectRoot ?? '', p);
 
