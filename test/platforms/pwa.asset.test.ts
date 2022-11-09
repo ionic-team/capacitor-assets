@@ -54,7 +54,7 @@ describe('PWA Asset Test', () => {
     expect(sizedSet.every((e) => !!e)).toBe(true);
 
     const manifest = await strategy.getManifestJson(ctx.project);
-    expect(manifest.icons.length).toBe(6);
+    expect(manifest.icons.length).toBe(7);
 
     expect(
       manifest.icons

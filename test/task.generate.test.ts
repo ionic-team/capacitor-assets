@@ -46,7 +46,7 @@ describe('Task: Generate test', () => {
     // log('public', generated);
 
     // TODO: Make this more specific instead of "it generated a lot of assets"
-    expect(generated.length).toBeGreaterThan(97);
+    expect(generated.length).toBeGreaterThanOrEqual(97);
   });
 
   it('Should support custom pwa manifest dir', async () => {
@@ -62,6 +62,6 @@ describe('Task: Generate test', () => {
     expect(manifest['background_color']).toBe('#abcdef');
 
     // TODO: Make this more specific instead of "it generated a lot of assets"
-    expect(generated.length).toBeGreaterThan(100);
+    expect(generated.length).toBeGreaterThanOrEqual(97);
   });
 });
