@@ -46,7 +46,7 @@ Where the provided flags are:
 - `--logoSplashScale` - the scale multiplier to apply to the logo when generating splash screens from a single logo file (default: `0.2`)
 - `--ios` - explicitly run iOS asset generation. Using a platform flag makes the platform list exclusive.
 - `--android` - explicitly run Android asset generation. Using a platform flag makes the platform list exclusive.
-- `--android-padding` - set a icon padding that behaves like scaling. (default: `8`)
+- `--android-resize` - resize the non-legacy android icons based on a percentage.
 - `--pwa` - explicitly run Android asset generation. Using a platform flag makes the platform list exclusive.
 
 ### Usage - Custom Mode

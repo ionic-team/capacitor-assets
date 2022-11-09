@@ -19,12 +19,12 @@ import * as AndroidAssetTemplates from './assets';
 import { warn } from '../../util/log';
 
 export class AndroidAssetGenerator extends AssetGenerator {
-  padding: number;
+  resizeValue: number;
 
   constructor(options: AssetGeneratorOptions = {}) {
     super(options);
 
-    this.padding = options.androidPadding ?? 8;
+    this.resizeValue = options.androidResize ?? 8;
   }
 
   async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
@@ -267,7 +267,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     template: AndroidOutputAssetTemplate,
     pipe: Sharp
   ): Promise<[string, OutputInfo]> {
-    const radius = 4;
+    const radius = Math.round(template.height * 0.089);
     const svg = `<svg width="${template.width}" height="${template.height}"><rect x="0" y="0" width="${template.width}" height="${template.height}" rx="${radius}" fill="#ffffff"/></svg>`;
 
     const resPath = this.getResPath(project);
@@ -279,11 +279,11 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is trick, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const padding = this.padding;
     const resized = await sharp(asset.path)
       .resize(template.width, template.height)
-      // .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
+      .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .toBuffer();
+    const padding = Math.round(template.height * 0.1);
     const composited = await sharp(resized)
       .resize(Math.max(0, template.width - padding * 2), Math.max(0, template.height - padding * 2))
       .extend({
@@ -314,9 +314,13 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is tricky, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const padding = this.padding;
     const resized = await sharp(asset.path)
-      .resize(Math.max(0, template.width - this.padding * 2), Math.max(0, template.height - padding * 2))
+      .resize(template.width, template.height)
+      .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
+      .toBuffer();
+    const padding = Math.round(template.height * 0.06);
+    const composited = await sharp(resized)
+      .resize(Math.max(0, template.width - padding * 2), Math.max(0, template.height - padding * 2))
       .extend({
         top: padding,
         bottom: padding,
@@ -324,9 +328,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
         right: padding,
         background: { r: 0, g: 0, b: 0, alpha: 0 },
       })
-      .toBuffer();
-    const composited = await sharp(resized)
-      .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .toBuffer();
     const outputInfo = await sharp(composited).png().toFile(destRound);
 
@@ -365,9 +366,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
-    const padding = this.padding;
+    const padding = this.getPadding(icon.width);
     const outputInfoForeground = await pipe
-      .resize(Math.max(0, icon.width - padding * 2), Math.max(0, icon.height - padding * 2))
+      .resize(this.applyScaling(icon.width), this.applyScaling(icon.height))
       .extend({
         top: padding,
         bottom: padding,
@@ -442,18 +443,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
-    const padding = this.padding;
-    const outputInfoBackground = await pipe
-      .resize(Math.max(0, icon.width - padding * 2), Math.max(0, icon.height - padding * 2))
-      .extend({
-        top: padding,
-        bottom: padding,
-        left: padding,
-        right: padding,
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toFile(destBackground);
+    const outputInfoBackground = await pipe.resize(icon.width, icon.height).png().toFile(destBackground);
 
     // Create the adaptive icon XML
     const icLauncherXml = `
@@ -547,5 +537,13 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
   private getResPath(project: Project): string {
     return join(project.config.android!.path!, 'app', 'src', this.options.androidFlavor ?? 'main', 'res');
+  }
+
+  private applyScaling(size: number): number {
+    return Math.floor(Math.max(0, size * (this.resizeValue / 100)));
+  }
+
+  private getPadding(size: number): number {
+    return Math.floor(Math.max(0, (size - this.applyScaling(size)) / 2));
   }
 }

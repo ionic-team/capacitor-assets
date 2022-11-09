@@ -71,7 +71,11 @@ export function runProgram(ctx: Context) {
       '--android-flavor <name>',
       'Android product flavor name where generated assets will be created. Defaults to "main".'
     )
-    .option('--android-padding <floatVal>', 'Android icon padding that behaves like scaling.')
+    .option(
+      '--android-resize <floatVal>',
+      'Android resize will resize the non-legacy android icons based on a percentage.',
+      Number
+    )
     .option('--ios-project <dir>', 'Path to iOS project (defaults to "ios/App")')
     .option('--android-project <dir>', 'Path to Android project (defaults to "android")')
     /*

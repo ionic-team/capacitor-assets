@@ -27,6 +27,6 @@ export interface AssetGeneratorOptions {
   logoSplashTargetWidth?: number;
   // Android product flavor name where generated assets will be created. Default: main
   androidFlavor?: string;
-  // Android icon padding which behaves like scaling. Default: 8
-  androidPadding?: number;
+  // Android resize will resize the non-legacy android icons based on a percentage
+  androidResize?: number;
 }
