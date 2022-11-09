@@ -304,10 +304,13 @@ export class IosAssetGenerator extends AssetGenerator {
     const withoutMissing = parsed.images.filter((i: any) => !!i.filename);
 
     for (const g of generated) {
+      const width = g.template.width / (g.template.scale ?? 1);
+      const height = g.template.height / (g.template.scale ?? 1);
+
       const existing = withoutMissing.find(
         (f: any) =>
           f.scale === `${g.template.scale}x` &&
-          f.size === `${g.template.width / (g.template.scale ?? 1)}x${g.template.height / (g.template.scale ?? 1)}` &&
+          f.size === `${width}x${height}` &&
           f.idiom === (g.template as IosOutputAssetTemplate).idiom &&
           typeof f.appearances === 'undefined'
       );
@@ -317,7 +320,7 @@ export class IosAssetGenerator extends AssetGenerator {
       } else {
         withoutMissing.push({
           idiom: (g.template as IosOutputAssetTemplate).idiom,
-          size: `${g.template.width}x${g.template.height}`,
+          size: `${width}x${height}`,
           scale: `${g.template.scale ?? 1}x`,
           filename: (g.template as IosOutputAssetTemplate).name,
         });
