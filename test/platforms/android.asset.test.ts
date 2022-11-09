@@ -29,8 +29,11 @@ describe('Android asset test', () => {
   });
 
   afterAll(async () => {
-    console.log('Using text/fixtures/app Wrote to', join(fixtureDir, 'android', 'app', 'src', 'main', 'res'));
     /*
+    console.log(
+      'Using text/fixtures/app Wrote to',
+      join(fixtureDir, 'android', 'app', 'src', 'main', 'res'),
+    );
     const files = await readdirp(
       join(fixtureDir, 'android', 'app', 'src', 'main', 'res'),
     );
@@ -46,7 +49,7 @@ describe('Android asset test', () => {
     );
     // console.log(await readFile(join(fixtureDir, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), { encoding: 'utf-8' }));
     */
-    // await rm(fixtureDir, { force: true, recursive: true });
+    await rm(fixtureDir, { force: true, recursive: true });
   });
 
   async function verifySizes(generatedAssets: OutputAsset<AndroidOutputAssetTemplate>[]) {
