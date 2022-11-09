@@ -68,11 +68,11 @@ export function runProgram(ctx: Context) {
       'Path to the assets directory for your project. By default will check "assets" and "resources" directories, in that order.'
     )
     .option(
-      '--android-flavor <name>',
+      '--androidFlavor <name>',
       'Android product flavor name where generated assets will be created. Defaults to "main".'
     )
-    .option('--ios-project <dir>', 'Path to iOS project (defaults to "ios/App")')
-    .option('--android-project <dir>', 'Path to Android project (defaults to "android")')
+    .option('--iosProject <dir>', 'Path to iOS project (defaults to "ios/App")')
+    .option('--androidProject <dir>', 'Path to Android project (defaults to "android")')
     /*
     .option(
       '--pwaTags',
