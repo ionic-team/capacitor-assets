@@ -24,7 +24,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
   constructor(options: AssetGeneratorOptions = {}) {
     super(options);
 
-    this.resizeValue = options.androidResize ?? 8;
+    this.resizeValue = options.androidResize ?? 100;
   }
 
   async generate(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
