@@ -2,7 +2,7 @@ import { join } from 'path';
 import { readFile, writeFile } from '@ionic/utils-fs';
 
 import { InputAsset } from '../../input-asset';
-import { AssetKind, IosOutputAssetTemplate } from '../../definitions';
+import { AssetKind, IosOutputAssetTemplate, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import { OutputAsset } from '../../output-asset';
 import { Project } from '../../project';
@@ -33,6 +33,10 @@ export class IosAssetGenerator extends AssetGenerator {
 
     if (!iosDir) {
       throw new BadProjectError('No ios project found');
+    }
+
+    if (asset.platform !== Platform.Any && asset.platform !== Platform.Ios) {
+      return [];
     }
 
     switch (asset.kind) {
@@ -304,10 +308,14 @@ export class IosAssetGenerator extends AssetGenerator {
     const withoutMissing = parsed.images.filter((i: any) => !!i.filename);
 
     for (const g of generated) {
+      const width = g.template.width / (g.template.scale ?? 1);
+      const height = g.template.height / (g.template.scale ?? 1);
+      const scale = g.template.scale ?? 1;
+
       const existing = withoutMissing.find(
         (f: any) =>
-          f.scale === `${g.template.scale}x` &&
-          f.size === `${g.template.width / (g.template.scale ?? 1)}x${g.template.height / (g.template.scale ?? 1)}` &&
+          f.scale === `${scale}x` &&
+          f.size === `${width}x${height}` &&
           f.idiom === (g.template as IosOutputAssetTemplate).idiom &&
           typeof f.appearances === 'undefined'
       );
@@ -317,8 +325,8 @@ export class IosAssetGenerator extends AssetGenerator {
       } else {
         withoutMissing.push({
           idiom: (g.template as IosOutputAssetTemplate).idiom,
-          size: `${g.template.width}x${g.template.height}`,
-          scale: `${g.template.scale ?? 1}x`,
+          size: `${width}x${height}`,
+          scale: `${scale}x`,
           filename: (g.template as IosOutputAssetTemplate).name,
         });
       }

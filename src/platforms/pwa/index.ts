@@ -87,6 +87,10 @@ export class PwaAssetGenerator extends AssetGenerator {
       throw new BadProjectError('No web app (PWA) found');
     }
 
+    if (asset.platform !== Platform.Any) {
+      return [];
+    }
+
     switch (asset.kind) {
       case AssetKind.Logo:
       case AssetKind.LogoDark:

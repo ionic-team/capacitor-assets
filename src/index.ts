@@ -1,9 +1,10 @@
 import { Command, InvalidArgumentError } from 'commander';
-import { Context, loadContext, setArguments } from './ctx';
-import { logger } from './util/log';
-import { wrapAction } from './util/cli';
-import { log } from './util/log';
+
 import * as c from './colors';
+import type { Context } from './ctx';
+import { loadContext, setArguments } from './ctx';
+import { wrapAction } from './util/cli';
+import { logger, log } from './util/log';
 
 export async function run() {
   try {
@@ -68,7 +69,7 @@ export function runProgram(ctx: Context) {
       'Path to the assets directory for your project. By default will check "assets" and "resources" directories, in that order.'
     )
     .option(
-      '--android-flavor <name>',
+      '--androidFlavor <name>',
       'Android product flavor name where generated assets will be created. Defaults to "main".'
     )
     .option(
@@ -76,8 +77,8 @@ export function runProgram(ctx: Context) {
       'Android resize will resize the non-legacy android icons based on a percentage.',
       Number
     )
-    .option('--ios-project <dir>', 'Path to iOS project (defaults to "ios/App")')
-    .option('--android-project <dir>', 'Path to Android project (defaults to "android")')
+    .option('--iosProject <dir>', 'Path to iOS project (defaults to "ios/App")')
+    .option('--androidProject <dir>', 'Path to Android project (defaults to "android")')
     /*
     .option(
       '--pwaTags',

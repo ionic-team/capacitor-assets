@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 2.0.0
+
+### Major Changes
+
+- Fixed icon generation issue on iOS and normalized argument format"
+
 ## 1.0.14
 
 ### Patch Changes

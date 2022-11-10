@@ -1,17 +1,12 @@
-import {
-  AssetKind,
-  PwaOutputAssetTemplate,
-  Format,
-  Platform,
-} from '../../definitions';
+import { AssetKind, PwaOutputAssetTemplate, Format, Platform } from '../../definitions';
 
 export const PWA_48_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
   kind: AssetKind.Icon,
-  name: 'icon-192.webp',
+  name: 'icon-48.webp',
   format: Format.WebP,
-  width: 192,
-  height: 192,
+  width: 48,
+  height: 48,
 };
 export const PWA_72_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,
