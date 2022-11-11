@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 2.0.1
+
+### Patch Changes
+
+- Android launcher padding #424
+
 ## 2.0.0
 
 ### Major Changes
