@@ -38,6 +38,7 @@ Where the provided flags are:
 
 - `--iosProject` - the path to the iOS project (default `ios/App`)
 - `--androidProject` - the path to the Android project (default `android`)
+- `--assetPath <path>` - Path to the assets directory for your project. By default will check `"assets"` and `"resources"` directories, in that order.
 - `--iconBackgroundColor` - the background color (hex value) used when generating icon layers for light mode (default `#ffffff`)
 - `--iconBackgroundColorDark` - the background color (hex value) used when generating icon layers for dark mode (where supported) (default `#111111`)
 - `--splashBackgroundColor` - the background color (hex value) used when generating splash screens (default `#ffffff`)
