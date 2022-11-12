@@ -124,6 +124,16 @@ export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIc
 //
 // Splash screens
 //
+export const ANDROID_SCREEN: AndroidOutputAssetTemplateSplash = {
+  platform: Platform.Android,
+  kind: AssetKind.Splash,
+  format: Format.Png,
+  width: 320,
+  height: 480,
+  density: AndroidDensity.Default,
+  orientation: Orientation.Default,
+};
+
 export const ANDROID_LAND_LDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,
   kind: AssetKind.Splash,
@@ -245,6 +255,16 @@ export const ANDROID_PORT_XXXHDPI_SCREEN: AndroidOutputAssetTemplateSplash = {
 };
 
 // Dark/night mode splashes
+
+export const ANDROID_SCREEN_DARK: AndroidOutputAssetTemplateSplash = {
+  platform: Platform.Android,
+  kind: AssetKind.SplashDark,
+  format: Format.Png,
+  width: 320,
+  height: 240,
+  density: AndroidDensity.DefaultNight,
+  orientation: Orientation.Default,
+};
 
 export const ANDROID_LAND_LDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash = {
   platform: Platform.Android,

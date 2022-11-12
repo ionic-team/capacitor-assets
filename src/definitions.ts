@@ -60,6 +60,7 @@ export const enum Format {
 }
 
 export const enum Orientation {
+  Default = '',
   Portrait = 'portrait',
   Landscape = 'landscape',
 }
@@ -71,6 +72,7 @@ export const enum Theme {
 }
 
 export const enum AndroidDensity {
+  Default = '',
   Ldpi = 'ldpi',
   Mdpi = 'mdpi',
   Hdpi = 'hdpi',
@@ -89,6 +91,7 @@ export const enum AndroidDensity {
   PortXhdpi = 'port-xhdpi',
   PortXxhdpi = 'port-xxhdpi',
   PortXxxhdpi = 'port-xxxhdpi',
+  DefaultNight = 'night',
   LdpiNight = 'night-ldpi',
   MdpiNight = 'night-mdpi',
   HdpiNight = 'night-hdpi',

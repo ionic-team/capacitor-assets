@@ -164,7 +164,10 @@ export class AndroidAssetGenerator extends AssetGenerator {
     // Generate light splash
     const resPath = this.getResPath(project);
 
-    const drawableDir = `drawable-${splash.density}`;
+    let drawableDir = `drawable`;
+    if (splash.density) {
+      drawableDir = `drawable-${splash.density}`;
+    }
 
     const parentDir = join(resPath, drawableDir);
     if (!(await pathExists(parentDir))) {
