@@ -108,11 +108,11 @@ describe('Android asset test', () => {
     const strategy = new AndroidAssetGenerator();
     let generatedAssets = (await assets.splash?.generate(strategy, ctx.project)) ?? [];
 
-    expect(generatedAssets.length).toBe(12);
+    expect(generatedAssets.length).toBe(13);
 
     generatedAssets = (await assets.splashDark?.generate(strategy, ctx.project)) ?? [];
 
-    expect(generatedAssets.length).toBe(12);
+    expect(generatedAssets.length).toBe(13);
     await verifySizes(generatedAssets as OutputAsset<AndroidOutputAssetTemplate>[]);
   });
 });
@@ -175,7 +175,7 @@ describe('Android Asset Test - Logo Only', () => {
     let generatedAssets = ((await assets.logo?.generate(strategy, ctx.project)) ??
       []) as OutputAsset<AndroidOutputAssetTemplate>[];
 
-    expect(generatedAssets.length).toBe(48);
+    expect(generatedAssets.length).toBe(50);
     await verifySizes(generatedAssets);
   });
 
@@ -187,7 +187,7 @@ describe('Android Asset Test - Logo Only', () => {
     let generatedAssets = ((await assets.logoDark?.generate(strategy, ctx.project)) ??
       []) as OutputAsset<AndroidOutputAssetTemplate>[];
 
-    expect(generatedAssets.length).toBe(12);
+    expect(generatedAssets.length).toBe(13);
     await verifySizes(generatedAssets);
   });
 
