@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 2.0.2
+
+### Patch Changes
+
+- Android non-density asset generation
+
 ## 2.0.1
 
 ### Patch Changes
