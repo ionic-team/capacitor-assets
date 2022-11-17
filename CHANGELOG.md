@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 2.0.3
+
+### Patch Changes
+
+- General all iOS sub-icons from main icon
+
 ## 2.0.2
 
 ### Patch Changes
