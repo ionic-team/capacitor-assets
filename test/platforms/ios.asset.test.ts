@@ -74,7 +74,11 @@ describe('iOS Asset Test', () => {
   });
 
   it('Should generate ios icons', async () => {
-    const exportedIcons = Object.values(IosAssets).filter((a) => a.kind === AssetKind.Icon);
+    const exportedIcons = Object.values(IosAssets).filter(
+      (a) =>
+        [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].indexOf(a.kind) >=
+        0
+    );
 
     const strategy = new IosAssetGenerator();
     let generatedAssets = ((await assets.icon?.generate(strategy, ctx.project)) ??

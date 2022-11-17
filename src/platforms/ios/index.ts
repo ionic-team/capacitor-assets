@@ -227,7 +227,11 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async generateIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.Icon);
+    const icons = Object.values(IosAssetTemplates).filter((a) =>
+      [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].find(
+        (i) => i === a.kind
+      )
+    );
 
     return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
   }

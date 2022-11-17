@@ -16,7 +16,7 @@ The tool expects a `assets` or `resources` folder to exist in the root of the pr
 
 There are two modes this tool can be used in: Easy Mode, and Full Control mode.
 
-### Usage - Easy Mode
+### Usage - Easy Mode (recommended)
 
 With Easy Mode, the tool supports generating all the icon and splash assets you need for iOS, Android, and PWA from a single logo file along with an optional dark mode logo, and background colors. This is the easiest way to generate all your assets, but it trades customizability for convenience.
 
