@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 2.0.4
+
+### Patch Changes
+
+- Fix Android drawable issue
+
 ## 2.0.3
 
 ### Patch Changes
