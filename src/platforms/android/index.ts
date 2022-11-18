@@ -511,7 +511,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     template: AndroidOutputAssetTemplateSplash,
     pipe: Sharp
   ): Promise<[string, OutputInfo]> {
-    const drawableDir = `drawable-${template.density}`;
+    const drawableDir = template.density ? `drawable-${template.density}` : 'drawable';
 
     const resPath = this.getResPath(project);
     const parentDir = join(resPath, drawableDir);
