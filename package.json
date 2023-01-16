@@ -57,7 +57,7 @@
     "@capacitor/cli": "^3.2.5",
     "@ionic/utils-array": "^2.1.5",
     "@ionic/utils-fs": "^3.1.5",
-    "@trapezedev/project": "^5.0.5",
+    "@trapezedev/project": "^7.0.4",
     "commander": "^8.3.0",
     "debug": "^4.2.0",
     "fs-extra": "^10.0.1",
