@@ -54,7 +54,7 @@
     "splash screen"
   ],
   "dependencies": {
-    "@capacitor/cli": "^3.2.5",
+    "@capacitor/cli": "^4.6.3",
     "@ionic/utils-array": "^2.1.5",
     "@ionic/utils-fs": "^3.1.5",
     "@trapezedev/project": "^5.0.5",
