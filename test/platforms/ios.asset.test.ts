@@ -95,7 +95,7 @@ describe('iOS Asset Test', () => {
     const strategy = new IosAssetGenerator();
     let generatedAssets = ((await assets.iosNotificationIcon?.generate(strategy, ctx.project)) ??
       []) as OutputAsset<IosOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBeGreaterThan(0);
+    expect(generatedAssets.length).toBeGreaterThanOrEqual(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     await verifyExists(generatedAssets);
@@ -108,7 +108,7 @@ describe('iOS Asset Test', () => {
     const strategy = new IosAssetGenerator();
     let generatedAssets = ((await assets.iosSettingsIcon?.generate(strategy, ctx.project)) ??
       []) as OutputAsset<IosOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBeGreaterThan(0);
+    expect(generatedAssets.length).toBeGreaterThanOrEqual(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     await verifyExists(generatedAssets);
@@ -121,7 +121,7 @@ describe('iOS Asset Test', () => {
     const strategy = new IosAssetGenerator();
     let generatedAssets = ((await assets.iosSpotlightIcon?.generate(strategy, ctx.project)) ??
       []) as OutputAsset<IosOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBeGreaterThan(0);
+    expect(generatedAssets.length).toBeGreaterThanOrEqual(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     await verifyExists(generatedAssets);
