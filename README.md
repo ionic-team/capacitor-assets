@@ -47,7 +47,7 @@ Where the provided flags are:
 - `--logoSplashScale` - the scale multiplier to apply to the logo when generating splash screens from a single logo file (default: `0.2`)
 - `--ios` - explicitly run iOS asset generation. Using a platform flag makes the platform list exclusive.
 - `--android` - explicitly run Android asset generation. Using a platform flag makes the platform list exclusive.
-- `--pwa` - explicitly run Android asset generation. Using a platform flag makes the platform list exclusive.
+- `--pwa` - explicitly run PWA asset generation. Using a platform flag makes the platform list exclusive.
 
 ### Usage - Custom Mode
 
