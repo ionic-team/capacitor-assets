@@ -7,7 +7,7 @@ Note: previous versions of this tool supported Cordova but Cordova support has b
 ## Install
 
 ```shell
-npm install @capacitor/assets
+npm install --save-dev @capacitor/assets
 ```
 
 ## Usage
