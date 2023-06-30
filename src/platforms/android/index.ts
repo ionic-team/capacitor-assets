@@ -365,10 +365,10 @@ export class AndroidAssetGenerator extends AssetGenerator {
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background>
-        <inset android:drawable="@mipmap/ic_launcher_background" android:inset="16.7%" />
+        <inset android:drawable="@mipmap/ic_launcher_background" android:inset="16.666666666666668%" />
     </background>
     <foreground>
-        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="16.7%" />
+        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="16.666666666666668%" />
     </foreground>
 </adaptive-icon>
     `.trim();
@@ -436,10 +436,10 @@ export class AndroidAssetGenerator extends AssetGenerator {
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background>
-        <inset android:drawable="@mipmap/ic_launcher_background" android:inset="16.7%" />
+        <inset android:drawable="@mipmap/ic_launcher_background" android:inset="16.666666666666668%" />
     </background>
     <foreground>
-        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="16.7%" />
+        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="16.666666666666668%" />
     </foreground>
 </adaptive-icon>
     `.trim();
