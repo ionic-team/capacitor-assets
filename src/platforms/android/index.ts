@@ -196,7 +196,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       },
     });
 
-    const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+    const resized = await sharp(asset.path).resize({width: targetWidth, fit: "contain", background: backgroundColor}).toBuffer();
 
     const outputInfo = await canvas
       .composite([{ input: resized, gravity: sharp.gravity.center }])
@@ -284,11 +284,11 @@ export class AndroidAssetGenerator extends AssetGenerator {
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
     const padding = 8;
     const resized = await sharp(asset.path)
-      .resize(template.width, template.height)
+      .resize({width: template.width, height: template.height, fit: "contain", background: '#ffffff'})
       // .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .toBuffer();
     const composited = await sharp(resized)
-      .resize(Math.max(0, template.width - padding * 2), Math.max(0, template.height - padding * 2))
+      .resize({width: Math.max(0, template.width - padding * 2), height: Math.max(0, template.height - padding * 2), fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 }})
       .extend({
         top: padding,
         bottom: padding,
@@ -317,7 +317,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is tricky, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const resized = await sharp(asset.path).resize(template.width, template.height).toBuffer();
+    const resized = await sharp(asset.path).resize({width: template.width, height: template.height, fit: "contain", background: '#ffffff'}).toBuffer();
     const composited = await sharp(resized)
       .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
       .toBuffer();
@@ -358,7 +358,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
-    const outputInfoForeground = await pipe.resize(icon.width, icon.height).png().toFile(destForeground);
+    const outputInfoForeground = await pipe.resize({width: icon.width, height: icon.height, fit: "contain", background: '#ffffff'}).png().toFile(destForeground);
 
     // Create the adaptive icon XML
     const icLauncherXml = `
@@ -429,7 +429,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       await mkdirp(parentDir);
     }
 
-    const outputInfoBackground = await pipe.resize(icon.width, icon.height).png().toFile(destBackground);
+    const outputInfoBackground = await pipe.resize({width: icon.width, height: icon.height, fit: "contain", background: '#ffffff'}).png().toFile(destBackground);
 
     // Create the adaptive icon XML
     const icLauncherXml = `
@@ -520,7 +520,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
     const dest = join(resPath, drawableDir, 'splash.png');
 
-    const outputInfo = await pipe.resize(template.width, template.height).png().toFile(dest);
+    const outputInfo = await pipe.resize({width: template.width, height: template.height, fit: "contain", background: '#ffffff'}).png().toFile(dest);
 
     return [dest, outputInfo];
   }
