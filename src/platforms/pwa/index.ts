@@ -303,7 +303,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     if (await pathExists(join(pwaDir ?? '', 'assets'))) {
       return join(pwaDir ?? '', 'assets');
     }
-    return '';
+    return pwaDir ?? '';
   }
 
   private async getManifestJsonPath(projectRoot?: string): Promise<string> {

@@ -1,4 +1,4 @@
-import { copy, pathExists, readJSON, rm } from '@ionic/utils-fs';
+import { copy, pathExists, readJSON, rm, move } from '@ionic/utils-fs';
 import tempy from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';
@@ -10,84 +10,104 @@ import { isAbsolute, join, parse } from 'path';
 import { OutputAsset } from '../../src/output-asset';
 
 describe('PWA Asset Test', () => {
-  let ctx: Context;
-  const fixtureDir = tempy.directory();
+  const setups = [
+    {
+      setup: 'standard',
+      fixtureDir: tempy.directory(),
+      setupFunc: (fixtureDir: string) => copy('test/fixtures/app', fixtureDir),
+    },
+    {
+      setup: 'alternative',
+      fixtureDir: tempy.directory(),
+      setupFunc: async (fixtureDir: string) => {
+        await copy('test/fixtures/app', fixtureDir);
+        await Promise.all([
+          move(`${fixtureDir}/assets`, `${fixtureDir}/resources`),
+          move(`${fixtureDir}/public`, `${fixtureDir}/src`),
+        ]);
+      },
+    },
+  ];
 
-  beforeAll(async () => {
-    await copy('test/fixtures/app', fixtureDir);
-  });
+  describe.each(setups)('PWA Asset Test - Setup: $setup', ({ setup, fixtureDir, setupFunc }) => {
+    let ctx: Context;
 
-  beforeEach(async () => {
-    ctx = await loadContext(fixtureDir);
-  });
+    beforeAll(async () => {
+      await setupFunc(fixtureDir);
+    });
 
-  afterAll(async () => {
-    await rm(fixtureDir, { force: true, recursive: true });
-  });
+    beforeEach(async () => {
+      ctx = await loadContext(fixtureDir);
+    });
 
-  it('Should generate PWA icons', async () => {
-    const assets = await ctx.project.loadInputAssets();
+    afterAll(async () => {
+      await rm(fixtureDir, { force: true, recursive: true });
+    });
 
-    const exportedIcons = Object.values(PwaAssets).filter((a) => a.kind === AssetKind.Icon);
+    it('Should generate PWA icons', async () => {
+      const assets = await ctx.project.loadInputAssets();
 
-    const strategy = new PwaAssetGenerator();
-    let generatedAssets = ((await assets.icon?.generate(strategy, ctx.project)) ??
-      []) as OutputAsset<PwaOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBe(exportedIcons.length);
+      const exportedIcons = Object.values(PwaAssets).filter((a) => a.kind === AssetKind.Icon);
 
-    const existSet = await Promise.all(
-      generatedAssets.map((asset) => {
-        const dest = asset.destFilenames[asset.template.name];
-        return pathExists(dest);
-      })
-    );
-    expect(existSet.every((e) => !!e)).toBe(true);
+      const strategy = new PwaAssetGenerator();
+      let generatedAssets = ((await assets.icon?.generate(strategy, ctx.project)) ??
+        []) as OutputAsset<PwaOutputAssetTemplate>[];
+      expect(generatedAssets.length).toBe(exportedIcons.length);
 
-    const sizedSet = await Promise.all(
-      generatedAssets.map(async (asset) => {
-        const dest = asset.destFilenames[asset.template.name];
-        const pipe = sharp(dest);
-        const metadata = await pipe.metadata();
-        return metadata.width === asset.template.width && metadata.height === asset.template.height;
-      })
-    );
-    expect(sizedSet.every((e) => !!e)).toBe(true);
-
-    const manifest = await strategy.getManifestJson(ctx.project);
-    expect(manifest.icons.length).toBe(7);
-
-    expect(
-      manifest.icons
-        .map((icon: any) => {
-          const fname = parse(icon.src).name;
-          const num = fname.split('-')[1];
-          return icon.sizes === `${num}x${num}`;
+      const existSet = await Promise.all(
+        generatedAssets.map((asset) => {
+          const dest = asset.destFilenames[asset.template.name];
+          return dest.startsWith(fixtureDir) && pathExists(dest);
         })
-        .every((i: any) => !!i)
-    ).toBe(true);
+      );
+      expect(existSet.every((e) => !!e)).toBe(true);
 
-    // Make sure the file extensions are correct and the paths are relative
-    expect(
-      manifest.icons
-        .map((icon: any) => {
-          const ext = parse(icon.src).ext;
-          return ext === '.webp' && !isAbsolute(icon.src);
+      const sizedSet = await Promise.all(
+        generatedAssets.map(async (asset) => {
+          const dest = asset.destFilenames[asset.template.name];
+          const pipe = sharp(dest);
+          const metadata = await pipe.metadata();
+          return metadata.width === asset.template.width && metadata.height === asset.template.height;
         })
-        .every((i: any) => !!i)
-    ).toBe(true);
-  });
+      );
+      expect(sizedSet.every((e) => !!e)).toBe(true);
 
-  it.skip('Should generate PWA splashes', async () => {
-    const assets = await ctx.project.loadInputAssets();
+      const manifest = await strategy.getManifestJson(ctx.project);
+      expect(manifest.icons.length).toBe(7);
 
-    const strategy = new PwaAssetGenerator();
-    let generatedAssets = ((await assets.splash?.generate(strategy, ctx.project)) ??
-      []) as OutputAsset<PwaOutputAssetTemplate>[];
+      expect(
+        manifest.icons
+          .map((icon: any) => {
+            const fname = parse(icon.src).name;
+            const num = fname.split('-')[1];
+            return icon.sizes === `${num}x${num}`;
+          })
+          .every((i: any) => !!i)
+      ).toBe(true);
 
-    expect(generatedAssets.length).toBeGreaterThan(10);
+      // Make sure the file extensions are correct and the paths are relative
+      expect(
+        manifest.icons
+          .map((icon: any) => {
+            const ext = parse(icon.src).ext;
+            return ext === '.webp' && !isAbsolute(icon.src);
+          })
+          .every((i: any) => !!i)
+      ).toBe(true);
+    });
 
-    generatedAssets = ((await assets.splashDark?.generate(strategy, ctx.project)) ??
-      []) as OutputAsset<PwaOutputAssetTemplate>[];
+    it.skip('Should generate PWA splashes', async () => {
+      const assets = await ctx.project.loadInputAssets();
+
+      const strategy = new PwaAssetGenerator();
+      let generatedAssets = ((await assets.splash?.generate(strategy, ctx.project)) ??
+        []) as OutputAsset<PwaOutputAssetTemplate>[];
+
+      expect(generatedAssets.length).toBeGreaterThan(10);
+
+      generatedAssets = ((await assets.splashDark?.generate(strategy, ctx.project)) ??
+        []) as OutputAsset<PwaOutputAssetTemplate>[];
+    });
   });
 });
 
