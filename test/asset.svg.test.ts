@@ -1,4 +1,4 @@
-import { copy, rm, writeFile } from '@ionic/utils-fs';
+import { copy, rmSync as rm, writeFile } from '@ionic/utils-fs';
 import { join } from 'path';
 import tempy from 'tempy';
 

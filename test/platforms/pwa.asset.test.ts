@@ -1,4 +1,4 @@
-import { copy, pathExists, readJSON, rm } from '@ionic/utils-fs';
+import { copy, pathExists, readJSON, rmSync as rm } from '@ionic/utils-fs';
 import tempy from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';

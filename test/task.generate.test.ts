@@ -1,4 +1,4 @@
-import { copy, readJSON, rm } from '@ionic/utils-fs';
+import { copy, readJSON, rmSync as rm } from '@ionic/utils-fs';
 import { join } from 'path';
 import tempy from 'tempy';
 

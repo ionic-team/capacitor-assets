@@ -1,4 +1,4 @@
-import { copy, pathExists, readdirp, readFile, rm, statSync } from '@ionic/utils-fs';
+import { copy, pathExists, readdirp, readFile, rmSync as rm, statSync } from '@ionic/utils-fs';
 import tempy from 'tempy';
 import sharp from 'sharp';
 import { join } from 'path';
