@@ -2,7 +2,7 @@ import { Subprocess, SubprocessError } from '@ionic/utils-subprocess';
 
 import c from '../colors';
 
-export async function runCommand(command: string, args: string[], options = {}) {
+export async function runCommand(command: string, args: string[], options = {}): Promise<void> {
   console.log(c.strong(`> ${command} ${args.join(' ')}`));
 
   const p = new Subprocess(command, args, options);
@@ -13,13 +13,7 @@ export async function runCommand(command: string, args: string[], options = {}) 
   } catch (e) {
     if (e instanceof SubprocessError) {
       // old behavior of just throwing the stdout/stderr strings
-      throw e.output
-        ? e.output
-        : e.code
-          ? e.code
-          : e.error
-            ? e.error.message
-            : 'Unknown error';
+      throw e.output ? e.output : e.code ? e.code : e.error ? e.error.message : 'Unknown error';
     }
 
     throw e;

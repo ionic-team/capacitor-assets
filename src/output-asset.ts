@@ -1,7 +1,8 @@
-import { OutputInfo } from 'sharp';
-import { InputAsset } from './input-asset';
-import { OutputAssetTemplate } from './definitions';
-import { Project } from './project';
+import type { OutputInfo } from 'sharp';
+
+import type { OutputAssetTemplate } from './definitions';
+import type { InputAsset } from './input-asset';
+import type { Project } from './project';
 
 /**
  * An instance of a generated asset
@@ -15,11 +16,11 @@ export class OutputAsset<OutputAssetTemplateType = OutputAssetTemplate> {
     public outputInfoMap: { [name: string]: OutputInfo },
   ) {}
 
-  getDestFilename(assetName: string) {
+  getDestFilename(assetName: string): string {
     return this.destFilenames[assetName];
   }
 
-  getOutputInfo(assetName: string) {
+  getOutputInfo(assetName: string): OutputInfo {
     return this.outputInfoMap[assetName];
   }
 }

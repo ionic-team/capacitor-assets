@@ -1,13 +1,5 @@
-import {
-  AssetKind,
-  Format,
-  IosIdiom,
-  IosOutputAssetTemplate,
-  IosOutputAssetTemplateSplash,
-  Orientation,
-  Platform,
-  Theme,
-} from '../../definitions';
+import type { IosOutputAssetTemplate, IosOutputAssetTemplateSplash } from '../../definitions';
+import { AssetKind, Format, IosIdiom, Orientation, Platform, Theme } from '../../definitions';
 
 /**
  * 1024px Icon

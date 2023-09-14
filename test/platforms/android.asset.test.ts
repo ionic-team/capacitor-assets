@@ -59,7 +59,7 @@ describe('Android asset test', () => {
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
         return metadata.width === asset.template.width && metadata.height === asset.template.height;
-      })
+      }),
     );
     expect(sizedSet.every((e) => !!e)).toBe(true);
   }
@@ -138,7 +138,7 @@ describe('Android Asset Test - Logo Only', () => {
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
         return metadata.width === asset.template.width && metadata.height === asset.template.height;
-      })
+      }),
     );
     expect(sizedSet.every((e) => !!e)).toBe(true);
   }

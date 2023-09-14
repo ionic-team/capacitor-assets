@@ -1,7 +1,7 @@
 import { logger } from './log';
 
 export function wrapAction(action: any) {
-  return async (...args: any[]) => {
+  return async (...args: any[]): Promise<void> => {
     try {
       await action(...args);
     } catch (e) {

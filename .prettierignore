@@ -1,0 +1,4 @@
+**/dist
+bin
+node_modules
+test

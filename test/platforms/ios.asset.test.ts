@@ -32,7 +32,7 @@ describe('iOS Asset Test', () => {
       generatedAssets.map((asset) => {
         const dest = asset.destFilenames[asset.template.name];
         return pathExists(dest);
-      })
+      }),
     );
     expect(existSet.every((e) => !!e)).toBe(true);
   }
@@ -44,7 +44,7 @@ describe('iOS Asset Test', () => {
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
         return metadata.width === asset.template.width && metadata.height === asset.template.height;
-      })
+      }),
     );
     expect(sizedSet.every((e) => !!e)).toBe(true);
   }
@@ -68,7 +68,7 @@ describe('iOS Asset Test', () => {
     const contentsJson = JSON.parse(
       await readFile(join(ctx.project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json'), {
         encoding: 'utf-8',
-      })
+      }),
     ) as IosContents;
     expect(contentsJson.images.find((i) => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name));
   });
@@ -77,7 +77,7 @@ describe('iOS Asset Test', () => {
     const exportedIcons = Object.values(IosAssets).filter(
       (a) =>
         [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].indexOf(a.kind) >=
-        0
+        0,
     );
 
     const strategy = new IosAssetGenerator();
@@ -154,7 +154,7 @@ describe('iOS Asset Test - Logo Only', () => {
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
         return metadata.width === asset.template.width && metadata.height === asset.template.height;
-      })
+      }),
     );
     expect(sizedSet.every((e) => !!e)).toBe(true);
   }
@@ -176,7 +176,7 @@ describe('iOS Asset Test - Logo Only', () => {
           AssetKind.SpotlightIcon,
           AssetKind.Splash,
           AssetKind.SplashDark,
-        ].indexOf(a.kind) >= 0
+        ].indexOf(a.kind) >= 0,
     );
 
     expect(generatedAssets.length).toBe(assetTemplates.length);
@@ -184,7 +184,7 @@ describe('iOS Asset Test - Logo Only', () => {
     const contentsJson = JSON.parse(
       await readFile(join(ctx.project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json'), {
         encoding: 'utf-8',
-      })
+      }),
     ) as IosContents;
     expect(contentsJson.images.find((i) => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name));
 
@@ -208,7 +208,7 @@ describe('iOS Asset Test - Logo Only', () => {
           AssetKind.NotificationIcon,
           AssetKind.SpotlightIcon,
           AssetKind.SplashDark,
-        ].indexOf(a.kind) >= 0
+        ].indexOf(a.kind) >= 0,
     );
 
     // Shouldn't generate standard splash
@@ -220,7 +220,7 @@ describe('iOS Asset Test - Logo Only', () => {
     const contentsJson = JSON.parse(
       await readFile(join(ctx.project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json'), {
         encoding: 'utf-8',
-      })
+      }),
     ) as IosContents;
     expect(contentsJson.images.find((i) => i.filename === IosAssets.IOS_2X_UNIVERSAL_ANYANY_SPLASH_DARK.name));
 

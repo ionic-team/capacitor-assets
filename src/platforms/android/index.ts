@@ -1,22 +1,24 @@
-import { dirname, join, relative } from 'path';
-import sharp, { OutputInfo, Sharp } from 'sharp';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { mkdirp, pathExists, writeFile } from '@ionic/utils-fs';
+import { dirname, join, relative } from 'path';
+import type { OutputInfo, Sharp } from 'sharp';
+import sharp from 'sharp';
 
-import { InputAsset } from '../../input-asset';
-import { AssetGenerator, AssetGeneratorOptions } from '../../asset-generator';
-import {
+import type { AssetGeneratorOptions } from '../../asset-generator';
+import { AssetGenerator } from '../../asset-generator';
+import type {
   AndroidOutputAssetTemplate,
   AndroidOutputAssetTemplateAdaptiveIcon,
   AndroidOutputAssetTemplateSplash,
-  AssetKind,
-  Platform,
 } from '../../definitions';
+import { AssetKind, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
+import type { InputAsset } from '../../input-asset';
 import { OutputAsset } from '../../output-asset';
-import { Project } from '../../project';
+import type { Project } from '../../project';
+import { warn } from '../../util/log';
 
 import * as AndroidAssetTemplates from './assets';
-import { warn } from '../../util/log';
 
 export class AndroidAssetGenerator extends AssetGenerator {
   constructor(options: AssetGeneratorOptions = {}) {
@@ -83,9 +85,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
             asset,
             splash,
             pipe,
-            this.options.splashBackgroundColor ?? '#ffffff'
+            this.options.splashBackgroundColor ?? '#ffffff',
           );
-        })
+        }),
       );
 
       generated.push(...generatedSplashes);
@@ -100,9 +102,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
           asset,
           splash,
           pipe,
-          this.options.splashBackgroundColorDark ?? '#111111'
+          this.options.splashBackgroundColorDark ?? '#111111',
         );
-      })
+      }),
     );
 
     generated.push(...generatedSplashes);
@@ -114,7 +116,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
   private async _generateAdaptiveIconsFromLogo(
     project: Project,
     asset: InputAsset,
-    pipe: Sharp
+    pipe: Sharp,
   ): Promise<OutputAsset[]> {
     // Current versions of Android don't appear to support night mode icons (13+ might?)
     // so, for now, we only generate light mode ones
@@ -136,19 +138,19 @@ export class AndroidAssetGenerator extends AssetGenerator {
     });
 
     const icons = Object.values(AndroidAssetTemplates).filter(
-      (a) => a.kind === AssetKind.AdaptiveIcon
+      (a) => a.kind === AssetKind.AdaptiveIcon,
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const backgroundImages = await Promise.all(
       icons.map(async (icon) => {
         return await this._generateAdaptiveIconBackground(project, asset, icon, backgroundPipe);
-      })
+      }),
     );
 
     const foregroundImages = await Promise.all(
       icons.map(async (icon) => {
         return await this._generateAdaptiveIconForeground(project, asset, icon, pipe);
-      })
+      }),
     );
 
     return [...foregroundImages, ...backgroundImages];
@@ -159,7 +161,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     asset: InputAsset,
     splash: AndroidOutputAssetTemplate,
     pipe: Sharp,
-    backgroundColor: string
+    backgroundColor: string,
   ): Promise<OutputAsset> {
     // Generate light splash
     const resPath = this.getResPath(project);
@@ -212,7 +214,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       },
       {
         [dest]: outputInfo,
-      }
+      },
     );
 
     return splashOutput;
@@ -220,7 +222,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
   private async generateLegacyIcon(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
-      (a) => a.kind === AssetKind.Icon
+      (a) => a.kind === AssetKind.Icon,
     ) as AndroidOutputAssetTemplate[];
 
     const pipe = asset.pipeline();
@@ -238,9 +240,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
           asset,
           project,
           { [`mipmap-${icon.density}/ic_launcher.png`]: dest },
-          { [`mipmap-${icon.density}/ic_launcher.png`]: outputInfo }
+          { [`mipmap-${icon.density}/ic_launcher.png`]: outputInfo },
         );
-      })
+      }),
     );
 
     collected.push(
@@ -253,10 +255,10 @@ export class AndroidAssetGenerator extends AssetGenerator {
             asset,
             project,
             { [`mipmap-${icon.density}/ic_launcher_round.png`]: dest },
-            { [`mipmap-${icon.density}/ic_launcher_round.png`]: outputInfo }
+            { [`mipmap-${icon.density}/ic_launcher_round.png`]: outputInfo },
           );
-        })
-      ))
+        }),
+      )),
     );
 
     await this.updateManifest(project);
@@ -268,7 +270,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     template: AndroidOutputAssetTemplate,
-    pipe: Sharp
+    pipe: Sharp,
   ): Promise<[string, OutputInfo]> {
     const radius = 4;
     const svg = `<svg width="${template.width}" height="${template.height}"><rect x="0" y="0" width="${template.width}" height="${template.height}" rx="${radius}" fill="#ffffff"/></svg>`;
@@ -306,7 +308,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     template: AndroidOutputAssetTemplate,
-    pipe: Sharp
+    pipe: Sharp,
   ): Promise<[string, OutputInfo]> {
     const svg = `<svg width="${template.width}" height="${template.height}"><circle cx="${template.width / 2}" cy="${
       template.height / 2
@@ -328,7 +330,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
   private async generateAdaptiveIconForeground(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
-      (a) => a.kind === AssetKind.Icon
+      (a) => a.kind === AssetKind.Icon,
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const pipe = asset.pipeline();
@@ -340,7 +342,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     return Promise.all(
       icons.map(async (icon) => {
         return await this._generateAdaptiveIconForeground(project, asset, icon, pipe);
-      })
+      }),
     );
   }
 
@@ -348,13 +350,13 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     icon: AndroidOutputAssetTemplateAdaptiveIcon,
-    pipe: Sharp
+    pipe: Sharp,
   ) {
     const resPath = this.getResPath(project);
 
     // Create the foreground and background images
     const destForeground = join(resPath, `mipmap-${icon.density}`, 'ic_launcher_foreground.png');
-    let parentDir = dirname(destForeground);
+    const parentDir = dirname(destForeground);
     if (!(await pathExists(parentDir))) {
       await mkdirp(parentDir);
     }
@@ -394,13 +396,13 @@ export class AndroidAssetGenerator extends AssetGenerator {
       },
       {
         [`mipmap-${icon.density}/ic_launcher_foreground.png`]: outputInfoForeground,
-      }
+      },
     );
   }
 
   private async generateAdaptiveIconBackground(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
-      (a) => a.kind === AssetKind.Icon
+      (a) => a.kind === AssetKind.Icon,
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const pipe = asset.pipeline();
@@ -412,14 +414,14 @@ export class AndroidAssetGenerator extends AssetGenerator {
     return Promise.all(
       icons.map(async (icon) => {
         return await this._generateAdaptiveIconBackground(project, asset, icon, pipe);
-      })
+      }),
     );
   }
   private async _generateAdaptiveIconBackground(
     project: Project,
     asset: InputAsset,
     icon: AndroidOutputAssetTemplateAdaptiveIcon,
-    pipe: Sharp
+    pipe: Sharp,
   ) {
     const resPath = this.getResPath(project);
 
@@ -465,7 +467,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
       },
       {
         [`mipmap-${icon.density}/ic_launcher_background.png`]: outputInfoBackground,
-      }
+      },
     );
   }
 
@@ -499,7 +501,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
         const relPath = relative(resPath, dest);
         return new OutputAsset(splash, asset, project, { [relPath]: dest }, { [relPath]: outputInfo });
-      })
+      }),
     );
 
     return collected;
@@ -509,7 +511,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     template: AndroidOutputAssetTemplateSplash,
-    pipe: Sharp
+    pipe: Sharp,
   ): Promise<[string, OutputInfo]> {
     const drawableDir = template.density ? `drawable-${template.density}` : 'drawable';
 

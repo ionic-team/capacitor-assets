@@ -32,7 +32,7 @@ describe('Task: Generate test', () => {
         })
         .map((g) => Object.values(g.destFilenames).map((f) => f.replace(fixtureDir, '')))
         .flat()
-        .sort()
+        .sort(),
     );
   }
 

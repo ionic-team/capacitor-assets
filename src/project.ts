@@ -1,7 +1,10 @@
-import { Framework, MobileProject, MobileProjectConfig } from '@trapezedev/project';
-import { AssetKind, Assets, Platform } from './definitions';
-import { join } from 'path';
 import { pathExists } from '@ionic/utils-fs';
+import type { MobileProjectConfig } from '@trapezedev/project';
+import { MobileProject } from '@trapezedev/project';
+import { join } from 'path';
+
+import type { Assets } from './definitions';
+import { AssetKind, Platform } from './definitions';
 import { InputAsset } from './input-asset';
 import { error } from './util/log';
 
@@ -11,7 +14,11 @@ export class Project extends MobileProject {
 
   assetDir: string;
 
-  constructor(projectRoot: string = process.cwd(), config: MobileProjectConfig, private assetPath: string = 'assets') {
+  constructor(
+    projectRoot: string = process.cwd(),
+    config: MobileProjectConfig,
+    private assetPath: string = 'assets',
+  ) {
     super(projectRoot, config);
 
     this.directory = projectRoot;
@@ -20,25 +27,25 @@ export class Project extends MobileProject {
     this.detectAssetDir();
   }
 
-  async detectAssetDir() {
+  async detectAssetDir(): Promise<void> {
     if (this.assetPath === 'assets' && !(await pathExists(this.assetDir))) {
       this.assetDir = join(this.projectRoot, 'resources');
     }
   }
 
-  async androidExists() {
-    return this.config.android?.path && (await pathExists(this.config.android?.path));
+  async androidExists(): Promise<boolean> {
+    return this.config.android?.path !== undefined && (await pathExists(this.config.android?.path));
   }
 
-  async iosExists() {
-    return this.config.ios?.path && (await pathExists(this.config.ios?.path));
+  async iosExists(): Promise<boolean> {
+    return this.config.ios?.path !== undefined && (await pathExists(this.config.ios?.path));
   }
 
-  async assetDirExists() {
+  async assetDirExists(): Promise<boolean> {
     return pathExists(this.assetDir);
   }
 
-  assetDirectory() {
+  assetDirectory(): string {
     return this.assetDir;
   }
 
@@ -68,7 +75,7 @@ export class Project extends MobileProject {
       androidNotificationIcon: await this.loadInputAsset(
         'android/notification',
         AssetKind.NotificationIcon,
-        Platform.Android
+        Platform.Android,
       ),
     };
     return this.assets;
@@ -87,7 +94,7 @@ export class Project extends MobileProject {
 
     const extensions = ['.png', '.webp', '.jpg', '.jpeg', '.svg'];
     let filename: string | null = null;
-    for (let ext of extensions) {
+    for (const ext of extensions) {
       filename = `${path}${ext}`;
       if (await pathExists(join(this.assetDir, filename))) {
         imagePath = join(this.assetDir, filename);

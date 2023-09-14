@@ -1,9 +1,11 @@
-import { basename, extname, join } from 'path';
+import { basename, extname } from 'path';
 import sharp from 'sharp';
-import { AssetKind, Format, Platform } from './definitions';
-import { OutputAsset } from './output-asset';
-import { Project } from './project';
-import { AssetGenerator } from './asset-generator';
+
+import type { AssetGenerator } from './asset-generator';
+import type { AssetKind, Platform } from './definitions';
+import { Format } from './definitions';
+import type { OutputAsset } from './output-asset';
+import type { Project } from './project';
 
 /**
  * An instance of an asset that we will use to generate
@@ -16,15 +18,19 @@ export class InputAsset {
 
   private _sharp: sharp.Sharp | null = null;
 
-  constructor(public path: string, public kind: AssetKind, public platform: Platform) {
+  constructor(
+    public path: string,
+    public kind: AssetKind,
+    public platform: Platform,
+  ) {
     this.filename = basename(path);
   }
 
-  pipeline() {
+  pipeline(): sharp.Sharp | undefined {
     return this._sharp?.clone();
   }
 
-  format() {
+  format(): Format.Jpeg | Format.Png | Format.Svg | Format.Unknown {
     const ext = extname(this.filename);
 
     switch (ext) {

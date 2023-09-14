@@ -1,10 +1,10 @@
-import yargs from 'yargs';
+import type { MobileProjectConfig } from '@trapezedev/project';
 import { join } from 'path';
+import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { Project } from './project';
 
-import { AssetGeneratorOptions } from './asset-generator';
-import { MobileProjectConfig } from '@trapezedev/project';
+import type { AssetGeneratorOptions } from './asset-generator';
+import { Project } from './project';
 
 export interface Context {
   // Path the to the root of the capacitor project, if needed
@@ -37,7 +37,7 @@ export async function loadContext(projectRootPath?: string): Promise<Context> {
   };
 }
 
-export function setArguments(ctx: Context, args: any) {
+export function setArguments(ctx: Context, args: any): void {
   ctx.args = args;
   process.env.VERBOSE = '' + !!args.verbose;
 }

@@ -1,14 +1,9 @@
-import {
-  AssetKind,
+import type {
   AndroidOutputAssetTemplate,
-  AndroidDensity,
-  Format,
-  Orientation,
-  Platform,
   AndroidOutputAssetTemplateAdaptiveIcon,
   AndroidOutputAssetTemplateSplash,
-  Theme,
 } from '../../definitions';
+import { AssetKind, AndroidDensity, Format, Orientation, Platform } from '../../definitions';
 
 export const ANDROID_LDPI_ICON: AndroidOutputAssetTemplate = {
   platform: Platform.Android,

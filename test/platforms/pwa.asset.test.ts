@@ -39,7 +39,7 @@ describe('PWA Asset Test', () => {
       generatedAssets.map((asset) => {
         const dest = asset.destFilenames[asset.template.name];
         return pathExists(dest);
-      })
+      }),
     );
     expect(existSet.every((e) => !!e)).toBe(true);
 
@@ -49,7 +49,7 @@ describe('PWA Asset Test', () => {
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
         return metadata.width === asset.template.width && metadata.height === asset.template.height;
-      })
+      }),
     );
     expect(sizedSet.every((e) => !!e)).toBe(true);
 
@@ -63,7 +63,7 @@ describe('PWA Asset Test', () => {
           const num = fname.split('-')[1];
           return icon.sizes === `${num}x${num}`;
         })
-        .every((i: any) => !!i)
+        .every((i: any) => !!i),
     ).toBe(true);
 
     // Make sure the file extensions are correct and the paths are relative
@@ -73,7 +73,7 @@ describe('PWA Asset Test', () => {
           const ext = parse(icon.src).ext;
           return ext === '.webp' && !isAbsolute(icon.src);
         })
-        .every((i: any) => !!i)
+        .every((i: any) => !!i),
     ).toBe(true);
   });
 
@@ -102,7 +102,7 @@ describe('PWA Asset Test - logo only', () => {
         const pipe = sharp(dest);
         const metadata = await pipe.metadata();
         return metadata.width === asset.template.width && metadata.height === asset.template.height;
-      })
+      }),
     );
     expect(sizedSet.every((e) => !!e)).toBe(true);
   }
