@@ -5,8 +5,9 @@ import {
   createDefaultLogger,
 } from '@ionic/cli-framework-output';
 
-import { isInteractive } from './term';
 import c from '../colors';
+
+import { isInteractive } from './term';
 
 const options = {
   colors: c,
@@ -28,20 +29,20 @@ export const logger = createDefaultLogger({
   },
 });
 
-export function debug(...args: any[]) {
+export function debug(...args: any[]): void {
   if (process.env.VERBOSE !== 'false') {
     console.log(...args);
   }
 }
-export function log(...args: any[]) {
+export function log(...args: any[]): void {
   console.log(...args);
 }
 
-export function warn(...args: any[]) {
+export function warn(...args: any[]): void {
   console.warn(...args);
 }
 
-export function error(...args: any[]) {
+export function error(...args: any[]): void {
   console.error(...args);
 }
 

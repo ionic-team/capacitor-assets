@@ -1,12 +1,16 @@
-import { join } from 'path';
 import { readFile, writeFile } from '@ionic/utils-fs';
+import { join } from 'path';
+import sharp from 'sharp';
 
-import { InputAsset } from '../../input-asset';
-import { AssetKind, IosOutputAssetTemplate, Platform } from '../../definitions';
+import type { AssetGeneratorOptions } from '../../asset-generator';
+import { AssetGenerator } from '../../asset-generator';
+import type { IosOutputAssetTemplate } from '../../definitions';
+import { AssetKind, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
+import type { InputAsset } from '../../input-asset';
 import { OutputAsset } from '../../output-asset';
-import { Project } from '../../project';
-import { AssetGenerator, AssetGeneratorOptions } from '../../asset-generator';
+import type { Project } from '../../project';
+
 import {
   IOS_1X_UNIVERSAL_ANYANY_SPLASH,
   IOS_2X_UNIVERSAL_ANYANY_SPLASH,
@@ -16,7 +20,6 @@ import {
   IOS_3X_UNIVERSAL_ANYANY_SPLASH_DARK,
 } from './assets';
 import * as IosAssetTemplates from './assets';
-import sharp from 'sharp';
 
 export const IOS_APP_ICON_SET_NAME = 'AppIcon';
 export const IOS_APP_ICON_SET_PATH = `App/Assets.xcassets/${IOS_APP_ICON_SET_NAME}.appiconset`;
@@ -47,6 +50,7 @@ export class IosAssetGenerator extends AssetGenerator {
         return this.generateIcons(asset, project);
       case AssetKind.NotificationIcon:
         return this.generateNotificationIcons(asset, project);
+      // eslint-disable-next-line no-duplicate-case
       case AssetKind.Icon:
         return [];
       case AssetKind.SettingsIcon:
@@ -117,7 +121,7 @@ export class IosAssetGenerator extends AssetGenerator {
           },
           {
             [lightDest]: lightOutputInfo,
-          }
+          },
         );
 
         generated.push(lightSplashOutput);
@@ -161,7 +165,7 @@ export class IosAssetGenerator extends AssetGenerator {
         },
         {
           [darkDest]: darkOutputInfo,
-        }
+        },
       );
 
       generated.push(darkSplashOutput);
@@ -176,7 +180,7 @@ export class IosAssetGenerator extends AssetGenerator {
   private async _generateIcons(
     asset: InputAsset,
     project: Project,
-    icons: IosOutputAssetTemplate[]
+    icons: IosOutputAssetTemplate[],
   ): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
 
@@ -205,9 +209,9 @@ export class IosAssetGenerator extends AssetGenerator {
           },
           {
             [icon.name]: outputInfo,
-          }
+          },
         );
-      })
+      }),
     );
 
     await this.updateIconsContentsJson(generated, project);
@@ -219,8 +223,8 @@ export class IosAssetGenerator extends AssetGenerator {
   private async generateIconsForLogo(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(IosAssetTemplates).filter((a) =>
       [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].find(
-        (i) => i === a.kind
-      )
+        (i) => i === a.kind,
+      ),
     );
 
     return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
@@ -229,8 +233,8 @@ export class IosAssetGenerator extends AssetGenerator {
   private async generateIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(IosAssetTemplates).filter((a) =>
       [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].find(
-        (i) => i === a.kind
-      )
+        (i) => i === a.kind,
+      ),
     );
 
     return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
@@ -287,7 +291,7 @@ export class IosAssetGenerator extends AssetGenerator {
         },
         {
           [assetMeta.name]: outputInfo,
-        }
+        },
       );
 
       generated.push(g);
@@ -321,7 +325,7 @@ export class IosAssetGenerator extends AssetGenerator {
           f.scale === `${scale}x` &&
           f.size === `${width}x${height}` &&
           f.idiom === (g.template as IosOutputAssetTemplate).idiom &&
-          typeof f.appearances === 'undefined'
+          typeof f.appearances === 'undefined',
       );
 
       if (existing) {
@@ -352,7 +356,7 @@ export class IosAssetGenerator extends AssetGenerator {
     for (const g of generated) {
       const existing = withoutMissing.find(
         (f: any) =>
-          f.scale === `${g.template.scale}x` && f.idiom === 'universal' && typeof f.appearances === 'undefined'
+          f.scale === `${g.template.scale}x` && f.idiom === 'universal' && typeof f.appearances === 'undefined',
       );
 
       if (existing) {
@@ -382,7 +386,7 @@ export class IosAssetGenerator extends AssetGenerator {
     for (const g of generated) {
       const existing = withoutMissing.find(
         (f: any) =>
-          f.scale === `${g.template.scale}x` && f.idiom === 'universal' && typeof f.appearances !== 'undefined'
+          f.scale === `${g.template.scale}x` && f.idiom === 'universal' && typeof f.appearances !== 'undefined',
       );
 
       if (existing) {

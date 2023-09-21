@@ -1,4 +1,4 @@
-import { copy, readJSON, rm } from '@ionic/utils-fs';
+import { copy, readJSON, rmSync as rm } from '@ionic/utils-fs';
 import { join } from 'path';
 import tempy from 'tempy';
 
@@ -32,7 +32,7 @@ describe('Task: Generate test', () => {
         })
         .map((g) => Object.values(g.destFilenames).map((f) => f.replace(fixtureDir, '')))
         .flat()
-        .sort()
+        .sort(),
     );
   }
 

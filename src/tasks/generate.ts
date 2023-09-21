@@ -1,20 +1,20 @@
-import { Context } from '../ctx';
+import type { AssetGenerator, AssetGeneratorOptions } from '../asset-generator';
 import * as c from '../colors';
-import { error, log, logger, warn } from '../util/log';
+import type { Context } from '../ctx';
+import type { Assets } from '../definitions';
+import type { InputAsset } from '../input-asset';
+import type { OutputAsset } from '../output-asset';
+import { AndroidAssetGenerator } from '../platforms/android';
 import { IosAssetGenerator } from '../platforms/ios';
 import { PwaAssetGenerator } from '../platforms/pwa';
-import { AndroidAssetGenerator } from '../platforms/android';
-import { AssetGenerator, AssetGeneratorOptions } from '../asset-generator';
-import { OutputAsset } from '../output-asset';
-import { AssetKind, Assets } from '../definitions';
-import { Project } from '../project';
-import { InputAsset } from '../input-asset';
+import type { Project } from '../project';
+import { error, log, logger } from '../util/log';
 
 export async function run(ctx: Context): Promise<OutputAsset[]> {
   try {
     if (!(await ctx.project.assetDirExists())) {
       error(
-        `Asset directory not found at ${ctx.project.projectRoot}. Use --asset-path to specify a specific directory containing assets`
+        `Asset directory not found at ${ctx.project.projectRoot}. Use --asset-path to specify a specific directory containing assets`,
       );
       return [];
     }
@@ -24,8 +24,8 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
     if ([assets.logo, assets.icon, assets.splash, assets.splashDark].every((a) => !a)) {
       error(
         `No assets found in the asset path ${c.ancillary(
-          ctx.project.assetDir
-        )}. See https://github.com/ionic-team/capacitor-assets to learn how to use this tool.`
+          ctx.project.assetDir,
+        )}. See https://github.com/ionic-team/capacitor-assets to learn how to use this tool.`,
       );
       return [];
     }
@@ -134,7 +134,7 @@ function logGenerated(generated: OutputAsset[]) {
       log(
         `${c.strong(c.success('CREATE'))} ${c.strong(c.extra(g.template.platform))} ${c.weak(g.template.kind)} ${
           filename ?? ''
-        }${outputInfo ? ` (${size(outputInfo.size)})` : ''}`
+        }${outputInfo ? ` (${size(outputInfo.size)})` : ''}`,
       );
     });
   }
@@ -168,19 +168,19 @@ function logGenerated(generated: OutputAsset[]) {
         count: number;
         size: number;
       };
-    }
+    },
   );
 
   log('Totals:');
   for (const platformName of Object.keys(totals).sort()) {
     const e = totals[platformName];
     log(
-      `${c.strong(c.success(platformName))}: ${c.strong(c.extra(e.count))} generated, ${c.strong(size(e.size))} total`
+      `${c.strong(c.success(platformName))}: ${c.strong(c.extra(e.count))} generated, ${c.strong(size(e.size))} total`,
     );
   }
 }
 
 function size(bytes: number) {
-  var i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return Number((bytes / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
 }

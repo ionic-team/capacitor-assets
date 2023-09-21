@@ -1,4 +1,5 @@
-import { AssetKind, PwaOutputAssetTemplate, Format, Platform } from '../../definitions';
+import type { PwaOutputAssetTemplate } from '../../definitions';
+import { AssetKind, Format, Platform } from '../../definitions';
 
 export const PWA_48_PX_ICON: PwaOutputAssetTemplate = {
   platform: Platform.Pwa,

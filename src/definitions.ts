@@ -1,4 +1,4 @@
-import { InputAsset } from './input-asset';
+import type { InputAsset } from './input-asset';
 
 export interface Assets {
   logo: InputAsset | null;
@@ -136,7 +136,7 @@ export const enum IosIdiom {
   TV = 'tv',
 }
 
-export interface IosOutputAssetTemplateIcon extends IosOutputAssetTemplate {}
+export type IosOutputAssetTemplateIcon = IosOutputAssetTemplate;
 export interface IosOutputAssetTemplateSplash extends IosOutputAssetTemplate {
   orientation: Orientation;
   theme: Theme;

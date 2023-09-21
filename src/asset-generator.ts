@@ -1,6 +1,6 @@
-import { InputAsset } from './input-asset';
-import { OutputAsset } from './output-asset';
-import { Project } from './project';
+import type { InputAsset } from './input-asset';
+import type { OutputAsset } from './output-asset';
+import type { Project } from './project';
 
 export abstract class AssetGenerator {
   constructor(public options: AssetGeneratorOptions) {}
