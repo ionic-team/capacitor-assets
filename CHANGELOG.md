@@ -1,5 +1,15 @@
 # @capacitor/assets
 
+## 3.0.0
+
+### Major Changes
+
+- 99a87f4: Only generate 1024x1024 for iOS icons for xcode 14 compatibility
+
+### Patch Changes
+
+- c5138af: Fix critical dependency issues and update Cap Cli dependency
+
 ## 2.0.4
 
 ### Patch Changes
