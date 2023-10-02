@@ -22,7 +22,6 @@
     "fmt": "npm run prettier -- --write",
     "eslint": "eslint . --ext ts",
     "prettier": "prettier 'src/**/*.ts'",
-    "release": "np",
     "prepublishOnly": "npm run build"
   },
   "prettier": "@ionic/prettier-config",
