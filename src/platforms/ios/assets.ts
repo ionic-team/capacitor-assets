@@ -4,17 +4,16 @@ import { AssetKind, Format, IosIdiom, Orientation, Platform, Theme } from '../..
 /**
  * 1024px Icon
  *
- * - App Store
+ * - iOS 1024 icon
  */
 export const IOS_1024_ICON: IosOutputAssetTemplate = {
   platform: Platform.Ios,
-  idiom: IosIdiom.iOSMarketing,
+  idiom: IosIdiom.Universal,
   kind: AssetKind.Icon,
   name: 'AppIcon-512@2x.png',
   format: Format.Png,
   width: 1024,
   height: 1024,
-  scale: 1,
 };
 
 export const IOS_1X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {

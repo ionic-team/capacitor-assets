@@ -1,4 +1,4 @@
-import { readFile, writeFile } from '@ionic/utils-fs';
+import { readFile, rmSync, writeFile } from '@ionic/utils-fs';
 import { join } from 'path';
 import sharp from 'sharp';
 
@@ -48,15 +48,6 @@ export class IosAssetGenerator extends AssetGenerator {
         return this.generateFromLogo(asset, project);
       case AssetKind.Icon:
         return this.generateIcons(asset, project);
-      case AssetKind.NotificationIcon:
-        return this.generateNotificationIcons(asset, project);
-      // eslint-disable-next-line no-duplicate-case
-      case AssetKind.Icon:
-        return [];
-      case AssetKind.SettingsIcon:
-        return this.generateSettingsIcons(asset, project);
-      case AssetKind.SpotlightIcon:
-        return this.generateSpotlightIcons(asset, project);
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
@@ -221,39 +212,13 @@ export class IosAssetGenerator extends AssetGenerator {
 
   // Generate ALL the icons when only given a logo
   private async generateIconsForLogo(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter((a) =>
-      [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].find(
-        (i) => i === a.kind,
-      ),
-    );
+    const icons = Object.values(IosAssetTemplates).filter((a) => [AssetKind.Icon].find((i) => i === a.kind));
 
     return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
   }
 
   private async generateIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter((a) =>
-      [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].find(
-        (i) => i === a.kind,
-      ),
-    );
-
-    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
-  }
-
-  private async generateNotificationIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.NotificationIcon);
-
-    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
-  }
-
-  private async generateSettingsIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.SettingsIcon);
-
-    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
-  }
-
-  private async generateSpotlightIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.SpotlightIcon);
+    const icons = Object.values(IosAssetTemplates).filter((a) => [AssetKind.Icon].find((i) => i === a.kind));
 
     return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
   }
@@ -308,36 +273,29 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async updateIconsContentsJson(generated: OutputAsset[], project: Project) {
-    const contentsJsonPath = join(project.config.ios!.path!, IOS_APP_ICON_SET_PATH, 'Contents.json');
+    const assetsPath = join(project.config.ios!.path!, IOS_APP_ICON_SET_PATH);
+    const contentsJsonPath = join(assetsPath, 'Contents.json');
     const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
 
     const parsed = JSON.parse(json);
 
-    const withoutMissing = parsed.images.filter((i: any) => !!i.filename);
-
+    const withoutMissing = [];
     for (const g of generated) {
-      const width = g.template.width / (g.template.scale ?? 1);
-      const height = g.template.height / (g.template.scale ?? 1);
-      const scale = g.template.scale ?? 1;
+      const width = g.template.width;
+      const height = g.template.height;
 
-      const existing = withoutMissing.find(
-        (f: any) =>
-          f.scale === `${scale}x` &&
-          f.size === `${width}x${height}` &&
-          f.idiom === (g.template as IosOutputAssetTemplate).idiom &&
-          typeof f.appearances === 'undefined',
-      );
+      parsed.images.map((i: any) => {
+        if (i.filename !== (g.template as IosOutputAssetTemplate).name) {
+          rmSync(join(assetsPath, i.filename));
+        }
+      });
 
-      if (existing) {
-        existing.filename = (g.template as IosOutputAssetTemplate).name;
-      } else {
-        withoutMissing.push({
-          idiom: (g.template as IosOutputAssetTemplate).idiom,
-          size: `${width}x${height}`,
-          scale: `${scale}x`,
-          filename: (g.template as IosOutputAssetTemplate).name,
-        });
-      }
+      withoutMissing.push({
+        idiom: (g.template as IosOutputAssetTemplate).idiom,
+        size: `${width}x${height}`,
+        filename: (g.template as IosOutputAssetTemplate).name,
+        platform: Platform.Ios,
+      });
     }
 
     parsed.images = withoutMissing;
