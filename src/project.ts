@@ -62,9 +62,6 @@ export class Project extends MobileProject {
       iosIcon: await this.loadInputAsset('ios/icon', AssetKind.Icon, Platform.Ios),
       iosSplash: await this.loadInputAsset('ios/splash', AssetKind.Splash, Platform.Ios),
       iosSplashDark: await this.loadInputAsset('ios/splash-dark', AssetKind.SplashDark, Platform.Ios),
-      iosNotificationIcon: await this.loadInputAsset('ios/notification-icon', AssetKind.NotificationIcon, Platform.Ios),
-      iosSettingsIcon: await this.loadInputAsset('ios/settings-icon', AssetKind.SettingsIcon, Platform.Ios),
-      iosSpotlightIcon: await this.loadInputAsset('ios/spotlight-icon', AssetKind.SpotlightIcon, Platform.Ios),
 
       androidIcon: await this.loadInputAsset('android/icon', AssetKind.Icon, Platform.Android),
       androidIconForeground: await this.loadInputAsset('android/icon-foreground', AssetKind.Icon, Platform.Android),

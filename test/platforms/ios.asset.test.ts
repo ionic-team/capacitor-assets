@@ -76,52 +76,13 @@ describe('iOS Asset Test', () => {
   it('Should generate ios icons', async () => {
     const exportedIcons = Object.values(IosAssets).filter(
       (a) =>
-        [AssetKind.Icon, AssetKind.NotificationIcon, AssetKind.SettingsIcon, AssetKind.SpotlightIcon].indexOf(a.kind) >=
+        [AssetKind.Icon].indexOf(a.kind) >=
         0,
     );
 
     const strategy = new IosAssetGenerator();
     let generatedAssets = ((await assets.icon?.generate(strategy, ctx.project)) ??
       []) as OutputAsset<IosOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBe(exportedIcons.length);
-
-    await verifyExists(generatedAssets);
-    await verifySizes(generatedAssets);
-  });
-
-  it('Should generate ios notification icons', async () => {
-    const exportedIcons = Object.values(IosAssets).filter((a) => a.kind === AssetKind.NotificationIcon);
-
-    const strategy = new IosAssetGenerator();
-    let generatedAssets = ((await assets.iosNotificationIcon?.generate(strategy, ctx.project)) ??
-      []) as OutputAsset<IosOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBeGreaterThanOrEqual(0);
-    expect(generatedAssets.length).toBe(exportedIcons.length);
-
-    await verifyExists(generatedAssets);
-    await verifySizes(generatedAssets);
-  });
-
-  it('Should generate ios settings icons', async () => {
-    const exportedIcons = Object.values(IosAssets).filter((a) => a.kind === AssetKind.SettingsIcon);
-
-    const strategy = new IosAssetGenerator();
-    let generatedAssets = ((await assets.iosSettingsIcon?.generate(strategy, ctx.project)) ??
-      []) as OutputAsset<IosOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBeGreaterThanOrEqual(0);
-    expect(generatedAssets.length).toBe(exportedIcons.length);
-
-    await verifyExists(generatedAssets);
-    await verifySizes(generatedAssets);
-  });
-
-  it('Should generate ios spotlight icons', async () => {
-    const exportedIcons = Object.values(IosAssets).filter((a) => a.kind === AssetKind.SpotlightIcon);
-
-    const strategy = new IosAssetGenerator();
-    let generatedAssets = ((await assets.iosSpotlightIcon?.generate(strategy, ctx.project)) ??
-      []) as OutputAsset<IosOutputAssetTemplate>[];
-    expect(generatedAssets.length).toBeGreaterThanOrEqual(0);
     expect(generatedAssets.length).toBe(exportedIcons.length);
 
     await verifyExists(generatedAssets);
@@ -171,9 +132,6 @@ describe('iOS Asset Test - Logo Only', () => {
       (a) =>
         [
           AssetKind.Icon,
-          AssetKind.SettingsIcon,
-          AssetKind.NotificationIcon,
-          AssetKind.SpotlightIcon,
           AssetKind.Splash,
           AssetKind.SplashDark,
         ].indexOf(a.kind) >= 0,
@@ -204,9 +162,6 @@ describe('iOS Asset Test - Logo Only', () => {
         [
           AssetKind.Icon,
           AssetKind.Splash,
-          AssetKind.SettingsIcon,
-          AssetKind.NotificationIcon,
-          AssetKind.SpotlightIcon,
           AssetKind.SplashDark,
         ].indexOf(a.kind) >= 0,
     );

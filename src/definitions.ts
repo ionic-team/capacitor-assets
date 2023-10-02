@@ -12,9 +12,6 @@ export interface Assets {
   iosIcon?: InputAsset | null;
   iosSplash?: InputAsset | null;
   iosSplashDark?: InputAsset | null;
-  iosNotificationIcon?: InputAsset | null;
-  iosSettingsIcon?: InputAsset | null;
-  iosSpotlightIcon?: InputAsset | null;
 
   androidIcon?: InputAsset | null;
   androidIconForeground?: InputAsset | null;
@@ -37,8 +34,6 @@ export const enum AssetKind {
   IconForeground = 'icon-foreground',
   IconBackground = 'icon-background',
   NotificationIcon = 'notification-icon',
-  SettingsIcon = 'settings-icon',
-  SpotlightIcon = 'spotlight-icon',
   Splash = 'splash',
   SplashDark = 'splash-dark',
 }
@@ -129,7 +124,6 @@ export interface IosOutputAssetTemplate extends OutputAssetTemplate {
 // https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_ref-Asset_Catalog_Format/ImageSetType.html#//apple_ref/doc/uid/TP40015170-CH25-SW2
 export const enum IosIdiom {
   Universal = 'universal',
-  iOSMarketing = 'ios-marketing',
   iPhone = 'iphone',
   iPad = 'ipad',
   Watch = 'watch',
