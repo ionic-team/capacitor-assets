@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 3.0.1
+
+### Patch Changes
+
+- 2c19107: fix: properly configure the single 1024x1024 iOS icon
+
 ## 3.0.0
 
 ### Major Changes
