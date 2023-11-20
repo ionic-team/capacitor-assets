@@ -233,7 +233,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     const collected = await Promise.all(
       icons.map(async (icon) => {
-        const [dest, outputInfo] = await this.generateLegacyLauncherIcon(project, asset, icon, pipe);
+        const [dest, outputInfo] = await this.generateLegacyLauncherIcon(project, asset, icon);
 
         return new OutputAsset(
           icon,
@@ -248,7 +248,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     collected.push(
       ...(await Promise.all(
         icons.map(async (icon) => {
-          const [dest, outputInfo] = await this.generateRoundLauncherIcon(project, asset, icon, pipe);
+          const [dest, outputInfo] = await this.generateRoundLauncherIcon(project, asset, icon);
 
           return new OutputAsset(
             icon,
@@ -270,10 +270,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     template: AndroidOutputAssetTemplate,
-    pipe: Sharp,
   ): Promise<[string, OutputInfo]> {
-    const radius = 4;
-    const svg = `<svg width="${template.width}" height="${template.height}"><rect x="0" y="0" width="${template.width}" height="${template.height}" rx="${radius}" fill="#ffffff"/></svg>`;
+    //const radius = 4;
+    //const svg = `<svg width="${template.width}" height="${template.height}"><rect x="0" y="0" width="${template.width}" height="${template.height}" rx="${radius}" fill="#ffffff"/></svg>`;
 
     const resPath = this.getResPath(project);
     const parentDir = join(resPath, `mipmap-${template.density}`);
@@ -308,7 +307,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     template: AndroidOutputAssetTemplate,
-    pipe: Sharp,
   ): Promise<[string, OutputInfo]> {
     const svg = `<svg width="${template.width}" height="${template.height}"><circle cx="${template.width / 2}" cy="${
       template.height / 2

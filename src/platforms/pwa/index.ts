@@ -1,4 +1,4 @@
-import { mkdirp, pathExists, readFile, readJSON, writeJSON } from '@ionic/utils-fs';
+import { mkdirp, pathExists, readFile, readJSON, rmSync, writeJSON } from '@ionic/utils-fs';
 import fetch from 'node-fetch';
 import parse from 'node-html-parser';
 import { basename, extname, join, posix, relative, sep } from 'path';
@@ -118,7 +118,7 @@ export class PwaAssetGenerator extends AssetGenerator {
 
     const generated: OutputAsset[] = [];
 
-    const splashes = await Promise.all(assetSizes.map((a) => this._generateSplashFromLogo(project, asset, a, pipe)));
+    const splashes = await Promise.all(assetSizes.map((a) => this._generateSplashFromLogo(project, asset, a)));
 
     generated.push(...splashes.flat());
 
@@ -129,7 +129,6 @@ export class PwaAssetGenerator extends AssetGenerator {
     project: Project,
     asset: InputAsset,
     sizeString: string,
-    pipe: Sharp,
   ): Promise<OutputAsset[]> {
     const parts = sizeString.split('@');
     const sizeParts = parts[0].split('x');
@@ -291,8 +290,8 @@ export class PwaAssetGenerator extends AssetGenerator {
   private async getPWADirectory(projectRoot?: string): Promise<string> {
     if (await pathExists(join(projectRoot ?? '', 'public')) /* React */) {
       return join(projectRoot ?? '', 'public');
-    } else if (await pathExists(join(projectRoot ?? '', 'src/assets')) /* Angular and Vue */) {
-      return join(projectRoot ?? '', 'src/assets');
+    } else if (await pathExists(join(projectRoot ?? '', 'src')) /* Angular and Vue */) {
+      return join(projectRoot ?? '', 'src');
     } else if (await pathExists(join(projectRoot ?? '', 'www'))) {
       return join(projectRoot ?? '', 'www');
     } else {
@@ -353,18 +352,27 @@ export class PwaAssetGenerator extends AssetGenerator {
       manifestJson = await readJSON(manifestPath);
     }
 
-    const icons = manifestJson['icons'] || [];
-
+    let icons = manifestJson['icons'] || [];
+    const replacedIcons = [];
     for (const asset of pwaAssets) {
       const src = asset.template.name;
       const fname = basename(src);
       const relativePath = relative(pwaDir, join(pwaAssetDir, PWA_ASSET_PATH, fname));
+      replacedIcons.push(this.makeIconManifestEntry(asset.template, relativePath));
+    }
 
-      const existing = !!icons.find((i: any) => i.src === relativePath);
-      if (!existing) {
-        icons.push(this.makeIconManifestEntry(asset.template, relativePath));
+    // Delete icons that were replaced
+    for (const icon of icons) {
+      if (await pathExists(join(pwaDir, icon.src))) {
+        const exists = !!pwaAssets.find((i: any) => i.sizes === icon.sizes);
+        if (!exists) {
+          rmSync(join(pwaDir, icon.src));
+          warn(`DELETE ${icon.src}`);
+        }
       }
     }
+
+    icons = replacedIcons;
 
     // Update the manifest background color to the splash one if provided to ensure
     // platform automatic splash generation works
@@ -445,8 +453,8 @@ export class PwaAssetGenerator extends AssetGenerator {
     const dest = join(destDir, name);
 
     // console.log(width, height);
-    const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
-    const targetWidth = Math.floor(width * targetLogoWidthPercent);
+    //const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
+    //const targetWidth = Math.floor(width * targetLogoWidthPercent);
     const outputInfo = await pipe.resize(width, height).png().toFile(dest);
 
     const template: PwaOutputAssetTemplate = {
