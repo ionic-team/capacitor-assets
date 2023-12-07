@@ -10,6 +10,7 @@ import type {
   AndroidOutputAssetTemplate,
   AndroidOutputAssetTemplateAdaptiveIcon,
   AndroidOutputAssetTemplateSplash,
+  AndroidOutputAssetTemplateBanner,
 } from '../../definitions';
 import { AssetKind, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
@@ -46,6 +47,8 @@ export class AndroidAssetGenerator extends AssetGenerator {
         return this.generateAdaptiveIconForeground(asset, project);
       case AssetKind.IconBackground:
         return this.generateAdaptiveIconBackground(asset, project);
+      case AssetKind.Banner:
+        return this.generateBanners(asset, project);
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
@@ -76,8 +79,24 @@ export class AndroidAssetGenerator extends AssetGenerator {
       const generatedLegacyIcons = await this.generateLegacyIcon(asset, project);
       generated.push(...generatedLegacyIcons);
 
-      const splashes = Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.Splash);
+      // Generate banners
+      const banners = Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.Banner);
+      const generatedBanners = await Promise.all(
+        banners.map(async (banner) => {
+          return this._generateBannersFromLogo(
+            project,
+            asset,
+            banner,
+            pipe,
+            this.options.splashBackgroundColor ?? '#ffffff',
+          );
+        }),
+      );
 
+      generated.push(...generatedBanners);
+
+      // Generate splashes
+      const splashes = Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.Splash);
       const generatedSplashes = await Promise.all(
         splashes.map(async (splash) => {
           return this._generateSplashesFromLogo(
@@ -154,6 +173,70 @@ export class AndroidAssetGenerator extends AssetGenerator {
     );
 
     return [...foregroundImages, ...backgroundImages];
+  }
+
+  private async _generateBannersFromLogo(
+    project: Project,
+    asset: InputAsset,
+    splash: AndroidOutputAssetTemplate,
+    pipe: Sharp,
+    backgroundColor: string,
+  ): Promise<OutputAsset> {
+    // Generate light splash
+    const resPath = this.getResPath(project);
+
+    let drawableDir = `drawable`;
+    if (splash.density) {
+      drawableDir = `drawable-${splash.density}`;
+    }
+
+    const parentDir = join(resPath, drawableDir);
+    if (!(await pathExists(parentDir))) {
+      await mkdirp(parentDir);
+    }
+    const dest = join(resPath, drawableDir, 'banner.png');
+
+    const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
+    let targetWidth = this.options.logoSplashTargetWidth ?? Math.floor((splash.width ?? 0) * targetLogoWidthPercent);
+
+    if (targetWidth > splash.width || targetWidth > splash.height) {
+      targetWidth = Math.floor((splash.width ?? 0) * targetLogoWidthPercent);
+    }
+
+    if (targetWidth > splash.width || targetWidth > splash.height) {
+      warn(`Logo dimensions exceed dimensions of splash ${splash.width}x${splash.height}, using default logo size`);
+      targetWidth = Math.floor((splash.width ?? 0) * 0.2);
+    }
+
+    const canvas = sharp({
+      create: {
+        width: splash.width ?? 0,
+        height: splash.height ?? 0,
+        channels: 4,
+        background: backgroundColor,
+      },
+    });
+
+    const resized = await sharp(asset.path).resize(targetWidth).toBuffer();
+
+    const outputInfo = await canvas
+      .composite([{ input: resized, gravity: sharp.gravity.center }])
+      .png()
+      .toFile(dest);
+
+    const splashOutput = new OutputAsset(
+      splash,
+      asset,
+      project,
+      {
+        [dest]: dest,
+      },
+      {
+        [dest]: outputInfo,
+      },
+    );
+
+    return splashOutput;
   }
 
   private async _generateSplashesFromLogo(
@@ -474,11 +557,56 @@ export class AndroidAssetGenerator extends AssetGenerator {
   private async updateManifest(project: Project) {
     project.android?.getAndroidManifest()?.setAttrs('manifest/application', {
       'android:icon': '@mipmap/ic_launcher',
+      'android:banner': '@drawable/banner',
       'android:roundIcon': '@mipmap/ic_launcher_round',
     });
 
     await project.commit();
   }
+
+  private async generateBanners (asset: InputAsset, project: Project): Promise<OutputAsset[]> {
+    const pipe = asset.pipeline();
+
+    if (!pipe) {
+      throw new BadPipelineError('Sharp instance not created');
+    }
+
+    const banners = Object.values(AndroidAssetTemplates).filter((a) => a.kind === AssetKind.Banner) as AndroidOutputAssetTemplateBanner[];
+
+    const resPath = this.getResPath(project);
+
+    const collected = await Promise.all(
+      banners.map(async (banner) => {
+        const [dest, outputInfo] = await this.generateBanner(project, asset, banner, pipe);
+
+        const relPath = relative(resPath, dest);
+        return new OutputAsset(banner, asset, project, { [relPath]: dest }, { [relPath]: outputInfo });
+      }),
+    );
+
+    return collected;
+  }
+
+  private async generateBanner(
+    project: Project,
+    asset: InputAsset,
+    template: AndroidOutputAssetTemplateBanner,
+    pipe: Sharp,
+  ): Promise<[string, OutputInfo]> {
+    const drawableDir = template.density ? `drawable-${template.density}` : 'drawable';
+
+    const resPath = this.getResPath(project);
+    const parentDir = join(resPath, drawableDir);
+    if (!(await pathExists(parentDir))) {
+      await mkdirp(parentDir);
+    }
+    const dest = join(resPath, drawableDir, 'banner.png');
+
+    const outputInfo = await pipe.resize(template.width, template.height).png().toFile(dest);
+
+    return [dest, outputInfo];
+  }
+
 
   private async generateSplashes(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const pipe = asset.pipeline();
