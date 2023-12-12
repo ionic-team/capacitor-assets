@@ -271,9 +271,6 @@ export class AndroidAssetGenerator extends AssetGenerator {
     asset: InputAsset,
     template: AndroidOutputAssetTemplate,
   ): Promise<[string, OutputInfo]> {
-    //const radius = 4;
-    //const svg = `<svg width="${template.width}" height="${template.height}"><rect x="0" y="0" width="${template.width}" height="${template.height}" rx="${radius}" fill="#ffffff"/></svg>`;
-
     const resPath = this.getResPath(project);
     const parentDir = join(resPath, `mipmap-${template.density}`);
     if (!(await pathExists(parentDir))) {
