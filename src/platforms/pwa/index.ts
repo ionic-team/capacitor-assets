@@ -452,9 +452,6 @@ export class PwaAssetGenerator extends AssetGenerator {
     }
     const dest = join(destDir, name);
 
-    // console.log(width, height);
-    //const targetLogoWidthPercent = this.options.logoSplashScale ?? 0.2;
-    //const targetWidth = Math.floor(width * targetLogoWidthPercent);
     const outputInfo = await pipe.resize(width, height).png().toFile(dest);
 
     const template: PwaOutputAssetTemplate = {
