@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 3.0.3
+
+### Patch Changes
+
+- 3c5ecbe: Fix the path discovered for Angular and Vue project when --pwa option used
+
 ## 3.0.1
 
 ### Patch Changes
