@@ -1,5 +1,11 @@
 # @capacitor/assets
 
+## 3.0.4
+
+### Patch Changes
+
+- 5f42c57: fix sharp vulnerability by bumping patch version
+
 ## 3.0.3
 
 ### Patch Changes
