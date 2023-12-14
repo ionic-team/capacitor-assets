@@ -14,7 +14,7 @@ The source code is written in TypeScript. Spin up the compiler to watch for sour
 npm run watch
 ```
 
-Note remember to add a Changeset entry for your work before submitting a PR. (`npx changeset` thne follow the prompts.)
+Note remember to add a Changeset entry for your work before submitting a PR. (`npx changeset` then follow the prompts.)
 
 
 ## Publishing
