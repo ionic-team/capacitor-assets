@@ -83,7 +83,7 @@
     "rimraf": "3.0.2",
     "tempy": "1.0.1",
     "ts-jest": "27.1.5",
-    "typescript": "4.4.4"
+    "typescript": "4.9.5"
   },
   "overrides": {
     "@capacitor/cli": {
