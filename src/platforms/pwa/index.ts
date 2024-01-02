@@ -143,7 +143,8 @@ export class PwaAssetGenerator extends AssetGenerator {
     const destDir = join(pwaAssetDir, PWA_ASSET_PATH);
     try {
       await mkdirp(destDir);
-    } catch {
+    } catch (e) {
+      console.log(e);
       // ignore error
     }
 
@@ -364,7 +365,9 @@ export class PwaAssetGenerator extends AssetGenerator {
     // Delete icons that were replaced
     for (const icon of icons) {
       if (await pathExists(join(pwaDir, icon.src))) {
-        const exists = !!pwaAssets.find((i: any) => i.sizes === icon.sizes);
+        const exists = !!pwaAssets.find(({ template: { width, height } }) => {
+          return `${width}x${height}` === icon.sizes
+        });
         if (!exists) {
           rmSync(join(pwaDir, icon.src));
           warn(`DELETE ${icon.src}`);
