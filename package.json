@@ -1,6 +1,6 @@
 {
   "name": "@capacitor/assets",
-  "version": "3.0.5",
+  "version": "3.1.0",
   "description": "Generate icon and splash screen images for Capacitor apps",
   "homepage": "https://ionicframework.com",
   "author": "Ionic Team <hi@ionicframework.com>",
@@ -58,7 +58,7 @@
     "fs-extra": "10.1.0",
     "node-fetch": "2.7.0",
     "node-html-parser": "5.4.2",
-    "sharp": "0.32.6",
+    "sharp": "0.33.3",
     "tslib": "2.6.2",
     "yargs": "17.7.2"
   },
@@ -67,13 +67,13 @@
     "@ionic/eslint-config": "0.3.0",
     "@ionic/prettier-config": "4.0.0",
     "@types/debug": "4.1.8",
-    "@types/jest": "27.5.2",
     "@types/fs-extra": "9.0.13",
-    "@types/plist": "3.0.2",
-    "@types/slice-ansi": "5.0.0",
+    "@types/jest": "27.5.2",
     "@types/node": "18.17.15",
     "@types/node-fetch": "2.6.5",
+    "@types/plist": "3.0.2",
     "@types/rimraf": "3.0.2",
+    "@types/slice-ansi": "5.0.0",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "eslint": "7.32.0",
     "husky": "^8.0.1",
@@ -99,7 +99,7 @@
     }
   },
   "volta": {
-    "node": "16.13.2",
+    "node": "18.17.0",
     "npm": "8.3.0"
   }
 }
