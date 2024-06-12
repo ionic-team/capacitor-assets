@@ -366,7 +366,7 @@ export class PwaAssetGenerator extends AssetGenerator {
     for (const icon of icons) {
       if (await pathExists(join(pwaDir, icon.src))) {
         const exists = !!pwaAssets.find(({ template: { width, height } }) => {
-          return `${width}x${height}` === icon.sizes
+          return `${width}x${height}` === icon.sizes;
         });
         if (!exists) {
           rmSync(join(pwaDir, icon.src));
