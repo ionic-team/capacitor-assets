@@ -6,6 +6,17 @@ import { loadContext, setArguments } from './ctx';
 import { wrapAction } from './util/cli';
 import { logger, log } from './util/log';
 
+export * from './definitions';
+export * from './asset-generator';
+export * from './project';
+export * from './input-asset';
+export * from './output-asset';
+export * from './tasks/generate';
+
+export * from './platforms/ios';
+export * from './platforms/android';
+export * from './platforms/android';
+
 export async function run(): Promise<void> {
   try {
     const ctx = await loadContext();
