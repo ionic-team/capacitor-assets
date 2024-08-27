@@ -51,13 +51,14 @@ Where the provided flags are:
 
 ### Usage - Custom Mode
 
-This mode provides full control over the assets used to generate icons and splash screens, but requires more source files. To use this mode, provide custom icons and splash screen source images as shown below:
+This mode provides full control over the assets used to generate icons, banners and splash screens, but requires more source files. To use this mode, provide custom icons, banners and splash screen source images as shown below:
 
 ```
 assets/
 ├── icon-only.png
 ├── icon-foreground.png
 ├── icon-background.png
+├── banner.png
 ├── splash.png
 └── splash-dark.png
 ```
