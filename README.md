@@ -45,9 +45,12 @@ Where the provided flags are:
 - `--splashBackgroundColorDark` - the background color (hex value) used when generating splash screens for dark mode (where supported) (default `#111111`)
 - `--logoSplashTargetWidth` - A specific width to set the logo to when generating splash screens from a single logo file (not used by default, logo is scaled as percentage of splash instead, see `--logoSplashScale`)
 - `--logoSplashScale` - the scale multiplier to apply to the logo when generating splash screens from a single logo file (default: `0.2`)
-- `--ios` - explicitly run iOS asset generation. Using a platform flag makes the platform list exclusive.
-- `--android` - explicitly run Android asset generation. Using a platform flag makes the platform list exclusive.
-- `--pwa` - explicitly run PWA asset generation. Using a platform flag makes the platform list exclusive.
+- `--platform <platform>` - Only generate assets for a specific platform (ios, android, pwa)
+- `--ios`, `--android`, `--pwa` - explicitly run a single platform. Using any of these makes the platform list exclusive.
+- `--icon-only` - Only generate icons
+- `--splash-only` - Only generate splash screens
+- `--dark` - Enable dark mode assets (e.g. logo-dark.png)
+- `--androidFlavor` - Specify the Android product flavor where generated assets will be created (default: `main`)
 
 ### Usage - Custom Mode
 
@@ -72,10 +75,10 @@ To generate resources with all the default options, just run:
 npx @capacitor/assets generate
 ```
 
-`@capacitor/assets` accepts a platform for the first argument (`ios`, `android`, or `pwa` currently). If specified, resources are generated only for that platform:
+You may also pass a platform with --platform to restrict generation:
 
 ```shell
-npx @capacitor/assets generate --ios
+npx @capacitor/assets generate --platform ios
 ```
 
 Otherwise `@capacitor/assets` will use all detected Capacitor platforms.
@@ -87,6 +90,33 @@ Otherwise `@capacitor/assets` will use all detected Capacitor platforms.
 This tool will create and/or update the web app manifest used in your project, and supports both the older `manifest.json` file and the newer `manifest.webmanifest` files, preferring `manifest.webmanifest` when no existing manifest is found.
 
 By default, the tool will look for the manifest file in `public`, `src`, and `www` in that order. Use the flag `--pwaManifestPath` to specify the exact path to your web app manifest.
+
+## Directory Structure
+
+This tool expects and generates the following directory structure:
+
+```
+ios/
+└── App/App/Assets.xcassets/
+    ├── AppIcon.appiconset/
+    └── Splash.imageset/
+```
+
+```
+android/
+└── app/src/main/res/
+    ├── mipmap-*/ic_launcher.png
+    └── drawable/ic_launcher_background.xml
+```
+
+```
+public/
+└── manifest.webmanifest
+└── assets/
+    ├── icon-192.png
+    ├── icon-512.png
+    └── splash-640x1136.png
+```
 
 ### Help
 

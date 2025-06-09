@@ -1,6 +1,6 @@
 {
   "name": "@capacitor/assets",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Generate icon and splash screen images for Capacitor apps",
   "homepage": "https://ionicframework.com",
   "author": "Ionic Team <hi@ionicframework.com>",
@@ -8,7 +8,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
-    "node": ">=10.3.0"
+    "node": ">=16.0.0"
   },
   "bin": {
     "capacitor-assets": "./bin/capacitor-assets"
@@ -51,39 +51,39 @@
   "dependencies": {
     "@ionic/utils-array": "2.1.6",
     "@ionic/utils-fs": "3.1.7",
-    "@trapezedev/project": "^7.0.10",
+    "@trapezedev/project": "^7.1.3",
     "commander": "8.3.0",
-    "debug": "4.3.4",
+    "debug": "4.3.7",
     "fs-extra": "10.1.0",
     "node-fetch": "2.7.0",
     "node-html-parser": "5.4.2",
     "sharp": "0.32.6",
-    "tslib": "2.6.2",
+    "tslib": "2.6.3",
     "yargs": "17.7.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0",
-    "@changesets/cli": "2.26.2",
-    "@ionic/eslint-config": "0.3.0",
+    "@capacitor/cli": "7.3.0",
+    "@changesets/cli": "2.29.4",
+    "@ionic/eslint-config": "0.4.0",
     "@ionic/prettier-config": "4.0.0",
-    "@types/debug": "4.1.8",
+    "@types/debug": "4.1.12",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "27.5.2",
-    "@types/node": "^18.17.15",
-    "@types/node-fetch": "2.6.5",
-    "@types/plist": "3.0.2",
+    "@types/node": "18.17.19",
+    "@types/node-fetch": "2.6.12",
+    "@types/plist": "3.0.5",
     "@types/rimraf": "3.0.2",
-    "@types/slice-ansi": "5.0.0",
+    "@types/slice-ansi": "5.0.2",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "eslint": "7.32.0",
     "husky": "^8.0.1",
     "jest": "27.5.1",
-    "np": "7.7.0",
+    "np": "^10.2.0",
     "prettier": "3.0.3",
     "rimraf": "3.0.2",
     "tempy": "1.0.1",
     "ts-jest": "27.1.5",
-    "typescript": "4.4.4"
+    "typescript": "4.9.5"
   },
   "overrides": {
     "@capacitor/cli": {
