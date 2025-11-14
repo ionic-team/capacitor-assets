@@ -76,6 +76,10 @@ export function runProgram(ctx: Context): void {
       'Whether to fetch the latest screen sizes for Apple devices from the official Apple site. Set to true if running offline to use local cached sizes (may be occasionally out of date)',
     )
     .option(
+      '--pwaAppleSizesFile <path>',
+      "Path to a file containing Apple device screen sizes. The file should contain device size declarations in the format `WIDTHxHEIGHT @DENSITYx` (e.g., `1290x2796 @3x`). If provided, this file will be used instead of fetching sizes from Apple's website.",
+    )
+    .option(
       '--assetPath <path>',
       'Path to the assets directory for your project. By default will check "assets" and "resources" directories, in that order.',
     )

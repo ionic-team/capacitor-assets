@@ -1,6 +1,5 @@
 import { mkdirp, pathExists, readFile, readJSON, rmSync, writeJSON } from '@ionic/utils-fs';
 import fetch from 'node-fetch';
-import parse from 'node-html-parser';
 import { basename, extname, join, posix, relative, sep } from 'path';
 import type { Sharp } from 'sharp';
 import sharp from 'sharp';
@@ -28,6 +27,7 @@ export interface ManifestIcon {
   type?: string;
 }
 
+const DEVICE_DECLARATION = new RegExp(/(?<width>\d+)x(?<height>\d+)[\s\D]+@(?<density>\d)x/g);
 export class PwaAssetGenerator extends AssetGenerator {
   constructor(options: AssetGeneratorOptions = {}) {
     super(options);
@@ -42,30 +42,34 @@ export class PwaAssetGenerator extends AssetGenerator {
   }
 
   async getSplashSizes(): Promise<string[]> {
-    const appleInterfacePage = `https://developer.apple.com/design/human-interface-guidelines/foundations/layout/`;
+    // Apple has switched to JS based web pages, so we need to fetch the JSON data directly
+    const appleInterfaceJsonPath = `https://developer.apple.com/tutorials/data/design/human-interface-guidelines/layout.json`;
 
-    let assetSizes = PWA_IOS_DEVICE_SIZES;
+    const assetSizes = PWA_IOS_DEVICE_SIZES;
+
+    if (this.options.pwaAppleSizesFile) {
+      try {
+        const contents = await readFile(this.options.pwaAppleSizesFile, { encoding: 'utf-8' });
+        const allResolutions = [...contents.matchAll(DEVICE_DECLARATION)];
+        const deduped = new Set(allResolutions.map((match) => `${match[1]}x${match[2]}@${match[3]}x`));
+
+        return Array.from(deduped);
+      } catch (error) {
+        warn(
+          `Unable to load iOS HIG screen sizes to generate iOS PWA splash screens from file ${this.options.pwaAppleSizesFile}`,
+        );
+      }
+    }
     if (!this.options.pwaNoAppleFetch) {
       try {
-        const res = await fetch(appleInterfacePage);
+        const res = await fetch(appleInterfaceJsonPath);
 
-        const html = await res.text();
+        //Instead of parsing the JSON, we will just scrape resolutions directly from the text
+        const raw_json_text = await res.text();
+        const allResolutions = [...raw_json_text.matchAll(DEVICE_DECLARATION)];
+        const deduped = new Set(allResolutions.map((match) => `${match[1]}x${match[2]}@${match[3]}x`));
 
-        const doc = parse(html);
-
-        const target = doc.querySelector('main > section .row > .column table');
-        const sizes = target?.querySelectorAll('tr > td:nth-child(2)') ?? [];
-        const sizeStrings = sizes.map((td) => {
-          const t = td.innerText;
-          return t
-            .slice(t.indexOf('pt (') + 4)
-            .slice(0, -1)
-            .replace(' px ', '');
-        });
-
-        const deduped = new Set(sizeStrings);
-
-        assetSizes = Array.from(deduped);
+        return Array.from(deduped);
       } catch (e) {
         warn(
           `Unable to load iOS HIG screen sizes to generate iOS PWA splash screens. Using local snapshot of device sizes. Use --pwaNoAppleFetch true to always use local sizes`,
