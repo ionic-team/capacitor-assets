@@ -5,7 +5,6 @@ export abstract class BaseError extends Error {
   constructor(readonly message: string) {
     super(message);
     this.stack = new Error().stack || '';
-    this.message = message;
   }
 
   toString(): string {

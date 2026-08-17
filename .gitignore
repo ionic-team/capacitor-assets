@@ -1,5 +1,5 @@
-dist
 node_modules
 src-old/
 test-old/
 .DS_Store
+package-lock.json

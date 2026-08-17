@@ -71,10 +71,8 @@ export function runProgram(ctx: Context): void {
       'Background color used for splash screens in dark mode when generating from a single logo file',
     )
     .option('--pwaManifestPath <path>', "Path to the web app's manifest.json or manifest.webmanifest file")
-    .option(
-      '--pwaNoAppleFetch',
-      'Whether to fetch the latest screen sizes for Apple devices from the official Apple site. Set to true if running offline to use local cached sizes (may be occasionally out of date)',
-    )
+    .option('--pwaTags', 'Log the index.html tags needed to use the generated PWA icons and iOS splash screens')
+    .option('--pwaNoAppleFetch', 'Deprecated: no longer has any effect. The bundled device size list is always used.')
     .option(
       '--assetPath <path>',
       'Path to the assets directory for your project. By default will check "assets" and "resources" directories, in that order.',
@@ -95,13 +93,12 @@ export function runProgram(ctx: Context): void {
       wrapAction(async (args = {}) => {
         setArguments(ctx, args);
 
-        const { run } = await import('./tasks/generate');
-        await run(ctx);
+        const { run: runGenerate } = await import('./tasks/generate.js');
+        await runGenerate(ctx);
       }),
     );
 
   program.arguments('[command]').action(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     wrapAction((_: any) => {
       log(c.strong('\n⚡️ Capacitor Assets ⚡️\n'));
       program.outputHelp();

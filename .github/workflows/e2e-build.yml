@@ -1,0 +1,129 @@
+name: E2E Build Verification
+
+# Scaffolds a fresh Capacitor app, generates assets with the built CLI,
+# and verifies the real platform toolchains accept them: Gradle/AAPT2 for
+# Android (adaptive icon XML incl. monochrome layer, notification icons)
+# and Xcode's actool for iOS (appearances-based asset catalog).
+#
+# Uses @capacitor/app@latest deliberately, so this tracks what users get
+# today; an upstream Capacitor template change can therefore fail this
+# workflow even without changes in this repo.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch: {}
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Build CLI
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+      - name: Scaffold Capacitor app
+        run: |
+          cd "$RUNNER_TEMP"
+          npm init -y @capacitor/app@latest capapp -- --name capapp --app-id com.sssf.assetstest
+          cd capapp
+          npm install --no-audit --no-fund
+          npm install --no-audit --no-fund @capacitor/android
+          npm run build
+          npx cap add android
+      - name: Generate assets
+        run: |
+          mkdir -p "$RUNNER_TEMP/capapp/assets/android"
+          cp test/fixtures/app/assets/icon-only.png \
+             test/fixtures/app/assets/icon-foreground.png \
+             test/fixtures/app/assets/icon-background.png \
+             test/fixtures/app/assets/splash.png \
+             test/fixtures/app/assets/splash-dark.png \
+             "$RUNNER_TEMP/capapp/assets/"
+          cp test/fixtures/app/assets/android/notification.png "$RUNNER_TEMP/capapp/assets/android/"
+          cd "$RUNNER_TEMP/capapp"
+          node "$GITHUB_WORKSPACE/bin/capacitor-assets" generate --android --iconBackgroundColor '#eeeeee' --iconBackgroundColorDark '#222222'
+      - name: Build APK
+        run: |
+          cd "$RUNNER_TEMP/capapp/android"
+          ./gradlew assembleDebug --console=plain
+      - name: Verify APK contents
+        run: |
+          APK="$RUNNER_TEMP/capapp/android/app/build/outputs/apk/debug/app-debug.apk"
+          AAPT2=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | tail -1)
+          echo "Checking adaptive icon XML in APK..."
+          "$AAPT2" dump xmltree "$APK" --file res/mipmap-anydpi-v26/ic_launcher.xml | tee /tmp/ic_launcher.txt
+          grep -q "monochrome" /tmp/ic_launcher.txt
+          echo "Checking notification icons..."
+          test "$(unzip -l "$APK" | grep -c ic_stat_notification)" -eq 6
+          echo "Checking no obsolete ldpi launcher icons..."
+          ! unzip -l "$APK" | grep -q "mipmap-ldpi"
+          echo "APK verification passed"
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Build CLI
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+      - name: Scaffold Capacitor app
+        run: |
+          cd "$RUNNER_TEMP"
+          npm init -y @capacitor/app@latest capapp -- --name capapp --app-id com.sssf.assetstest
+          cd capapp
+          npm install --no-audit --no-fund
+          npm install --no-audit --no-fund @capacitor/ios
+          npm run build
+          npx cap add ios
+      - name: Generate assets
+        run: |
+          mkdir -p "$RUNNER_TEMP/capapp/assets"
+          cp test/fixtures/app/assets/icon-only.png \
+             test/fixtures/app/assets/splash.png \
+             test/fixtures/app/assets/splash-dark.png \
+             "$RUNNER_TEMP/capapp/assets/"
+          cd "$RUNNER_TEMP/capapp"
+          node "$GITHUB_WORKSPACE/bin/capacitor-assets" generate --ios --iconBackgroundColor '#eeeeee'
+      - name: Compile asset catalog with actool
+        run: |
+          OUT="$RUNNER_TEMP/actool-out"
+          mkdir -p "$OUT"
+          xcrun actool "$RUNNER_TEMP/capapp/ios/App/App/Assets.xcassets" \
+            --compile "$OUT" \
+            --platform iphoneos \
+            --minimum-deployment-target 14.0 \
+            --app-icon AppIcon \
+            --output-partial-info-plist "$OUT/partial.plist" > "$OUT/result.plist"
+          python3 - "$OUT/result.plist" <<'EOF'
+          import plistlib, sys
+          with open(sys.argv[1], 'rb') as f:
+              result = plistlib.load(f)
+          errors = result.get('com.apple.actool.errors')
+          if errors:
+              print('actool reported errors:', errors)
+              sys.exit(1)
+          print('actool compiled the asset catalog with no errors')
+          EOF
+          test -f "$OUT/Assets.car"
+          echo "Asset catalog verification passed"

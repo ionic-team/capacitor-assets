@@ -13,7 +13,7 @@ export async function runCommand(command: string, args: string[], options = {}):
   } catch (e) {
     if (e instanceof SubprocessError) {
       // old behavior of just throwing the stdout/stderr strings
-      throw e.output ? e.output : e.code ? e.code : e.error ? e.error.message : 'Unknown error';
+      throw e.output ? e.output : e.code ? e.code : e.message ? e.message : 'Unknown error';
     }
 
     throw e;

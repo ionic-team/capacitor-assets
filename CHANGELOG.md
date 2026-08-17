@@ -1,4 +1,15 @@
-# @capacitor/assets
+# sssf-capacitor-assets
+
+> Renamed from `@capacitor/assets` in 4.0.0 (fork of ionic-team/capacitor-assets).
+
+## 4.1.0
+
+### Minor Changes
+
+- Modernize generated assets to current (2026) platform standards. See `.changeset/modern-platform-assets.md` for the full list. Highlights:
+  - **iOS**: iOS 18+ dark and tinted 1024px icon variants (Xcode 16 `appearances` format), with optional `ios/icon-dark.png` / `ios/icon-tinted.png` sources. Verified with Xcode 26 actool.
+  - **Android**: `<monochrome>` layer for Android 13+ themed icons (needs compileSdk >= 33), spec-compliant full-bleed background, 19.4% safe-zone foreground inset; notification icon generation wired up (xxxhdpi 144→96px); fixed `android/icon-foreground`/`icon-background` asset kinds and dark default splash dimensions; ldpi icons dropped. Verified with a real Capacitor 8 Gradle build.
+  - **PWA**: genuine PNG icons at 192/512/1024 plus separate safe-zone maskable icon and `apple-touch-icon.png`; correct manifest MIME types; manifest cleanup no longer deletes user-managed files; Apple splash device list refreshed through iPhone 17 / M4 iPad Pro; broken HIG scraping removed (`--pwaNoAppleFetch` is a no-op, `node-html-parser` dropped); `--pwaTags` works again.
 
 ## 3.0.4
 

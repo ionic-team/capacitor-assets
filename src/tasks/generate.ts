@@ -25,7 +25,7 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
       error(
         `No assets found in the asset path ${c.ancillary(
           ctx.project.assetDir,
-        )}. See https://github.com/ionic-team/capacitor-assets to learn how to use this tool.`,
+        )}. See https://github.com/sssf-code/capacitor-assets to learn how to use this tool.`,
       );
       return [];
     }
@@ -60,11 +60,10 @@ export async function run(ctx: Context): Promise<OutputAsset[]> {
         logGenerated(generated);
       }
 
-      /*
       if (!ctx.args.silent && platforms.indexOf('pwa') >= 0 && ctx.args.pwaTags) {
-        PwaAssetGenerator.logInstructions(generated);
+        const pwaGenerator = generators.find((g) => g instanceof PwaAssetGenerator) as PwaAssetGenerator | undefined;
+        await pwaGenerator?.logInstructions(ctx.project, generated);
       }
-      */
 
       return generated;
     } else {
@@ -93,7 +92,7 @@ async function generateAssets(assets: Assets, generators: AssetGenerator[], proj
   const generated: OutputAsset[] = [];
 
   async function generateAndCollect(asset: InputAsset) {
-    const g = await Promise.all(generators.map((g) => asset.generate(g, project)));
+    const g = await Promise.all(generators.map((gen) => asset.generate(gen, project)));
     generated.push(...(g.flat().filter((f) => !!f) as OutputAsset[]));
   }
 
@@ -143,25 +142,25 @@ function logGenerated(generated: OutputAsset[]) {
 
   // Aggregate total assets and size per platform
   const totals = sorted.reduce(
-    (totals, g) => {
-      if (!(g.template.platform in totals)) {
-        totals[g.template.platform] = {
+    (acc, g) => {
+      if (!(g.template.platform in acc)) {
+        acc[g.template.platform] = {
           count: 0,
           size: 0,
         };
       }
 
-      const entry = totals[g.template.platform];
+      const entry = acc[g.template.platform];
 
       const count = Object.values(g.destFilenames).reduce((v) => v + 1, 0);
-      const size = Object.values(g.outputInfoMap).reduce((v, c) => v + c.size, 0);
+      const bytes = Object.values(g.outputInfoMap).reduce((v, info) => v + info.size, 0);
 
-      totals[g.template.platform] = {
+      acc[g.template.platform] = {
         count: entry.count + count,
-        size: entry.size + size,
+        size: entry.size + bytes,
       };
 
-      return totals;
+      return acc;
     },
     {} as {
       [platform: string]: {

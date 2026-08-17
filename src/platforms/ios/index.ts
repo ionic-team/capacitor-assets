@@ -5,7 +5,7 @@ import sharp from 'sharp';
 import type { AssetGeneratorOptions } from '../../asset-generator';
 import { AssetGenerator } from '../../asset-generator';
 import type { IosOutputAssetTemplate } from '../../definitions';
-import { AssetKind, Platform } from '../../definitions';
+import { AssetKind, IosIconAppearance, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import type { InputAsset } from '../../input-asset';
 import { OutputAsset } from '../../output-asset';
@@ -48,12 +48,36 @@ export class IosAssetGenerator extends AssetGenerator {
         return this.generateFromLogo(asset, project);
       case AssetKind.Icon:
         return this.generateIcons(asset, project);
+      case AssetKind.IconDark:
+        return this._generateIcons(asset, project, [IosAssetTemplates.IOS_1024_ICON_DARK]);
+      case AssetKind.IconTinted:
+        return this._generateIcons(asset, project, [IosAssetTemplates.IOS_1024_ICON_TINTED]);
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
     }
 
     return [];
+  }
+
+  /**
+   * The icon templates to generate from a primary (light) icon source.
+   * Dark/tinted variants are auto-derived unless the project provides
+   * explicit ios/icon-dark or ios/icon-tinted sources, which are then
+   * generated in their own pass.
+   */
+  private iconTemplates(project: Project): IosOutputAssetTemplate[] {
+    const icons = Object.values(IosAssetTemplates).filter((a) => a.kind === AssetKind.Icon) as IosOutputAssetTemplate[];
+
+    return icons.filter((icon) => {
+      if (icon.appearance === IosIconAppearance.Dark && project.assets?.iosIconDark) {
+        return false;
+      }
+      if (icon.appearance === IosIconAppearance.Tinted && project.assets?.iosIconTinted) {
+        return false;
+      }
+      return true;
+    });
   }
 
   private async generateFromLogo(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
@@ -63,7 +87,7 @@ export class IosAssetGenerator extends AssetGenerator {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    const iosDir = project.config.ios!.path!;
+    const iosDir = project.config.ios?.path ?? 'App';
 
     // Generate logos
     let logos: OutputAsset[] = [];
@@ -173,23 +197,44 @@ export class IosAssetGenerator extends AssetGenerator {
     project: Project,
     icons: IosOutputAssetTemplate[],
   ): Promise<OutputAsset[]> {
-    const pipe = asset.pipeline();
-
-    if (!pipe) {
+    if (!asset.pipeline()) {
       throw new BadPipelineError('Sharp instance not created');
     }
 
-    const iosDir = project.config.ios!.path!;
+    const iosDir = project.config.ios?.path ?? 'App';
     const lightDefaultBackground = '#ffffff';
+    // True when the source is an explicit ios/icon-dark or ios/icon-tinted
+    // file, in which case the user's art is used as-is (no derivation).
+    const explicitVariant = asset.kind === AssetKind.IconDark || asset.kind === AssetKind.IconTinted;
+
     const generated = await Promise.all(
       icons.map(async (icon) => {
         const dest = join(iosDir, IOS_APP_ICON_SET_PATH, icon.name);
+        const appearance = icon.appearance ?? IosIconAppearance.Any;
 
-        const outputInfo = await pipe
-          .resize(icon.width, icon.height)
-          .png()
-          .flatten({ background: this.options.iconBackgroundColor ?? lightDefaultBackground })
-          .toFile(dest);
+        // When deriving the dark variant while generating from a logo,
+        // prefer the dark logo if one was provided.
+        let sourcePath = asset.path;
+        if (appearance === IosIconAppearance.Dark && asset.kind === AssetKind.Logo && project.assets?.logoDark) {
+          sourcePath = project.assets.logoDark.path;
+        }
+
+        const pipe = sharp(sourcePath).resize(icon.width, icon.height);
+
+        if (appearance === IosIconAppearance.Dark) {
+          // Dark icons keep their transparency so the system-provided
+          // dark background shows through.
+        } else if (appearance === IosIconAppearance.Tinted) {
+          // Tinted icons must be fully opaque grayscale.
+          pipe.flatten({ background: this.options.iconBackgroundColor ?? lightDefaultBackground });
+          if (!explicitVariant) {
+            pipe.greyscale();
+          }
+        } else {
+          pipe.flatten({ background: this.options.iconBackgroundColor ?? lightDefaultBackground });
+        }
+
+        const outputInfo = await pipe.png().toFile(dest);
 
         return new OutputAsset(
           icon,
@@ -212,15 +257,11 @@ export class IosAssetGenerator extends AssetGenerator {
 
   // Generate ALL the icons when only given a logo
   private async generateIconsForLogo(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter((a) => [AssetKind.Icon].find((i) => i === a.kind));
-
-    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
+    return this._generateIcons(asset, project, this.iconTemplates(project));
   }
 
   private async generateIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
-    const icons = Object.values(IosAssetTemplates).filter((a) => [AssetKind.Icon].find((i) => i === a.kind));
-
-    return this._generateIcons(asset, project, icons as IosOutputAssetTemplate[]);
+    return this._generateIcons(asset, project, this.iconTemplates(project));
   }
 
   private async generateSplashes(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
@@ -242,7 +283,7 @@ export class IosAssetGenerator extends AssetGenerator {
     const generated: OutputAsset[] = [];
 
     for (const assetMeta of assetMetas) {
-      const iosDir = project.config.ios!.path!;
+      const iosDir = project.config.ios?.path ?? 'App';
       const dest = join(iosDir, IOS_SPLASH_IMAGE_SET_PATH, assetMeta.name);
 
       const outputInfo = await pipe.resize(assetMeta.width, assetMeta.height).png().toFile(dest);
@@ -273,38 +314,50 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async updateIconsContentsJson(generated: OutputAsset[], project: Project) {
-    const assetsPath = join(project.config.ios!.path!, IOS_APP_ICON_SET_PATH);
+    const assetsPath = join(project.config.ios?.path ?? 'App', IOS_APP_ICON_SET_PATH);
     const contentsJsonPath = join(assetsPath, 'Contents.json');
     const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
 
     const parsed = JSON.parse(json);
 
-    const withoutMissing = [];
+    // The luminosity appearance of a Contents.json image entry ('any' when absent)
+    const appearanceOf = (entry: any): string =>
+      entry?.appearances?.find((a: any) => a.appearance === 'luminosity')?.value ?? IosIconAppearance.Any;
+
+    let images: any[] = (parsed.images ?? []).filter((i: any) => !!i.filename);
+
     for (const g of generated) {
-      const width = g.template.width;
-      const height = g.template.height;
+      const template = g.template as IosOutputAssetTemplate;
+      const appearance = template.appearance ?? IosIconAppearance.Any;
 
-      parsed.images.map((i: any) => {
-        if (i.filename !== (g.template as IosOutputAssetTemplate).name) {
-          rmSync(join(assetsPath, i.filename));
+      // Replace any existing entries for this appearance, removing files
+      // they referenced (e.g. legacy multi-size icons from older projects)
+      for (const existing of images.filter((i) => appearanceOf(i) === appearance)) {
+        if (existing.filename !== template.name) {
+          rmSync(join(assetsPath, existing.filename), { force: true });
         }
-      });
+      }
+      images = images.filter((i) => appearanceOf(i) !== appearance);
 
-      withoutMissing.push({
-        idiom: (g.template as IosOutputAssetTemplate).idiom,
-        size: `${width}x${height}`,
-        filename: (g.template as IosOutputAssetTemplate).name,
+      const entry: any = {
+        idiom: template.idiom,
+        size: `${template.width}x${template.height}`,
+        filename: template.name,
         platform: Platform.Ios,
-      });
+      };
+      if (appearance !== IosIconAppearance.Any) {
+        entry.appearances = [{ appearance: 'luminosity', value: appearance }];
+      }
+      images.push(entry);
     }
 
-    parsed.images = withoutMissing;
+    parsed.images = images;
 
     await writeFile(contentsJsonPath, JSON.stringify(parsed, null, 2));
   }
 
   private async updateSplashContentsJson(generated: OutputAsset[], project: Project) {
-    const contentsJsonPath = join(project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
+    const contentsJsonPath = join(project.config.ios?.path ?? 'App', IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
     const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
 
     const parsed = JSON.parse(json);
@@ -334,7 +387,7 @@ export class IosAssetGenerator extends AssetGenerator {
   }
 
   private async updateSplashContentsJsonDark(generated: OutputAsset[], project: Project) {
-    const contentsJsonPath = join(project.config.ios!.path!, IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
+    const contentsJsonPath = join(project.config.ios?.path ?? 'App', IOS_SPLASH_IMAGE_SET_PATH, 'Contents.json');
     const json = await readFile(contentsJsonPath, { encoding: 'utf-8' });
 
     const parsed = JSON.parse(json);

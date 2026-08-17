@@ -1,10 +1,10 @@
 import type { IosOutputAssetTemplate, IosOutputAssetTemplateSplash } from '../../definitions';
-import { AssetKind, Format, IosIdiom, Orientation, Platform, Theme } from '../../definitions';
+import { AssetKind, Format, IosIconAppearance, IosIdiom, Orientation, Platform, Theme } from '../../definitions';
 
 /**
  * 1024px Icon
  *
- * - iOS 1024 icon
+ * - iOS 1024 icon (Xcode 14+ single-size)
  */
 export const IOS_1024_ICON: IosOutputAssetTemplate = {
   platform: Platform.Ios,
@@ -14,6 +14,37 @@ export const IOS_1024_ICON: IosOutputAssetTemplate = {
   format: Format.Png,
   width: 1024,
   height: 1024,
+  appearance: IosIconAppearance.Any,
+};
+
+/**
+ * iOS 18+ dark appearance icon. Apple expects a transparent background so
+ * the system-provided dark background can show through.
+ */
+export const IOS_1024_ICON_DARK: IosOutputAssetTemplate = {
+  platform: Platform.Ios,
+  idiom: IosIdiom.Universal,
+  kind: AssetKind.Icon,
+  name: 'AppIcon-512@2x-dark.png',
+  format: Format.Png,
+  width: 1024,
+  height: 1024,
+  appearance: IosIconAppearance.Dark,
+};
+
+/**
+ * iOS 18+ tinted appearance icon. Apple expects a fully opaque grayscale
+ * image; the system applies the user's tint color.
+ */
+export const IOS_1024_ICON_TINTED: IosOutputAssetTemplate = {
+  platform: Platform.Ios,
+  idiom: IosIdiom.Universal,
+  kind: AssetKind.Icon,
+  name: 'AppIcon-512@2x-tinted.png',
+  format: Format.Png,
+  width: 1024,
+  height: 1024,
+  appearance: IosIconAppearance.Tinted,
 };
 
 export const IOS_1X_UNIVERSAL_ANYANY_SPLASH: IosOutputAssetTemplateSplash = {

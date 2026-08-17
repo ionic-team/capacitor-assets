@@ -10,15 +10,41 @@ import type {
   AndroidOutputAssetTemplate,
   AndroidOutputAssetTemplateAdaptiveIcon,
   AndroidOutputAssetTemplateSplash,
+  AndroidNotificationTemplate,
 } from '../../definitions';
-import { AssetKind, Platform } from '../../definitions';
+import { AssetKind, Format, Platform } from '../../definitions';
 import { BadPipelineError, BadProjectError } from '../../error';
 import type { InputAsset } from '../../input-asset';
 import { OutputAsset } from '../../output-asset';
 import type { Project } from '../../project';
-import { warn } from '../../util/log';
+import { warn, error } from '../../util/log';
 
 import * as AndroidAssetTemplates from './assets';
+
+/**
+ * Adaptive icon layer XML (mipmap-anydpi-v26/ic_launcher.xml).
+ *
+ * - The background layer must be full-bleed (108dp, opaque) — masks and
+ *   parallax may expose any part of it, so it is never inset.
+ * - The foreground is inset so the logo stays inside the 66dp safe zone
+ *   of the 108dp canvas ((108 - 66) / 2 / 108 ≈ 19.4%).
+ * - The monochrome layer enables Android 13+ themed icons; the system uses
+ *   the alpha channel of the drawable, so the foreground works as a source.
+ *   Without it, Android 16 QPR2+ force-themes icons with an auto-derived
+ *   (and often artifact-prone) monochrome version.
+ */
+const IC_LAUNCHER_XML = `
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background" />
+    <foreground>
+        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="19.4%" />
+    </foreground>
+    <monochrome>
+        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="19.4%" />
+    </monochrome>
+</adaptive-icon>
+`.trim();
 
 export class AndroidAssetGenerator extends AssetGenerator {
   constructor(options: AssetGeneratorOptions = {}) {
@@ -46,6 +72,8 @@ export class AndroidAssetGenerator extends AssetGenerator {
         return this.generateAdaptiveIconForeground(asset, project);
       case AssetKind.IconBackground:
         return this.generateAdaptiveIconBackground(asset, project);
+      case AssetKind.NotificationIcon:
+        return this.generateNotificationIcons(asset, project);
       case AssetKind.Splash:
       case AssetKind.SplashDark:
         return this.generateSplashes(asset, project);
@@ -118,11 +146,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
     asset: InputAsset,
     pipe: Sharp,
   ): Promise<OutputAsset[]> {
-    // Current versions of Android don't appear to support night mode icons (13+ might?)
-    // so, for now, we only generate light mode ones
-    if (asset.kind === AssetKind.LogoDark) {
-      return [];
-    }
+    const isNightMode = asset.kind !== AssetKind.Logo;
 
     // Create the background pipeline for the generated icons
     const backgroundPipe = sharp({
@@ -130,15 +154,15 @@ export class AndroidAssetGenerator extends AssetGenerator {
         width: asset.width!,
         height: asset.height!,
         channels: 4,
-        background:
-          asset.kind === AssetKind.Logo
-            ? this.options.iconBackgroundColor ?? '#ffffff'
-            : this.options.iconBackgroundColorDark ?? '#111111',
+        background: isNightMode
+          ? (this.options.iconBackgroundColorDark ?? '#111111')
+          : (this.options.iconBackgroundColor ?? '#ffffff'),
       },
     });
 
+    const adaptiveIconKind = isNightMode ? AssetKind.AdaptiveIconDark : AssetKind.AdaptiveIcon;
     const icons = Object.values(AndroidAssetTemplates).filter(
-      (a) => a.kind === AssetKind.AdaptiveIcon,
+      (a) => a.kind === adaptiveIconKind,
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const backgroundImages = await Promise.all(
@@ -280,7 +304,9 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     // This pipeline is trick, but we need two separate pipelines
     // per https://github.com/lovell/sharp/issues/2378#issuecomment-864132578
-    const padding = 8;
+    // Padding scales with density so the logo renders at the same
+    // relative size at every dpi (8px at the 96px xhdpi baseline).
+    const padding = Math.round(template.width / 12);
     const resized = await sharp(asset.path)
       .resize(template.width, template.height)
       // .composite([{ input: Buffer.from(svg), blend: 'dest-in' }])
@@ -325,7 +351,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
   private async generateAdaptiveIconForeground(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
-      (a) => a.kind === AssetKind.Icon,
+      (a) => a.kind === AssetKind.AdaptiveIcon,
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const pipe = asset.pipeline();
@@ -357,27 +383,14 @@ export class AndroidAssetGenerator extends AssetGenerator {
     }
     const outputInfoForeground = await pipe.resize(icon.width, icon.height).png().toFile(destForeground);
 
-    // Create the adaptive icon XML
-    const icLauncherXml = `
-<?xml version="1.0" encoding="utf-8"?>
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background>
-        <inset android:drawable="@mipmap/ic_launcher_background" android:inset="16.7%" />
-    </background>
-    <foreground>
-        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="16.7%" />
-    </foreground>
-</adaptive-icon>
-    `.trim();
-
     const mipmapAnyPath = join(resPath, `mipmap-anydpi-v26`);
     if (!(await pathExists(mipmapAnyPath))) {
       await mkdirp(mipmapAnyPath);
     }
     const destIcLauncher = join(mipmapAnyPath, `ic_launcher.xml`);
     const destIcLauncherRound = join(mipmapAnyPath, `ic_launcher_round.xml`);
-    await writeFile(destIcLauncher, icLauncherXml);
-    await writeFile(destIcLauncherRound, icLauncherXml);
+    await writeFile(destIcLauncher, IC_LAUNCHER_XML);
+    await writeFile(destIcLauncherRound, IC_LAUNCHER_XML);
 
     // Return the created files for this OutputAsset
     return new OutputAsset(
@@ -397,7 +410,7 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
   private async generateAdaptiveIconBackground(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
     const icons = Object.values(AndroidAssetTemplates).filter(
-      (a) => a.kind === AssetKind.Icon,
+      (a) => a.kind === AssetKind.AdaptiveIcon,
     ) as AndroidOutputAssetTemplateAdaptiveIcon[];
 
     const pipe = asset.pipeline();
@@ -428,27 +441,14 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
     const outputInfoBackground = await pipe.resize(icon.width, icon.height).png().toFile(destBackground);
 
-    // Create the adaptive icon XML
-    const icLauncherXml = `
-<?xml version="1.0" encoding="utf-8"?>
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background>
-        <inset android:drawable="@mipmap/ic_launcher_background" android:inset="16.7%" />
-    </background>
-    <foreground>
-        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="16.7%" />
-    </foreground>
-</adaptive-icon>
-    `.trim();
-
     const mipmapAnyPath = join(resPath, `mipmap-anydpi-v26`);
     if (!(await pathExists(mipmapAnyPath))) {
       await mkdirp(mipmapAnyPath);
     }
     const destIcLauncher = join(mipmapAnyPath, `ic_launcher.xml`);
     const destIcLauncherRound = join(mipmapAnyPath, `ic_launcher_round.xml`);
-    await writeFile(destIcLauncher, icLauncherXml);
-    await writeFile(destIcLauncherRound, icLauncherXml);
+    await writeFile(destIcLauncher, IC_LAUNCHER_XML);
+    await writeFile(destIcLauncherRound, IC_LAUNCHER_XML);
 
     // Return the created files for this OutputAsset
     return new OutputAsset(
@@ -524,5 +524,73 @@ export class AndroidAssetGenerator extends AssetGenerator {
 
   private getResPath(project: Project): string {
     return join(project.config.android!.path!, 'app', 'src', this.options.androidFlavor ?? 'main', 'res');
+  }
+
+  private async generateNotificationIcons(asset: InputAsset, project: Project): Promise<OutputAsset[]> {
+    const pipe = asset.pipeline();
+    if (!pipe) {
+      throw new BadPipelineError('Sharp instance not created');
+    }
+
+    const notificationTemplates = Object.values(AndroidAssetTemplates).filter(
+      (a) => a.kind === AssetKind.NotificationIcon,
+    ) as AndroidNotificationTemplate[];
+    const resPath = this.getResPath(project);
+    const generated: OutputAsset[] = [];
+
+    for (const template of notificationTemplates) {
+      try {
+        const drawablePath = join(resPath, `drawable-${template.density}`);
+        if (!(await pathExists(drawablePath))) {
+          await mkdirp(drawablePath);
+        }
+
+        const destFile = join(drawablePath, 'ic_stat_notification.png');
+        const outputInfo = await pipe.resize(template.width, template.height).png().toFile(destFile);
+
+        const relPath = relative(resPath, destFile);
+        generated.push(new OutputAsset(template, asset, project, { [relPath]: destFile }, { [relPath]: outputInfo }));
+      } catch (err) {
+        error(`Failed to generate ${template.density} notification icon:`, err);
+      }
+    }
+
+    // Generate for main drawable folder
+    try {
+      const mainDrawablePath = join(resPath, 'drawable');
+      if (!(await pathExists(mainDrawablePath))) {
+        await mkdirp(mainDrawablePath);
+      }
+
+      const mainDestFile = join(mainDrawablePath, 'ic_stat_notification.png');
+      const outputInfo = await pipe
+        .resize(
+          AndroidAssetTemplates.ANDROID_NOTIFICATION_XXXHDPI_ICON.width,
+          AndroidAssetTemplates.ANDROID_NOTIFICATION_XXXHDPI_ICON.height,
+        )
+        .png()
+        .toFile(mainDestFile);
+
+      const relPath = relative(resPath, mainDestFile);
+      generated.push(
+        new OutputAsset(
+          {
+            platform: Platform.Android,
+            kind: AssetKind.NotificationIcon,
+            format: Format.Png,
+            width: AndroidAssetTemplates.ANDROID_NOTIFICATION_XXXHDPI_ICON.width,
+            height: AndroidAssetTemplates.ANDROID_NOTIFICATION_XXXHDPI_ICON.height,
+          },
+          asset,
+          project,
+          { [relPath]: mainDestFile },
+          { [relPath]: outputInfo },
+        ),
+      );
+    } catch (err) {
+      error('Failed to generate main notification icon:', err);
+    }
+
+    return generated;
   }
 }

@@ -18,13 +18,13 @@ export interface Context {
 export async function loadContext(projectRootPath?: string): Promise<Context> {
   const rootDir = process.cwd();
 
-  const argv = yargs(hideBin(process.argv)).argv;
+  const argv = yargs(hideBin(process.argv)).parseSync();
 
   let project: Project;
   try {
     project = await loadProject(argv, projectRootPath, (argv.assetPath as string) ?? 'assets');
   } catch (e) {
-    throw new Error(`Unable to load project: ${(e as any).message}`);
+    throw new Error(`Unable to load project: ${(e as any).message}`, { cause: e });
   }
 
   return {

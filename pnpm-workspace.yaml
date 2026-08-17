@@ -1,0 +1,15 @@
+# Supply-chain settings and security pins for transitive deps of @trapezedev/project.
+
+# Intentionally disabled: we pin `xcode` (a subdependency of trapeze) to a commit
+# of apache/cordova-node-xcode, and pnpm offers no per-package allowlist for this
+# policy. The 4.0.0-dev line drops the vulnerable uuid@7 dependency and carries
+# fixes not yet released to npm. Re-enable this and switch xcode to a normal
+# version range once xcode@4 is published to npm.
+blockExoticSubdeps: false
+
+overrides:
+  # npm's `xcode` (3.0.1, Dec 2021) still depends on vulnerable uuid@7.
+  # Apache's repo dropped uuid entirely; pin to a reviewed commit of master (4.0.0-dev).
+  xcode: github:apache/cordova-node-xcode#4a9fd3421e5bc00033461c025835a238a15e5c2d
+  # `replace` is declared by trapeze but never required at runtime — remove it.
+  replace: '-'

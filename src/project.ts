@@ -60,12 +60,22 @@ export class Project extends MobileProject {
       splashDark: await this.loadInputAsset('splash-dark', AssetKind.SplashDark, Platform.Any),
 
       iosIcon: await this.loadInputAsset('ios/icon', AssetKind.Icon, Platform.Ios),
+      iosIconDark: await this.loadInputAsset('ios/icon-dark', AssetKind.IconDark, Platform.Ios),
+      iosIconTinted: await this.loadInputAsset('ios/icon-tinted', AssetKind.IconTinted, Platform.Ios),
       iosSplash: await this.loadInputAsset('ios/splash', AssetKind.Splash, Platform.Ios),
       iosSplashDark: await this.loadInputAsset('ios/splash-dark', AssetKind.SplashDark, Platform.Ios),
 
       androidIcon: await this.loadInputAsset('android/icon', AssetKind.Icon, Platform.Android),
-      androidIconForeground: await this.loadInputAsset('android/icon-foreground', AssetKind.Icon, Platform.Android),
-      androidIconBackground: await this.loadInputAsset('android/icon-background', AssetKind.Icon, Platform.Android),
+      androidIconForeground: await this.loadInputAsset(
+        'android/icon-foreground',
+        AssetKind.IconForeground,
+        Platform.Android,
+      ),
+      androidIconBackground: await this.loadInputAsset(
+        'android/icon-background',
+        AssetKind.IconBackground,
+        Platform.Android,
+      ),
 
       androidSplash: await this.loadInputAsset('android/splash', AssetKind.Splash, Platform.Android),
       androidSplashDark: await this.loadInputAsset('android/splash-dark', AssetKind.SplashDark, Platform.Android),
@@ -74,6 +84,10 @@ export class Project extends MobileProject {
         AssetKind.NotificationIcon,
         Platform.Android,
       ),
+
+      pwaIcon: await this.loadInputAsset('pwa/icon', AssetKind.Icon, Platform.Pwa),
+      pwaSplash: await this.loadInputAsset('pwa/splash', AssetKind.Splash, Platform.Pwa),
+      pwaSplashDark: await this.loadInputAsset('pwa/splash-dark', AssetKind.SplashDark, Platform.Pwa),
     };
     return this.assets;
   }

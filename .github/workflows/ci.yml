@@ -11,19 +11,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x, 20.x]
     steps:
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js 24
+        uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
-      - uses: actions/checkout@v4
-      - name: npm install, build, and test
+          node-version: 24
+          cache: pnpm
+      - name: Install, build, and test
         env:
           CI: true
         run: |
-          npm install
-          npm run build
-          npm test
+          pnpm install --frozen-lockfile
+          pnpm run build
+          pnpm run lint
+          pnpm test

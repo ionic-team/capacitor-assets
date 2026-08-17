@@ -1,16 +1,13 @@
-import { copy, pathExists, rmSync as rm } from '@ionic/utils-fs';
-import tempy from 'tempy';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { copy, rmSync as rm } from '@ionic/utils-fs';
+import { temporaryDirectory } from 'tempy';
 
 import { Context, loadContext } from '../../src/ctx';
 import { PwaAssetGenerator } from '../../src/platforms/pwa';
-import { AssetKind } from '../../src/definitions';
-import * as PwaAssets from '../../src/platforms/pwa/assets';
-import sharp from 'sharp';
-import { parse } from 'path';
 
 describe('PWA Manifest Test', () => {
   let ctx: Context;
-  const fixtureDir = tempy.directory();
+  const fixtureDir = temporaryDirectory();
 
   beforeAll(async () => {
     await copy('test/fixtures/pwa-with-manifest', fixtureDir);

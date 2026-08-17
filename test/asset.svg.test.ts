@@ -1,13 +1,14 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { copy, rmSync as rm, writeFile } from '@ionic/utils-fs';
 import { join } from 'path';
-import tempy from 'tempy';
+import { temporaryDirectory } from 'tempy';
 
 import { Context, loadContext } from '../src/ctx';
 import { Format } from '../src/definitions';
 
 describe('Asset test - SVGs', () => {
   let ctx: Context;
-  const fixtureDir = tempy.directory();
+  const fixtureDir = temporaryDirectory();
 
   beforeAll(async () => {
     await copy('test/fixtures/app', fixtureDir);

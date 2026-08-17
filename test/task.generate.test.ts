@@ -1,14 +1,13 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { copy, readJSON, rmSync as rm } from '@ionic/utils-fs';
 import { join } from 'path';
-import tempy from 'tempy';
+import { temporaryDirectory } from 'tempy';
 
 import { Context, loadContext } from '../src/ctx';
-import { Format } from '../src/definitions';
-import { OutputAsset } from '../src/output-asset';
 
 describe('Task: Generate test', () => {
   let ctx: Context;
-  const fixtureDir = tempy.directory();
+  const fixtureDir = temporaryDirectory();
 
   beforeAll(async () => {
     await copy('test/fixtures/app', fixtureDir);
@@ -22,19 +21,6 @@ describe('Task: Generate test', () => {
   afterAll(async () => {
     await rm(fixtureDir, { force: true, recursive: true });
   });
-
-  function log(target: string, generated: OutputAsset[]) {
-    console.log('-'.repeat(10), target.toUpperCase(), '-'.repeat(10));
-    console.log(
-      generated
-        .filter((g) => {
-          return Object.values(g.destFilenames)[0].includes(target);
-        })
-        .map((g) => Object.values(g.destFilenames).map((f) => f.replace(fixtureDir, '')))
-        .flat()
-        .sort(),
-    );
-  }
 
   it('Should generate all project assets', async () => {
     const { run } = await import('../src/tasks/generate');

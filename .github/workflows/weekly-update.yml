@@ -1,0 +1,92 @@
+name: Weekly Version Bump and Updates
+
+permissions:
+  contents: write
+  # Needed to dispatch the release workflow after tagging
+  actions: write
+
+on:
+  schedule:
+    # Runs every Monday at 5:30 AM UTC
+    - cron: '30 5 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  weekly-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install from lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: Update dependencies (within semver ranges)
+        run: pnpm update
+
+      - name: Apply security fixes for unfixable transitive deps
+        run: |
+          pnpm audit --fix || true
+          # audit --fix writes overrides to package.json; sync the lockfile
+          pnpm install --no-frozen-lockfile
+
+      - name: Report remaining vulnerabilities
+        continue-on-error: true
+        run: pnpm audit
+
+      - name: Build
+        run: |
+          pnpm exec rimraf dist
+          pnpm run build
+
+      - name: Test
+        run: pnpm test
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump patch version
+        if: steps.changes.outputs.changed == 'true'
+        id: bump-version
+        # npm here is intentional: pnpm has no `version` command; this only edits package.json
+        run: |
+          NEW_VERSION=$(npm version patch --no-git-tag-version)
+          echo "new_version=${NEW_VERSION#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit, tag, and push changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "chore: weekly version bump to v${{ steps.bump-version.outputs.new_version }} and dependency updates"
+          git tag "v${{ steps.bump-version.outputs.new_version }}"
+          git push origin HEAD "refs/tags/v${{ steps.bump-version.outputs.new_version }}"
+
+      - name: Trigger release
+        # Tag pushes made with GITHUB_TOKEN do not trigger workflows
+        # (recursion guard), so dispatch the release workflow explicitly
+        # on the new tag ref.
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run release.yml --ref "v${{ steps.bump-version.outputs.new_version }}"

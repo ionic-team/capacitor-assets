@@ -1,6 +1,14 @@
 {
-  "appId": "io.ionic.starter",
-  "appName": "capacitor-resources-test",
-  "webDir": "build",
-  "bundledWebRuntime": false
+	"appId": "com.sssf.assetstest",
+	"appName": "capapp",
+	"webDir": "dist",
+	"plugins": {
+		"SplashScreen": {
+			"launchAutoHide": false
+		}
+	},
+	"packageClassList": [
+		"CAPCameraPlugin",
+		"SplashScreenPlugin"
+	]
 }

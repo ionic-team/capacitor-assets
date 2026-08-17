@@ -19,7 +19,7 @@ export interface AssetGeneratorOptions {
   splashBackgroundColorDark?: string;
   // Path to the web app manifest
   pwaManifestPath?: string;
-  // Whether to fetch latest device sizes from official apple site
+  // Deprecated: no longer has any effect. The bundled device size list is always used.
   pwaNoAppleFetch?: boolean;
   // Scale amount for logo when generating splashes. Default: 0.2 (20%)
   logoSplashScale?: number;

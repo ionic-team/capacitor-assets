@@ -10,6 +10,8 @@ export interface Assets {
   splashDark: InputAsset | null;
 
   iosIcon?: InputAsset | null;
+  iosIconDark?: InputAsset | null;
+  iosIconTinted?: InputAsset | null;
   iosSplash?: InputAsset | null;
   iosSplashDark?: InputAsset | null;
 
@@ -30,7 +32,10 @@ export const enum AssetKind {
   Logo = 'logo',
   LogoDark = 'logo-dark',
   AdaptiveIcon = 'adaptive-icon',
+  AdaptiveIconDark = 'adaptive-icon-dark',
   Icon = 'icon',
+  IconDark = 'icon-dark',
+  IconTinted = 'icon-tinted',
   IconForeground = 'icon-foreground',
   IconBackground = 'icon-background',
   NotificationIcon = 'notification-icon',
@@ -119,6 +124,14 @@ export interface OutputAssetTemplate {
 export interface IosOutputAssetTemplate extends OutputAssetTemplate {
   name: string;
   idiom: IosIdiom;
+  // iOS 18+ appearance variant (Xcode 16 asset catalog format). Absent = light/any.
+  appearance?: IosIconAppearance;
+}
+
+export const enum IosIconAppearance {
+  Any = 'any',
+  Dark = 'dark',
+  Tinted = 'tinted',
 }
 
 // https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_ref-Asset_Catalog_Format/ImageSetType.html#//apple_ref/doc/uid/TP40015170-CH25-SW2
@@ -139,10 +152,19 @@ export interface PwaOutputAssetTemplate extends OutputAssetTemplate {
   name: string;
   orientation?: Orientation;
   density?: string;
+  // Web app manifest icon purpose ("any" | "maskable"). Defaults to "any".
+  purpose?: 'any' | 'maskable';
+  // Generated as a file but not listed in the web app manifest (e.g. apple-touch-icon)
+  excludeFromManifest?: boolean;
 }
 
 export interface AndroidOutputAssetTemplate extends OutputAssetTemplate {
   density: AndroidDensity;
+}
+export interface AndroidNotificationTemplate extends AndroidOutputAssetTemplate {
+  kind: AssetKind.NotificationIcon;
+  width: number;
+  height: number;
 }
 export interface AndroidOutputAssetTemplateSplash extends OutputAssetTemplate {
   density: AndroidDensity;

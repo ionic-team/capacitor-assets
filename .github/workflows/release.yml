@@ -1,0 +1,57 @@
+name: Release
+
+# Publishes to npm via Trusted Publishing (OIDC) — no NPM_TOKEN secret.
+# The npm trusted publisher for sssf-capacitor-assets must reference this
+# exact workflow filename (release.yml), owner sssf-code, repo
+# capacitor-assets, with the Environment field left blank.
+#
+# Triggers:
+# - pushing a tag v* (manual releases: bump version, commit, tag, push)
+# - workflow_dispatch on a tag ref (used by weekly-update.yml, whose
+#   GITHUB_TOKEN tag pushes cannot trigger workflows directly)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required for npm Trusted Publishing (OIDC) and provenance
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Verify tag matches package.json version
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "Ref $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+      - name: Build
+        run: pnpm run build
+      - name: Lint
+        run: pnpm run lint
+      - name: Test
+        run: pnpm test
+      - name: Publish to npm
+        # --no-git-checks: tag checkouts are detached HEAD, which pnpm's
+        # default git checks reject
+        run: pnpm publish --access public --no-git-checks
