@@ -61,7 +61,7 @@
   "devDependencies": {
     "@capacitor/cli": "^6.0.0",
     "@changesets/cli": "2.26.2",
-    "@ionic/eslint-config": "^1.0.0",
+    "@ionic/eslint-config": "^0.5.0",
     "@ionic/prettier-config": "4.0.0",
     "@types/debug": "4.1.8",
     "@types/fs-extra": "9.0.13",
