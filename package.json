@@ -20,14 +20,11 @@
     "test": "jest --maxWorkers=4",
     "lint": "npm run eslint && npm run prettier -- --check",
     "fmt": "npm run prettier -- --write",
-    "eslint": "eslint . --ext ts",
+    "eslint": "eslint .",
     "prettier": "prettier 'src/**/*.ts'",
     "prepublishOnly": "npm run build"
   },
   "prettier": "@ionic/prettier-config",
-  "eslintConfig": {
-    "extends": "@ionic/eslint-config/recommended"
-  },
   "files": [
     "bin",
     "dist"
@@ -64,7 +61,7 @@
   "devDependencies": {
     "@capacitor/cli": "^6.0.0",
     "@changesets/cli": "2.26.2",
-    "@ionic/eslint-config": "0.3.0",
+    "@ionic/eslint-config": "^0.5.0",
     "@ionic/prettier-config": "4.0.0",
     "@types/debug": "4.1.8",
     "@types/fs-extra": "9.0.13",
@@ -75,7 +72,7 @@
     "@types/rimraf": "3.0.2",
     "@types/slice-ansi": "5.0.0",
     "@typescript-eslint/eslint-plugin": "5.62.0",
-    "eslint": "7.32.0",
+    "eslint": "^10.0.0",
     "husky": "^8.0.1",
     "jest": "27.5.1",
     "np": "7.7.0",

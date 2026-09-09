@@ -101,7 +101,7 @@ export function runProgram(ctx: Context): void {
     );
 
   program.arguments('[command]').action(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     wrapAction((_: any) => {
       log(c.strong('\n⚡️ Capacitor Assets ⚡️\n'));
       program.outputHelp();
