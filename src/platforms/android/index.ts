@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import { mkdirp, pathExists, writeFile } from '@ionic/utils-fs';
 import { dirname, join, relative } from 'path';
 import type { OutputInfo, Sharp } from 'sharp';
