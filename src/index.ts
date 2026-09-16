@@ -101,7 +101,6 @@ export function runProgram(ctx: Context): void {
     );
 
   program.arguments('[command]').action(
-     
     wrapAction((_: any) => {
       log(c.strong('\n⚡️ Capacitor Assets ⚡️\n'));
       program.outputHelp();
