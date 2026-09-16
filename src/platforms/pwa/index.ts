@@ -66,7 +66,7 @@ export class PwaAssetGenerator extends AssetGenerator {
         const deduped = new Set(sizeStrings);
 
         assetSizes = Array.from(deduped);
-      } catch (e) {
+      } catch {
         warn(
           `Unable to load iOS HIG screen sizes to generate iOS PWA splash screens. Using local snapshot of device sizes. Use --pwaNoAppleFetch true to always use local sizes`,
         );
