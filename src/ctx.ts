@@ -24,7 +24,8 @@ export async function loadContext(projectRootPath?: string): Promise<Context> {
   try {
     project = await loadProject(argv, projectRootPath, (argv.assetPath as string) ?? 'assets');
   } catch (e) {
-    throw new Error(`Unable to load project: ${(e as any).message}`, { cause: e });
+    // eslint-disable-next-line preserve-caught-error -- this package builds on TypeScript 4.4, which predates the Error cause option
+    throw new Error(`Unable to load project: ${(e as any).message}`);
   }
 
   return {
