@@ -27,3 +27,7 @@ jobs:
           npm install
           npm run build
           npm test
+      # eslint 10 needs node 20.19 or later
+      - name: lint
+        if: matrix.node-version == '20.x'
+        run: npm run lint
