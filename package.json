@@ -46,6 +46,7 @@
     "splash screen"
   ],
   "dependencies": {
+    "@ionic/cli-framework-output": "2.2.8",
     "@ionic/utils-array": "2.1.6",
     "@ionic/utils-fs": "3.1.7",
     "@trapezedev/project": "^7.0.10",
