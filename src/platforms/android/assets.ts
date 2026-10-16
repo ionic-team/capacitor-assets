@@ -1,6 +1,7 @@
 import type {
   AndroidOutputAssetTemplate,
   AndroidOutputAssetTemplateAdaptiveIcon,
+  AndroidOutputAssetTemplateBanner,
   AndroidOutputAssetTemplateSplash,
 } from '../../definitions';
 import { AssetKind, AndroidDensity, Format, Orientation, Platform } from '../../definitions';
@@ -113,6 +114,55 @@ export const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIc
   format: Format.Png,
   width: 432,
   height: 432,
+  density: AndroidDensity.Xxxhdpi,
+};
+
+//
+// Banners
+//
+
+export const ANDROID_MDPI_BANNER: AndroidOutputAssetTemplateBanner = {
+  platform: Platform.Android,
+  kind: AssetKind.Banner,
+  format: Format.Png,
+  width: 160,
+  height: 90,
+  density: AndroidDensity.Mdpi,
+};
+
+export const ANDROID_HDPI_BANNER: AndroidOutputAssetTemplateBanner = {
+  platform: Platform.Android,
+  kind: AssetKind.Banner,
+  format: Format.Png,
+  width: 240,
+  height: 135,
+  density: AndroidDensity.Hdpi,
+};
+
+export const ANDROID_XHDPI_BANNER: AndroidOutputAssetTemplateBanner = {
+  platform: Platform.Android,
+  kind: AssetKind.Banner,
+  format: Format.Png,
+  width: 320,
+  height: 180,
+  density: AndroidDensity.Xhdpi,
+};
+
+export const ANDROID_XXHDPI_BANNER: AndroidOutputAssetTemplateBanner = {
+  platform: Platform.Android,
+  kind: AssetKind.Banner,
+  format: Format.Png,
+  width: 480,
+  height: 270,
+  density: AndroidDensity.Xxhdpi,
+};
+
+export const ANDROID_XXXHDPI_BANNER: AndroidOutputAssetTemplateBanner = {
+  platform: Platform.Android,
+  kind: AssetKind.Banner,
+  format: Format.Png,
+  width: 640,
+  height: 360,
   density: AndroidDensity.Xxxhdpi,
 };
 

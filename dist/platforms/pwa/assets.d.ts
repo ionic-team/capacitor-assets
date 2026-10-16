@@ -1,0 +1,20 @@
+import type { PwaOutputAssetTemplate } from '../../definitions';
+export declare const PWA_48_PX_ICON: PwaOutputAssetTemplate;
+export declare const PWA_72_PX_ICON: PwaOutputAssetTemplate;
+export declare const PWA_96_PX_ICON: PwaOutputAssetTemplate;
+export declare const PWA_128_PX_ICON: PwaOutputAssetTemplate;
+export declare const PWA_192_PX_ICON: PwaOutputAssetTemplate;
+export declare const PWA_256_PX_ICON: PwaOutputAssetTemplate;
+export declare const PWA_512_PX_ICON: PwaOutputAssetTemplate;
+export declare const PWA_SPLASH: PwaOutputAssetTemplate;
+export declare const ASSETS: {
+    PWA_48_PX_ICON: PwaOutputAssetTemplate;
+    PWA_72_PX_ICON: PwaOutputAssetTemplate;
+    PWA_96_PX_ICON: PwaOutputAssetTemplate;
+    PWA_128_PX_ICON: PwaOutputAssetTemplate;
+    PWA_192_PX_ICON: PwaOutputAssetTemplate;
+    PWA_256_PX_ICON: PwaOutputAssetTemplate;
+    PWA_512_PX_ICON: PwaOutputAssetTemplate;
+    PWA_SPLASH: PwaOutputAssetTemplate;
+};
+export declare const PWA_IOS_DEVICE_SIZES: string[];

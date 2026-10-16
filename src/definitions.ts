@@ -17,6 +17,7 @@ export interface Assets {
   androidIconForeground?: InputAsset | null;
   androidIconBackground?: InputAsset | null;
 
+  androidBanner?: InputAsset | null;
   androidSplash?: InputAsset | null;
   androidSplashDark?: InputAsset | null;
   androidNotificationIcon?: InputAsset | null;
@@ -34,6 +35,7 @@ export const enum AssetKind {
   IconForeground = 'icon-foreground',
   IconBackground = 'icon-background',
   NotificationIcon = 'notification-icon',
+  Banner = 'banner',
   Splash = 'splash',
   SplashDark = 'splash-dark',
 }
@@ -142,6 +144,10 @@ export interface PwaOutputAssetTemplate extends OutputAssetTemplate {
 }
 
 export interface AndroidOutputAssetTemplate extends OutputAssetTemplate {
+  density: AndroidDensity;
+}
+
+export interface AndroidOutputAssetTemplateBanner extends OutputAssetTemplate {
   density: AndroidDensity;
 }
 export interface AndroidOutputAssetTemplateSplash extends OutputAssetTemplate {

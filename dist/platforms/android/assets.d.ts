@@ -1,0 +1,47 @@
+import type { AndroidOutputAssetTemplate, AndroidOutputAssetTemplateAdaptiveIcon, AndroidOutputAssetTemplateBanner, AndroidOutputAssetTemplateSplash } from '../../definitions';
+export declare const ANDROID_LDPI_ICON: AndroidOutputAssetTemplate;
+export declare const ANDROID_MDPI_ICON: AndroidOutputAssetTemplate;
+export declare const ANDROID_HDPI_ICON: AndroidOutputAssetTemplate;
+export declare const ANDROID_XHDPI_ICON: AndroidOutputAssetTemplate;
+export declare const ANDROID_XXHDPI_ICON: AndroidOutputAssetTemplate;
+export declare const ANDROID_XXXHDPI_ICON: AndroidOutputAssetTemplate;
+/**
+ * Adaptive icons
+ */
+export declare const ANDROID_LDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon;
+export declare const ANDROID_MDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon;
+export declare const ANDROID_HDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon;
+export declare const ANDROID_XHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon;
+export declare const ANDROID_XXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon;
+export declare const ANDROID_XXXHDPI_ADAPTIVE_ICON: AndroidOutputAssetTemplateAdaptiveIcon;
+export declare const ANDROID_MDPI_BANNER: AndroidOutputAssetTemplateBanner;
+export declare const ANDROID_HDPI_BANNER: AndroidOutputAssetTemplateBanner;
+export declare const ANDROID_XHDPI_BANNER: AndroidOutputAssetTemplateBanner;
+export declare const ANDROID_XXHDPI_BANNER: AndroidOutputAssetTemplateBanner;
+export declare const ANDROID_XXXHDPI_BANNER: AndroidOutputAssetTemplateBanner;
+export declare const ANDROID_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_LDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_MDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_HDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_XHDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_XXHDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_XXXHDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_LDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_MDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_HDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_XHDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_XXHDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_XXXHDPI_SCREEN: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_LDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_MDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_HDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_XHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_XXHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_LAND_XXXHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_LDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_MDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_HDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_XHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_XXHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
+export declare const ANDROID_PORT_XXXHDPI_SCREEN_DARK: AndroidOutputAssetTemplateSplash;
