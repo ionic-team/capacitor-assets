@@ -1,4 +1,5 @@
 import { basename, extname } from 'path';
+import type { Sharp } from 'sharp';
 import sharp from 'sharp';
 
 import type { AssetGenerator } from './asset-generator';
@@ -16,7 +17,7 @@ export class InputAsset {
   public width?: number;
   public height?: number;
 
-  private _sharp: sharp.Sharp | null = null;
+  private _sharp: Sharp | null = null;
 
   constructor(
     public path: string,
@@ -26,7 +27,7 @@ export class InputAsset {
     this.filename = basename(path);
   }
 
-  pipeline(): sharp.Sharp | undefined {
+  pipeline(): Sharp | undefined {
     return this._sharp?.clone();
   }
 
